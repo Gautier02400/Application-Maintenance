@@ -88,6 +88,8 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
   body{background:#fff;color:#000}
   .panel,.card{border-color:#999}
 }
+.brand{display:flex;align-items:center;gap:12px}
+.logo{height:40px;width:auto;background:#fff;padding:4px 8px;border-radius:6px}
 </style>
 </head>
 <body>
@@ -95,7 +97,10 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 <header class="noprint">
   <div class="wrap">
     <div class="top">
-      <h1>🔧 Tutos Maintenance <small>Trieurs optiques – verre · Sibelco Reims</small></h1>
+      <h1 class="brand">
+      <img src="icon-512.png" alt="Sibelco" class="logo">
+      <span> Tutos Maintenance <small>Trieurs optiques – verre · Sibelco Reims</small></span>
+      </h1>
       <div class="row">
         <button class="primary" onclick="newTuto()">+ Nouveau tutoriel</button>
         <button onclick="exportJSON()">Exporter</button>
@@ -215,7 +220,7 @@ function cardHTML(t){
   return `<div class="card" onclick="openTuto('${t.id}')">
     <div class="row" style="justify-content:space-between"><span class="tag">${esc(t.category)}</span><span class="tag ${esc(t.status)}">${STATUS[t.status]||''}</span></div>
     <h3>${esc(t.title)}</h3>
-    <div class="meta"><span>🏭 ${esc(t.machine)}</span><span>⏱ ${esc(t.duration)} min</span><span>📶 ${esc(t.level)}</span><span>${(t.steps||[]).length} étapes</span></div>
+    <div class="meta"><span> ${esc(t.machine)}</span><span>⏱ ${esc(t.duration)} min</span><span>📶 ${esc(t.level)}</span><span>${(t.steps||[]).length} étapes</span></div>
   </div>`;
 }
 function setCat(c){ state.cat=c; renderList(); }
