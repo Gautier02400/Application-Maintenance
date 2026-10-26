@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tutos Maintenance – Tri optique verre</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0b6bcb">
+<meta name="theme-color" content="#0a2f5a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tutos Maintenance">
@@ -16,30 +16,31 @@
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
-  --bg:#f4f6f8;--card:#ffffff;--text:#1b2733;--muted:#5d6b78;--line:#dbe1e7;
-  --accent:#0b6bcb;--accent-text:#ffffff;--ok:#1a8a4a;--warn-bg:#fff4d6;--warn-line:#e0a800;--warn-text:#5c4300;
+  --bg:#f2f5f9;--card:#ffffff;--text:#1b2733;--muted:#5d6b78;--line:#dbe1e7;
+  --brand:#0a2f5a;--accent:#0a5aa8;--accent-text:#ffffff;--ok:#1a8a4a;--warn-bg:#fff4d6;--warn-line:#e0a800;--warn-text:#5c4300;
   --danger-bg:#fde8e8;--danger-line:#d33;--danger-text:#7a1414;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#10161c;--card:#19222b;--text:#e8edf2;--muted:#9aa9b6;--line:#2c3a47;
-    --accent:#4da3ff;--accent-text:#04121f;--ok:#4cc57f;--warn-bg:#3a2f0b;--warn-line:#c99a00;--warn-text:#ffe29a;
+    --brand:#0a2540;--accent:#5aaeea;--accent-text:#04121f;--ok:#4cc57f;--warn-bg:#3a2f0b;--warn-line:#c99a00;--warn-text:#ffe29a;
     --danger-bg:#3d1717;--danger-line:#e66;--danger-text:#ffb3b3;
   }
 }
 :root[data-theme="dark"]{
   --bg:#10161c;--card:#19222b;--text:#e8edf2;--muted:#9aa9b6;--line:#2c3a47;
-  --accent:#4da3ff;--accent-text:#04121f;--ok:#4cc57f;--warn-bg:#3a2f0b;--warn-line:#c99a00;--warn-text:#ffe29a;
+  --brand:#0a2540;--accent:#5aaeea;--accent-text:#04121f;--ok:#4cc57f;--warn-bg:#3a2f0b;--warn-line:#c99a00;--warn-text:#ffe29a;
   --danger-bg:#3d1717;--danger-line:#e66;--danger-text:#ffb3b3;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
-header{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+header{background:var(--brand);color:#fff;border-bottom:3px solid #2d8fe0;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
 .wrap{max-width:980px;margin:0 auto;padding:12px 16px}
 .top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
 h1{font-size:1.15rem;margin:0}
-h1 small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+h1 small{display:block;font-weight:400;color:#c5d6ea;font-size:.8rem}
+header button.primary,header .lang button.on{background:#2d8fe0;border-color:#2d8fe0;color:#fff}
 button,.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer}
 button:hover{border-color:var(--accent)}
 button.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
