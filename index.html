@@ -135,14 +135,12 @@ header .wrap{max-width:none;padding:10px 20px}
 body{transition:padding-left .2s}
 @media(min-width:781px){body{padding-left:0}body.nav-open{padding-left:220px}}
 @media(max-width:780px){.logo{height:52px}body.nav-open{padding-left:0}}
-header .logo{height:clamp(44px,5vw,64px);transition:height .2s}
-header h1,header h1 small,header .menu-btn{transition:font-size .2s}
-header.big .wrap{padding:16px 24px}
-header.big .logo{height:clamp(64px,9vw,120px);padding:8px 16px}
-header.big h1{font-size:clamp(1.3rem,2.8vw,2.6rem)}
-header.big h1 small{font-size:clamp(.85rem,1.5vw,1.3rem)}
-header.big .menu-btn{font-size:clamp(1rem,1.6vw,1.4rem);padding:12px 22px}
-header.big .lang button{font-size:clamp(.9rem,1.4vw,1.2rem);padding:10px 16px}
+header{--hs:1}
+header .logo{height:calc(var(--hs)*48px);padding:calc(var(--hs)*4px) calc(var(--hs)*8px)}
+header h1{font-size:calc(var(--hs)*1.15rem)}
+header h1 small{font-size:calc(var(--hs)*.8rem)}
+header .menu-btn,header .lang button{font-size:calc(var(--hs)*1rem)}
+header .menu-btn{padding:calc(var(--hs)*8px) calc(var(--hs)*16px)}
 body.nolog{padding-left:0!important}body.nolog #side,body.nolog header,body.nolog #scrim{display:none!important}
 </style>
 </head>
@@ -676,7 +674,7 @@ const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','n
 function buildNav(){
   $('side').innerHTML=`<div class="meta" style="padding:4px 12px 12px;flex-direction:column;gap:4px"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span>${settings.name?`<b style="color:#fff">${esc(settings.name)}</b>`:''}</div>`+
    NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
-  document.querySelector('header').classList.toggle('big',state.section!=='tutos');
+  fitHeader();
   document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('hidden',state.section!=='tutos'));
 }
 function toggleNav(v){ const o=v===undefined?!$('side').classList.contains('open'):v; $('side').classList.toggle('open',o); $('scrim').classList.toggle('open',o); document.body.classList.toggle('nav-open',o); }
@@ -867,6 +865,23 @@ async function saveFiche(){
 }
 function delFiche(){ if(!confirm(T('confirm_del'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(T('deleted')); renderFiches(t); }
 
+
+/* ---------- Barre du haut : s'adapte à la largeur disponible ---------- */
+let fitRaf=0, fitW=0;
+function fitHeader(){ cancelAnimationFrame(fitRaf); fitRaf=requestAnimationFrame(doFit); }
+function doFit(){
+  const h=document.querySelector('header'); if(!h||getComputedStyle(h).display==='none') return;
+  const top=h.querySelector('.top'), kids=[...top.children], row=kids[kids.length-1], lang=row.querySelector('.lang');
+  const fits=()=>{
+    const tr=top.getBoundingClientRect(), mid=(tr.top+tr.bottom)/2;
+    if(!kids.every(k=>{const r=k.getBoundingClientRect(); return Math.abs((r.top+r.bottom)/2-mid)<6;})) return false;
+    return row.getBoundingClientRect().height<=lang.getBoundingClientRect().height*1.5;
+  };
+  let sc=2.2; h.style.setProperty('--hs',sc);
+  while(sc>0.7&&!fits()){ sc=Math.round((sc-0.1)*10)/10; h.style.setProperty('--hs',sc); }
+}
+if('ResizeObserver' in window) new ResizeObserver(es=>{ const w=Math.round(es[0].contentRect.width); if(w!==fitW){ fitW=w; fitHeader(); } }).observe(document.querySelector('header'));
+window.addEventListener('resize',fitHeader);
 (function(){var i=new Image();i.onload=function(){document.documentElement.classList.add('photo');};i.src='fond-verre.jpg';})();
 boot();
 if('serviceWorker' in navigator){
