@@ -143,6 +143,7 @@ header.big h1{font-size:clamp(1.3rem,2.8vw,2.6rem)}
 header.big h1 small{font-size:clamp(.85rem,1.5vw,1.3rem)}
 header.big .menu-btn{font-size:clamp(1rem,1.6vw,1.4rem);padding:12px 22px}
 header.big .lang button{font-size:clamp(.9rem,1.4vw,1.2rem);padding:10px 16px}
+body.nav-open .menu-btn{display:none!important}
 body.nolog{padding-left:0!important}body.nolog #side,body.nolog header,body.nolog #scrim{display:none!important}
 </style>
 </head>
@@ -674,7 +675,7 @@ function validateTraining(){ if(settings.cls<1) settings.cls=1; settings.chosen=
 
 const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['presentation','','nav_pres'],['settings','','nav_set']];
 function buildNav(){
-  $('side').innerHTML=`<div class="meta" style="padding:4px 12px 12px;flex-direction:column;gap:4px"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span>${settings.name?`<b style="color:#fff">${esc(settings.name)}</b>`:''}</div>`+
+  $('side').innerHTML=`<button class="nb" onclick="toggleNav(false)" aria-label="${L('Fermer le menu','Close menu')}" style="justify-content:flex-end"><svg viewBox="0 0 24 24" width="1.4em" height="1.4em" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button><div class="meta" style="padding:4px 12px 12px;flex-direction:column;gap:4px"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span>${settings.name?`<b style="color:#fff">${esc(settings.name)}</b>`:''}</div>`+
    NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
   document.querySelector('header').classList.toggle('big',state.section!=='tutos');
   document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('hidden',state.section!=='tutos'));
