@@ -135,6 +135,14 @@ header .wrap{max-width:none;padding:10px 20px}
 body{transition:padding-left .2s}
 @media(min-width:781px){body{padding-left:0}body.nav-open{padding-left:220px}}
 @media(max-width:780px){.logo{height:52px}body.nav-open{padding-left:0}}
+header .logo{height:clamp(44px,5vw,64px);transition:height .2s}
+header h1,header h1 small,header .menu-btn{transition:font-size .2s}
+header.big .wrap{padding:16px 24px}
+header.big .logo{height:clamp(64px,9vw,120px);padding:8px 16px}
+header.big h1{font-size:clamp(1.3rem,2.8vw,2.6rem)}
+header.big h1 small{font-size:clamp(.85rem,1.5vw,1.3rem)}
+header.big .menu-btn{font-size:clamp(1rem,1.6vw,1.4rem);padding:12px 22px}
+header.big .lang button{font-size:clamp(.9rem,1.4vw,1.2rem);padding:10px 16px}
 body.nolog{padding-left:0!important}body.nolog #side,body.nolog header,body.nolog #scrim{display:none!important}
 </style>
 </head>
@@ -668,6 +676,7 @@ const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','n
 function buildNav(){
   $('side').innerHTML=`<div class="meta" style="padding:4px 12px 12px;flex-direction:column;gap:4px"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span>${settings.name?`<b style="color:#fff">${esc(settings.name)}</b>`:''}</div>`+
    NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
+  document.querySelector('header').classList.toggle('big',state.section!=='tutos');
   document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('hidden',state.section!=='tutos'));
 }
 function toggleNav(v){ const o=v===undefined?!$('side').classList.contains('open'):v; $('side').classList.toggle('open',o); $('scrim').classList.toggle('open',o); document.body.classList.toggle('nav-open',o); }
