@@ -213,7 +213,7 @@ const I18N = {
   storage_full:'Stockage plein ou indisponible : pensez à exporter en JSON',
   footer:'Projet réalisé par Lecertisseur Gautier, Coordinateur Tri Optiques · Sibelco Reims',
   unspecified:'Non précisée', locked_tag:'Verrouillé',
-  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_pres:'Fiches présentation', nav_set:'Paramètres', items:'élément(s)',
+  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', items:'élément(s)',
   welcome:'Bienvenue', your_class:'Votre classe :', ask_level:'Quel est votre niveau sur les trieurs optiques ?',
   confirm_cls:'Je confirme avoir le niveau de cette classe (déclaratif, à valider avec le référent).',
   oblig_title:'Formation obligatoire', oblig_txt:"Vous ne connaissez pas encore les trieurs optiques : terminez d'abord la formation pour débloquer les autres tutoriels.", oblig_go:'Commencer la formation',
@@ -251,7 +251,7 @@ const I18N = {
   storage_full:'Storage full or unavailable: please export to JSON',
   footer:'Project by Lecertisseur Gautier, Optical Sorting Coordinator · Sibelco Reims',
   unspecified:'Not specified', locked_tag:'Locked',
-  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_pres:'Presentation sheets', nav_set:'Settings', items:'item(s)',
+  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', items:'item(s)',
   welcome:'Welcome', your_class:'Your class:', ask_level:'What is your level on optical sorters?',
   confirm_cls:'I confirm I have the level of this class (self-declared, to be validated with the referent).',
   oblig_title:'Mandatory training', oblig_txt:'You do not know optical sorters yet: complete the training first to unlock the other tutorials.', oblig_go:'Start training',
@@ -673,19 +673,20 @@ const needCls=t=>(t.mandatory||t.category==='Sécurité')?0:(t.level==='Avancé'
 const isLocked=t=>settings.cls<needCls(t);
 function validateTraining(){ if(settings.cls<1) settings.cls=1; settings.chosen=true; settings.trained=Date.now(); saveSettings(); buildNav(); toast(T('trained_ok')); }
 
-const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['presentation','','nav_pres'],['settings','','nav_set']];
+const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['presentation','','nav_pres'],['jeux','','nav_jeux'],['settings','','nav_set']];
 function buildNav(){
-  $('side').innerHTML=`<button class="nb" onclick="toggleNav(false)" aria-label="${L('Fermer le menu','Close menu')}" style="justify-content:flex-end"><svg viewBox="0 0 24 24" width="1.4em" height="1.4em" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button><div class="meta" style="padding:4px 12px 12px;flex-direction:column;gap:4px"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span>${settings.name?`<b style="color:#fff">${esc(settings.name)}</b>`:''}</div>`+
+  $('side').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 4px 4px 12px"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><button class="nb" onclick="toggleNav(false)" aria-label="${L('Fermer le menu','Close menu')}" style="width:auto;padding:6px 8px"><svg viewBox="0 0 24 24" width="1.4em" height="1.4em" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div>${settings.name?`<b style="color:#fff;padding:0 12px 12px">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
    NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
   document.querySelector('header').classList.toggle('big',state.section!=='tutos');
   document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('hidden',state.section!=='tutos'));
 }
 function toggleNav(v){ const o=v===undefined?!$('side').classList.contains('open'):v; $('side').classList.toggle('open',o); $('scrim').classList.toggle('open',o); document.body.classList.toggle('nav-open',o); }
-function go(k){ if(window.innerWidth<=780) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else renderFiches(k); }
+function go(k){ if(window.innerWidth<=780) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else renderFiches(k); }
 function renderSection(){ const v=state.view;
   if(v==='home') renderHome(); else if(v==='settings') renderSettings(); else if(v==='fiches') renderFiches(state.section);
+  else if(v==='jeux') renderGame();
   else if(v==='fiche') openFiche(state.fid); else if(v==='fedit') renderFicheEditor(); else renderList(); }
-function cnt(k){ if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
+function cnt(k){ if(k==='jeux') return 1; if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
 
 function renderHome(){
   state.section='home'; state.view='home'; $('filters').classList.add('hidden'); buildNav();
@@ -697,7 +698,7 @@ function renderHome(){
    ${!settings.chosen?`<div class="panel"><b>${esc(T('ask_level'))}</b><div class="row" style="margin-top:8px">${CLS.map((x,i)=>`<button onclick="chooseCls(${i})">${esc(clsL(i))}</button>`).join('')}</div></div>`:''}
    ${(c<1&&ob)?`<div class="box danger"><b>${esc(T('oblig_title'))}</b><br>${esc(T('oblig_txt'))}<div style="margin-top:8px"><button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button></div></div>`:''}
    ${settings.trained?`<div class="box" style="border-left-color:var(--ok)">${esc(T('trained_on'))} ${esc(new Date(settings.trained).toLocaleDateString(lang))}</div>`:''}
-   <div class="tiles">${NAV.slice(1,4).map(([k,i,l])=>`<div class="card" onclick="go('${k}')"><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div></div>`).join('')}</div>
+   <div class="tiles">${NAV.slice(1,5).map(([k,i,l])=>`<div class="card" onclick="go('${k}')"><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div></div>`).join('')}</div>
    <p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
@@ -867,6 +868,182 @@ async function saveFiche(){
   saveFiches(); toast(T('saved')); openFiche(d.id);
 }
 function delFiche(){ if(!confirm(T('confirm_del'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(T('deleted')); renderFiches(t); }
+
+/* ---------- JEU : TRIEUR SIBELCO (tri du verre / refus) ---------- */
+const GW=360, GH=440, GLINE=GH-56;
+const GBINS=[
+ {fr:'Vert',en:'Green',col:'#2e9e4f'},
+ {fr:'Blanc',en:'Clear',col:'#2f8fb5'},
+ {fr:'Brun',en:'Brown',col:'#8a5a2b'},
+ {fr:'Refus',en:'Reject',col:'#c0392b'}
+];
+const GITEMS=[
+ {bin:0,shape:'bottle',col:'#2e9e4f',fr:'Verre vert',en:'Green glass'},
+ {bin:1,shape:'bottle',col:'#bfe6f2',fr:'Verre blanc',en:'Clear glass'},
+ {bin:2,shape:'bottle',col:'#8a5a2b',fr:'Verre brun',en:'Brown glass'},
+ {bin:3,shape:'stone',fr:'Pierre',en:'Stone',
+  tfr:'Les pierres ne fondent pas dans le four : elles laissent des défauts dans le verre neuf.',
+  ten:'Stones do not melt in the furnace: they leave defects in new glass.'},
+ {bin:3,shape:'shard',fr:'Céramique',en:'Ceramic',
+  tfr:'La céramique fond à plus haute température que le verre : elle laisse des inclusions dans les bouteilles.',
+  ten:'Ceramic melts at a higher temperature than glass: it leaves inclusions in new bottles.'},
+ {bin:3,shape:'cap',fr:'Bouchon métal',en:'Metal cap',
+  tfr:'Le métal est un indésirable : il peut abîmer le four et perturber la fusion.',
+  ten:'Metal is a contaminant: it can damage the furnace and disturb melting.'},
+ {bin:3,shape:'bag',fr:'Plastique',en:'Plastic',
+  tfr:'Le plastique n\'a rien à faire dans le calcin : il perturbe la fusion.',
+  ten:'Plastic does not belong in cullet: it disturbs melting.'}
+];
+let G=null;
+const gBestKey=()=>'sibelco_game_best_'+(settings.id||'x');
+function gBest(){ try{ return +localStorage.getItem(gBestKey())||0; }catch(e){ return 0; } }
+function gSetBest(v){ try{ localStorage.setItem(gBestKey(),String(v)); }catch(e){} }
+
+function renderGame(){
+  state.section='jeux'; state.view='jeux'; $('filters').classList.add('hidden'); buildNav();
+  $('app').innerHTML=`<div class="panel"><h2 style="margin-top:0">${esc(T('nav_jeux'))} · ${L('Trieur Sibelco','Sibelco Sorter')}</h2>
+   <p class="meta" style="margin:0 0 10px">${L('Les débris défilent devant le trieur. Envoyez chaque pièce dans le bon bac : verre vert, blanc ou brun, et Refus pour les indésirables (pierre, céramique, métal, plastique). La pièce la plus basse est celle ciblée. Au clavier : touches 1 à 4.','Items run past the sorter. Send each piece to the right bin: green, clear or brown glass, and Reject for contaminants (stone, ceramic, metal, plastic). The lowest piece is the one targeted. On a keyboard: keys 1 to 4.')}</p>
+   <div style="max-width:420px;margin:0 auto">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px"><span id="gsc"></span><span id="gli"></span><span id="gbest" class="meta"></span></div>
+    <canvas id="gcv" style="display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);touch-action:manipulation"></canvas>
+    <div id="gmsg" style="min-height:3.2em;margin:8px 0;font-size:.9rem"></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${GBINS.map((b,i)=>`<button onclick="gSort(${i})" style="background:${b.col};color:#fff;border-color:${b.col};font-weight:700;padding:14px 4px;touch-action:manipulation">${esc(L(b.fr,b.en))}<br><small style="opacity:.85">${i+1}</small></button>`).join('')}</div>
+    <div style="text-align:center;margin-top:12px"><button id="gplay" class="primary" onclick="gameStart()" style="padding:10px 28px">${L('Jouer','Play')}</button></div>
+   </div></div><p class="disclaimer">${esc(T('footer'))}</p>`;
+  gameInit(); window.scrollTo(0,0);
+}
+function gMsg(t,col){ const m=$('gmsg'); if(m){ m.textContent=t||''; m.style.color=col||'var(--text)'; } }
+function gHud(g){
+  const sc=$('gsc'), li=$('gli'), be=$('gbest'); if(!sc) return;
+  sc.innerHTML=`<b>Score</b> ${g.score}`+(g.combo>1?` · Combo ${g.combo}`:'');
+  li.innerHTML=`<span style="color:#e04b4b;letter-spacing:2px">${'♥'.repeat(Math.max(0,g.lives))}${'♡'.repeat(Math.max(0,3-g.lives))}</span>`;
+  be.textContent=L('Record','Best')+' '+gBest();
+}
+function gameInit(){
+  if(G&&G.raf) cancelAnimationFrame(G.raf);
+  const cv=$('gcv'), dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=GW*dpr; cv.height=GH*dpr;
+  const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+  const g=G={cv,ctx,state:'ready',items:[],fx:[],score:0,lives:3,combo:0,sorted:0,spawn:0,off:0,last:0,raf:0,newBest:false};
+  gHud(g); gMsg('');
+  if(!window._gkey){ window._gkey=true; document.addEventListener('keydown',e=>{ if(!G||!G.cv.isConnected) return; const i='1234'.indexOf(e.key); if(i>=0&&e.key.length===1) gSort(i); }); }
+  const loop=ts=>{
+    if(G!==g||!cv.isConnected) return;
+    const dt=Math.min(.05,(ts-(g.last||ts))/1000); g.last=ts;
+    gUpdate(g,dt); gRender(g);
+    g.raf=requestAnimationFrame(loop);
+  };
+  g.raf=requestAnimationFrame(loop);
+}
+function gameStart(){
+  const g=G; if(!g) return;
+  Object.assign(g,{state:'play',items:[],fx:[],score:0,lives:3,combo:0,sorted:0,spawn:.2,newBest:false});
+  $('gplay').classList.add('hidden'); gMsg(''); gHud(g);
+}
+function gSpeed(g){ return 55+Math.min(120,g.sorted*2.2); }
+function gSpawn(g){
+  const glass=Math.random()<.55, pool=GITEMS.filter(i=>glass?i.bin<3:i.bin===3);
+  const t=pool[Math.floor(Math.random()*pool.length)];
+  g.items.push(Object.assign({},t,{x:40+Math.random()*(GW-80),y:-30,rot:(Math.random()-.5)*.8,vr:(Math.random()-.5)*.8}));
+}
+function gUpdate(g,dt){
+  g.off=(g.off+(g.state==='play'?gSpeed(g):30)*dt)%40;
+  g.fx=g.fx.filter(f=>(f.life-=dt)>0);
+  if(g.state!=='play') return;
+  g.spawn-=dt;
+  if(g.spawn<=0){ gSpawn(g); g.spawn=Math.max(.7,1.5-g.sorted*.02); }
+  const sp=gSpeed(g);
+  g.items.forEach(it=>{ it.y+=sp*dt; it.rot+=it.vr*dt; });
+  for(let i=g.items.length-1;i>=0&&g.state==='play';i--){
+    const it=g.items[i];
+    if(it.y>GLINE){ g.items.splice(i,1); gFail(g,it,L('Trop tard ! ','Too late! ')+L(it.fr,it.en)+'.'); }
+  }
+}
+function gFail(g,it,msg){
+  g.lives--; g.combo=0;
+  g.fx.push({x:it.x,y:Math.min(it.y,GLINE-10),life:.6,max:.6,txt:'✗',col:'#e04b4b'});
+  gMsg(msg,'var(--danger-line)'); gHud(g);
+  if(g.lives<=0) gOver(g);
+}
+function gSort(bin){
+  const g=G; if(!g||g.state!=='play'||!g.items.length) return;
+  let k=0; g.items.forEach((it,j)=>{ if(it.y>g.items[k].y) k=j; });
+  const it=g.items.splice(k,1)[0];
+  if(it.bin===bin){
+    g.combo++; g.sorted++;
+    const pts=10*(1+Math.floor((g.combo-1)/5)); g.score+=pts;
+    g.fx.push({x:it.x,y:it.y,life:.3,max:.3,jet:true,col:GBINS[bin].col});
+    g.fx.push({x:it.x,y:it.y,life:.6,max:.6,txt:'+'+pts,col:'#4cc57f'});
+    gMsg(it.bin===3?L(it.fr+' : bien rejeté !',it.en+': rightly rejected!'):'','var(--ok)'); gHud(g);
+  } else {
+    const nm=L(it.fr,it.en), bn=L(GBINS[bin].fr,GBINS[bin].en);
+    let m;
+    if(it.bin===3) m=nm+' → '+L('Refus','Reject')+'. '+L(it.tfr,it.ten);
+    else if(bin===3) m=L('Du bon verre rejeté : on perd de la matière recyclable.','Good glass rejected: recyclable material is lost.');
+    else m=nm+' ≠ '+bn+'. '+L('Mélanger les couleurs change la teinte du verre recyclé.','Mixing colours changes the colour of recycled glass.');
+    gFail(g,it,m);
+  }
+}
+function gOver(g){
+  g.state='over'; g.items=[];
+  const b=gBest(); if(g.score>b){ gSetBest(g.score); g.newBest=true; }
+  gMsg(L('Partie terminée','Game over')+' – '+g.score+' pts · '+g.sorted+' '+L('pièces triées','items sorted')+(g.newBest?' · '+L('Nouveau record !','New best!'):'')+'\n'+L('Le saviez-vous ? Le verre se recycle à l\'infini sans perdre en qualité.','Did you know? Glass can be recycled endlessly without losing quality.'));
+  $('gmsg').style.whiteSpace='pre-line';
+  $('gplay').textContent=L('Rejouer','Play again'); $('gplay').classList.remove('hidden'); gHud(g);
+}
+function gPoly(ctx,pts){ ctx.beginPath(); ctx.moveTo(pts[0],pts[1]); for(let i=2;i<pts.length;i+=2) ctx.lineTo(pts[i],pts[i+1]); ctx.closePath(); }
+function gItem(ctx,it){
+  ctx.save(); ctx.translate(it.x,it.y); ctx.rotate(it.rot); ctx.lineWidth=1.5; ctx.lineJoin='round';
+  if(it.shape==='bottle'){
+    ctx.globalAlpha=.92; ctx.fillStyle=it.col; ctx.strokeStyle='rgba(255,255,255,.75)';
+    ctx.beginPath(); ctx.moveTo(-5,-22); ctx.lineTo(5,-22); ctx.lineTo(5,-10); ctx.quadraticCurveTo(13,-6,13,4); ctx.lineTo(13,20); ctx.quadraticCurveTo(13,24,9,24); ctx.lineTo(-9,24); ctx.quadraticCurveTo(-13,24,-13,20); ctx.lineTo(-13,4); ctx.quadraticCurveTo(-13,-6,-5,-10); ctx.closePath();
+    ctx.fill(); ctx.stroke(); ctx.globalAlpha=.55; ctx.fillStyle='#fff'; ctx.fillRect(-9,0,3,18);
+  } else if(it.shape==='stone'){
+    ctx.fillStyle='#7d7f83'; ctx.strokeStyle='#4a4c50'; gPoly(ctx,[-16,-4,-8,-14,6,-15,16,-5,14,9,2,15,-11,12]); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#5c5e62'; ctx.fillRect(-6,-4,3,3); ctx.fillRect(4,3,3,3); ctx.fillRect(-2,8,2,2);
+  } else if(it.shape==='shard'){
+    ctx.fillStyle='#f1e8d6'; ctx.strokeStyle='#b9a98c'; gPoly(ctx,[-16,10,-4,-16,14,-6,10,14]); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle='#3b6fb0'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-9,4); ctx.lineTo(8,-2); ctx.stroke();
+  } else if(it.shape==='cap'){
+    ctx.fillStyle='#aab2ba'; ctx.strokeStyle='#6b747c'; ctx.beginPath(); ctx.arc(0,0,14,0,6.2832); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); for(let a=0;a<12;a++){ const r=a*Math.PI/6; ctx.moveTo(Math.cos(r)*11,Math.sin(r)*11); ctx.lineTo(Math.cos(r)*14,Math.sin(r)*14); } ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,7,0,6.2832); ctx.stroke();
+  } else if(it.shape==='bag'){
+    ctx.globalAlpha=.85; ctx.fillStyle='#e0638a'; ctx.strokeStyle='#a8385c';
+    ctx.beginPath(); ctx.moveTo(-14,-10); ctx.quadraticCurveTo(0,-16,14,-10); ctx.quadraticCurveTo(18,0,12,12); ctx.quadraticCurveTo(0,18,-12,12); ctx.quadraticCurveTo(-18,0,-14,-10); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.globalAlpha=.6; ctx.beginPath(); ctx.moveTo(-8,-6); ctx.lineTo(-2,8); ctx.moveTo(6,-8); ctx.lineTo(2,6); ctx.stroke();
+  }
+  ctx.restore();
+}
+function gRender(g){
+  const c=g.ctx;
+  c.clearRect(0,0,GW,GH);
+  c.fillStyle='#0f2a44'; c.fillRect(0,0,GW,GH);
+  c.strokeStyle='rgba(255,255,255,.07)'; c.lineWidth=2;
+  for(let y=-40+g.off;y<GH;y+=40){ c.beginPath(); c.moveTo(0,y); c.lineTo(GW,y); c.stroke(); }
+  c.fillStyle='#0a1d30'; c.fillRect(0,GLINE,GW,GH-GLINE);
+  c.strokeStyle='#2d8fe0'; c.setLineDash([8,6]); c.lineWidth=2; c.beginPath(); c.moveTo(0,GLINE); c.lineTo(GW,GLINE); c.stroke(); c.setLineDash([]);
+  c.fillStyle='#5aaeea'; for(let x=20;x<GW;x+=40){ c.beginPath(); c.arc(x,GLINE+12,4,0,6.2832); c.fill(); }
+  c.fillStyle='rgba(255,255,255,.55)'; c.font='600 12px system-ui,sans-serif'; c.textAlign='center';
+  c.fillText(L('ZONE D\'ÉJECTION','EJECTION ZONE'),GW/2,GLINE+38);
+  g.items.forEach(it=>gItem(c,it));
+  if(g.state==='play'&&g.items.length){
+    let k=0; g.items.forEach((it,j)=>{ if(it.y>g.items[k].y) k=j; });
+    const t=g.items[k]; c.strokeStyle='#fff'; c.lineWidth=2; c.setLineDash([5,4]); c.beginPath(); c.arc(t.x,t.y,30,0,6.2832); c.stroke(); c.setLineDash([]);
+  }
+  g.fx.forEach(f=>{
+    const p=1-f.life/f.max;
+    if(f.jet){ c.globalAlpha=1-p; c.strokeStyle=f.col; c.lineWidth=4; c.beginPath(); c.arc(f.x,f.y,12+p*34,0,6.2832); c.stroke(); c.globalAlpha=1; }
+    else { c.globalAlpha=1-p; c.fillStyle=f.col; c.font='700 20px system-ui,sans-serif'; c.textAlign='center'; c.fillText(f.txt,f.x,f.y-p*30); c.globalAlpha=1; }
+  });
+  if(g.state!=='play'){
+    c.fillStyle='rgba(10,29,48,.72)'; c.fillRect(0,0,GW,GH);
+    c.fillStyle='#fff'; c.textAlign='center'; c.font='700 26px system-ui,sans-serif';
+    c.fillText(g.state==='over'?L('Partie terminée','Game over'):L('Trieur Sibelco','Sibelco Sorter'),GW/2,GH/2-10);
+    c.font='500 15px system-ui,sans-serif'; c.fillStyle='#c5d6ea';
+    c.fillText(g.state==='over'?(g.score+' pts'):L('Appuyez sur « Jouer »','Press “Play”'),GW/2,GH/2+20);
+  }
+}
 
 (function(){var i=new Image();i.onload=function(){document.documentElement.classList.add('photo');};i.src='fond-verre.jpg';})();
 boot();
