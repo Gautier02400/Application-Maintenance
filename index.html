@@ -109,6 +109,26 @@ html.photo body::before{background-image:linear-gradient(rgba(242,245,249,.88),r
 @media (prefers-color-scheme: dark){
   html.photo:not([data-theme="light"]) body::before{background-image:linear-gradient(rgba(16,22,28,.88),rgba(16,22,28,.88)),url("fond-verre.jpg")}
 }
+
+/* Menu latéral + classes */
+#side{position:fixed;top:0;bottom:0;left:0;width:220px;background:var(--card);border-right:1px solid var(--line);z-index:30;padding:calc(12px + env(safe-area-inset-top,0px)) 10px calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:4px;overflow:auto}
+#side .nb{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px}
+#side .nb.on{background:var(--accent);color:var(--accent-text);font-weight:600}
+#side .sp{flex:1}
+.menu-btn,#scrim{display:none}
+@media(min-width:781px){body{padding-left:220px}}
+@media(max-width:780px){#side{transform:translateX(-100%);transition:transform .2s}#side.open{transform:none}.menu-btn{display:inline-block}#scrim.open{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:25}}
+.cls{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 10px;border-radius:999px;color:#fff}
+.cls0{background:#c0392b}.cls1{background:#b9770e}.cls2{background:#1a8a4a}.cls3{background:#0a5aa8}
+.card.locked{opacity:.6}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:12px 0}
+a.btn{display:inline-block;text-decoration:none;color:var(--accent)}
+@media print{#side{display:none!important}body{padding-left:0!important}}
+
+#side{background:var(--brand);border-right:3px solid #2d8fe0}
+#side .nb{color:#fff}#side .nb:hover{background:rgba(255,255,255,.12)}#side .nb.on{background:#2d8fe0;color:#fff}
+#side .meta{color:#c5d6ea}
+body.nolog{padding-left:0!important}body.nolog #side,body.nolog header,body.nolog #scrim{display:none!important}
 </style>
 </head>
 <body>
@@ -116,6 +136,7 @@ html.photo body::before{background-image:linear-gradient(rgba(242,245,249,.88),r
 <header class="noprint">
   <div class="wrap">
     <div class="top">
+      <button class="menu-btn" onclick="toggleNav()" aria-label="Menu">Menu</button>
       <h1 class="brand">
       <img src="icon-512.png" alt="Sibelco" class="logo">
       <span><span data-i18n="app_title"></span> <small data-i18n="app_sub"></small></span>
@@ -125,9 +146,9 @@ html.photo body::before{background-image:linear-gradient(rgba(242,245,249,.88),r
           <button id="bFr" onclick="setLang('fr')">FR</button>
           <button id="bEn" onclick="setLang('en')">EN</button>
         </div>
-        <button class="primary" onclick="newTuto()" data-i18n="new"></button>
-        <button onclick="exportJSON()" data-i18n="export"></button>
-        <button onclick="document.getElementById('imp').click()" data-i18n="import"></button>
+        <button class="primary tbtn" onclick="newTuto()" data-i18n="new"></button>
+        <button class="tbtn" onclick="exportJSON()" data-i18n="export"></button>
+        <button class="tbtn" onclick="document.getElementById('imp').click()" data-i18n="import"></button>
         <input id="imp" type="file" accept="application/json" class="hidden" onchange="importJSON(event)">
       </div>
     </div>
@@ -139,6 +160,7 @@ html.photo body::before{background-image:linear-gradient(rgba(242,245,249,.88),r
   </div>
 </header>
 
+<nav id="side" class="noprint"></nav><div id="scrim" onclick="toggleNav(false)"></div>
 <main class="wrap" id="app"></main>
 <div class="toast" id="toast"></div>
 
@@ -174,7 +196,17 @@ const I18N = {
   export_started:'Export lancé', imported:n=>n+' tutoriel(s) importé(s)', invalid:'Fichier invalide',
   storage_full:'Stockage plein ou indisponible : pensez à exporter en JSON',
   footer:'Projet réalisé par Lecertisseur Gautier, Coordinateur Tri Optiques · Sibelco Reims',
-  unspecified:'Non précisée'
+  unspecified:'Non précisée', locked_tag:'Verrouillé',
+  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_pres:'Fiches présentation', nav_set:'Paramètres', items:'élément(s)',
+  welcome:'Bienvenue', your_class:'Votre classe :', ask_level:'Quel est votre niveau sur les trieurs optiques ?',
+  confirm_cls:'Je confirme avoir le niveau de cette classe (déclaratif, à valider avec le référent).',
+  oblig_title:'Formation obligatoire', oblig_txt:"Vous ne connaissez pas encore les trieurs optiques : terminez d'abord la formation pour débloquer les autres tutoriels.", oblig_go:'Commencer la formation',
+  trained_on:'Formation validée le', trained_ok:'Formation validée : classe 1 débloquée !',
+  locked_title:'Tutoriel verrouillé', locked_txt:n=>'Ce tutoriel demande la classe '+n+' minimum.', locked_ref:'Contactez votre référent pour faire évoluer votre classe.',
+  add_fiche:'+ Ajouter une fiche', no_fiche:'Aucune fiche pour le moment.', open_doc:'Ouvrir le document',
+  f_text:'Contenu / description', f_url:'Lien ou fichier du document (facultatif)', ph_url:'Ex : https://… ou docs/notice.pdf',
+  set_name:'Votre nom', set_class:'Votre classe', set_theme:'Thème', theme_auto:'Automatique', theme_light:'Clair', theme_dark:'Sombre',
+  reset_train:'Réinitialiser ma formation', confirm_reset:'Repasser en classe 0 ?'
  },
  en:{
   app_title:'Maintenance Tutorials', app_sub:'Optical glass sorters · Sibelco Reims',
@@ -202,7 +234,17 @@ const I18N = {
   export_started:'Export started', imported:n=>n+' tutorial(s) imported', invalid:'Invalid file',
   storage_full:'Storage full or unavailable: please export to JSON',
   footer:'Project by Lecertisseur Gautier, Optical Sorting Coordinator · Sibelco Reims',
-  unspecified:'Not specified'
+  unspecified:'Not specified', locked_tag:'Locked',
+  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_pres:'Presentation sheets', nav_set:'Settings', items:'item(s)',
+  welcome:'Welcome', your_class:'Your class:', ask_level:'What is your level on optical sorters?',
+  confirm_cls:'I confirm I have the level of this class (self-declared, to be validated with the referent).',
+  oblig_title:'Mandatory training', oblig_txt:'You do not know optical sorters yet: complete the training first to unlock the other tutorials.', oblig_go:'Start training',
+  trained_on:'Training completed on', trained_ok:'Training completed: class 1 unlocked!',
+  locked_title:'Tutorial locked', locked_txt:n=>'This tutorial requires class '+n+' minimum.', locked_ref:'Contact your referent to upgrade your class.',
+  add_fiche:'+ Add a sheet', no_fiche:'No sheet yet.', open_doc:'Open document',
+  f_text:'Content / description', f_url:'Document link or file (optional)', ph_url:'E.g. https://… or docs/manual.pdf',
+  set_name:'Your name', set_class:'Your class', set_theme:'Theme', theme_auto:'Automatic', theme_light:'Light', theme_dark:'Dark',
+  reset_train:'Reset my training', confirm_reset:'Go back to class 0?'
  }
 };
 let lang = (()=>{ try{ const l=localStorage.getItem(LANG_KEY); if(l==='fr'||l==='en') return l; }catch(e){} return (navigator.language||'fr').toLowerCase().startsWith('en')?'en':'fr'; })();
@@ -221,6 +263,17 @@ const statusL = s => STATUS_L[lang][s]||'';
 const machineL = m => lang==='en'?(MACHINE_TR[m]||m):m;
 
 /* ---------- TUTORIELS D'EXEMPLE ---------- */
+const TOBL={id:'tobl',mandatory:true,title:'FORMATION OBLIGATOIRE – Les bases du trieur optique verre',machine:'Tous trieurs',category:'Sécurité',level:'Obligatoire',duration:30,
+ tools:['EPI : lunettes, gants, chaussures de sécurité, protection auditive','Fiche constructeur de la machine'],
+ safety:['Obligatoire avant toute autre intervention si vous ne connaissez pas les trieurs optiques','Jamais d\'intervention sans consignation (voir tuto LOTO)','Dans le doute : on s\'arrête et on appelle le référent'],
+ steps:[
+  {text:'Principe : le verre (calcin) défile en nappe fine devant des caméras et un éclairage ; le trieur repère les indésirables (céramique, pierre, porcelaine, couleurs selon réglage).',warn:'',img:''},
+  {text:'Repérer les 4 zones : alimentation / convoyeur, zone optique (caméras + éclairage + vitres), bloc d\'éjection (buses d\'air comprimé), écran / automate.',warn:'',img:''},
+  {text:'Connaître les dangers : pièces en mouvement, électricité, air comprimé, éclats et poussières de verre, bruit.',warn:'EPI obligatoires en zone machine.',img:''},
+  {text:'Savoir arrêter : arrêt normal depuis l\'écran ; arrêt d\'urgence uniquement en cas de danger. Repérer leur emplacement.',warn:'',img:''},
+  {text:'Règles d\'or : consigner avant d\'intervenir, ne jamais souffler à l\'air comprimé sur les optiques, mains hors de la zone d\'éjection, aucun solvant non validé.',warn:'',img:''},
+  {text:'Lire le tutoriel LOTO et la fiche constructeur de votre trieur, puis noter qui est le référent à appeler.',warn:'Cochez toutes les étapes : la classe 1 se débloque automatiquement.',img:''}
+ ],status:'avalider',updated:0};
 const SEED = [
  {id:'t1',title:'Consignation avant intervention (LOTO)',machine:'Tous trieurs',category:'Sécurité',level:'Obligatoire',duration:15,
   tools:['Cadenas personnel','Étiquettes de consignation','Fiche de consignation du site'],
@@ -262,9 +315,21 @@ const SEED = [
    {text:'Contrôler les valeurs obtenues et les comparer aux valeurs habituelles / tolérances.',warn:'Valeur anormale : ne pas valider, prévenir le responsable maintenance.',img:''},
    {text:'Faire un test avec du verre connu et vérifier la qualité de tri (rejets / acceptés).',warn:'',img:''}
   ],status:'brouillon',updated:0}
-];
+
+,TOBL];
 /* Traductions anglaises des exemples (affichées tant qu'ils ne sont pas modifiés) */
 const SEED_EN = {
+ tobl:{title:'MANDATORY TRAINING – Optical glass sorter basics',machine:'All sorters',
+  tools:['PPE: glasses, gloves, safety shoes, hearing protection','Manufacturer sheet of the machine'],
+  safety:['Mandatory before any other intervention if you do not know optical sorters','Never intervene without lockout (see LOTO tutorial)','When in doubt: stop and call the referent'],
+  steps:[
+   ['Principle: glass cullet runs in a thin layer past cameras and lighting; the sorter detects unwanted items (ceramics, stones, porcelain, colours depending on setup).',''],
+   ['Identify the 4 zones: feed / conveyor, optical area (cameras + lighting + windows), ejection block (compressed-air nozzles), screen / PLC.',''],
+   ['Know the hazards: moving parts, electricity, compressed air, glass splinters and dust, noise.','PPE mandatory in the machine area.'],
+   ['Know how to stop: normal stop from the screen; emergency stop only in case of danger. Locate both.',''],
+   ['Golden rules: lock out before intervening, never blow compressed air on the optics, hands out of the ejection area, no unapproved solvent.',''],
+   ['Read the LOTO tutorial and your sorter\'s manufacturer sheet, then note who the referent to call is.','Tick every step: class 1 unlocks automatically.']
+  ]},
  t1:{title:'Lockout / tagout before intervention (LOTO)',machine:'All sorters',
   tools:['Personal padlock','Lockout tags','Site lockout form'],
   safety:['No intervention without full lockout','Adapt the procedure to the site lockout rules'],
@@ -316,8 +381,8 @@ function view(t){
 }
 
 /* ---------- ÉTAT ---------- */
-let tutos = load();
-let state = {view:'list', id:null, cat:'', draft:null, done:{}};
+let tutos = load(); if(!tutos.some(t=>t.id==='tobl')) tutos.unshift(JSON.parse(JSON.stringify(TOBL)));
+let state = {view:'home', section:'home', id:null, cat:'', draft:null, done:{}};
 
 function load(){
   try{ const r = localStorage.getItem(KEY); if(r){ const d = JSON.parse(r); if(Array.isArray(d)) return d; } }catch(e){}
@@ -334,7 +399,7 @@ function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show');
 
 /* ---------- LANGUE ---------- */
 function applyStatic(){
-  document.documentElement.lang=lang;
+  document.documentElement.lang=lang; buildNav();
   document.querySelectorAll('[data-i18n]').forEach(e=>{ e.textContent=T(e.dataset.i18n); });
   document.querySelectorAll('[data-i18n-ph]').forEach(e=>{ e.placeholder=T(e.dataset.i18nPh); });
   $('bFr').classList.toggle('on',lang==='fr');
@@ -349,7 +414,7 @@ function setLang(l){
   applyStatic();
   if(state.view==='view' && state.id) openTuto(state.id);
   else if(state.view==='edit') renderEditor();
-  else renderList();
+  else renderSection();
 }
 
 /* ---------- LISTE ---------- */
@@ -359,7 +424,7 @@ function refreshMachineFilter(){
   sel.innerHTML = `<option value="">${esc(T('all_machines'))}</option>`+machines().map(m=>`<option ${m===cur?'selected':''} value="${esc(m)}">${esc(m)}</option>`).join('');
 }
 function renderList(){
-  state.view='list';
+  state.view='list'; state.section='tutos'; buildNav();
   $('filters').classList.remove('hidden');
   refreshMachineFilter();
   const q=($('q').value||'').toLowerCase(), fm=$('fMachine').value, fs=$('fStatus').value;
@@ -384,9 +449,9 @@ function renderList(){
   window.scrollTo(0,0);
 }
 function cardHTML(t){
-  return `<div class="card" onclick="openTuto('${t.id}')">
+  return `<div class="card ${isLocked(t)?'locked':''}" onclick="openTuto('${t.id}')">
     <div class="row" style="justify-content:space-between"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span></div>
-    <h3>${esc(t.title)}</h3>
+    <h3>${isLocked(t)?`<span class="tag">${esc(T('locked_tag'))}</span> `:''}${esc(t.title)}</h3>
     <div class="meta"><span>${esc(machineL(t.machine))}</span><span>${esc(t.duration)} ${T('min')}</span><span>${esc(levelL(t.level))}</span><span>${T('steps_n',(t.steps||[]).length)}</span></div>
   </div>`;
 }
@@ -396,7 +461,8 @@ function setCat(i){ state.cat = i<0?'':CATS[i]; renderList(); }
 function openTuto(id){
   const raw=tutos.find(x=>x.id===id); if(!raw) return;
   const t=view(raw);
-  state.view='view'; state.id=id;
+  state.view='view'; state.id=id; state.section='tutos'; buildNav();
+  if(isLocked(raw)) return renderLocked(raw,t);
   if(!state.done[id]) state.done[id]=[];
   $('filters').classList.add('hidden');
   const stepsHTML=(t.steps||[]).map((s,i)=>`
@@ -443,7 +509,7 @@ function updProgress(id, notify){
   const p=n?Math.round(d/n*100):0;
   $('bar').style.width=p+'%';
   $('pct').textContent=T('prog',d,n,p);
-  if(notify && n && d===n) toast(T('finished'));
+  if(notify && n && d===n){ toast(T('finished')); if(t.mandatory) validateTraining(); }
 }
 
 /* ---------- ÉDITION ---------- */
@@ -574,9 +640,219 @@ function importJSON(ev){
   r.readAsText(f);
 }
 
+
+/* ---------- CLASSES / PARAMÈTRES / MENU ---------- */
+const SKEY='sibelco_settings_v1', FKEY='sibelco_fiches_v1';
+const CLS=[
+ {fr:'Classe 0 – Découverte',en:'Class 0 – Beginner',dfr:'Ne connaît pas les trieurs optiques : formation obligatoire avant les autres tutos.',den:'New to optical sorters: mandatory training before the other tutorials.'},
+ {fr:'Classe 1 – Opérateur',en:'Class 1 – Operator',dfr:'Connaît les trieurs : accès aux tutos Facile / Moyen.',den:'Knows the sorters: access to Easy / Medium tutorials.'},
+ {fr:'Classe 2 – Technicien',en:'Class 2 – Technician',dfr:'Autonome en maintenance : accès aux tutos Avancé.',den:'Autonomous in maintenance: access to Advanced tutorials.'},
+ {fr:'Classe 3 – Référent',en:'Class 3 – Referent',dfr:'Référent : valide les tutos et forme les autres.',den:'Referent: validates tutorials and trains others.'}
+];
+const clsL=n=>CLS[n][lang], clsD=n=>CLS[n]['d'+lang];
+let settings={name:'',cls:0,chosen:true,trained:0,theme:'auto'};
+function saveSettings(){ saveUsers(); }
+function applyTheme(){ const r=document.documentElement; if(settings.theme==='light'||settings.theme==='dark') r.setAttribute('data-theme',settings.theme); else r.removeAttribute('data-theme'); }
+const needCls=t=>(t.mandatory||t.category==='Sécurité')?0:(t.level==='Avancé'?2:1);
+const isLocked=t=>settings.cls<needCls(t);
+function validateTraining(){ if(settings.cls<1) settings.cls=1; settings.chosen=true; settings.trained=Date.now(); saveSettings(); buildNav(); toast(T('trained_ok')); }
+
+const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['presentation','','nav_pres'],['settings','','nav_set']];
+function buildNav(){
+  $('side').innerHTML=`<div class="meta" style="padding:4px 12px 12px;flex-direction:column;gap:4px"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span>${settings.name?`<b style="color:#fff">${esc(settings.name)}</b>`:''}</div>`+
+   NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('hidden',state.section!=='tutos'));
+}
+function toggleNav(v){ const o=v===undefined?!$('side').classList.contains('open'):v; $('side').classList.toggle('open',o); $('scrim').classList.toggle('open',o); }
+function go(k){ toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else renderFiches(k); }
+function renderSection(){ const v=state.view;
+  if(v==='home') renderHome(); else if(v==='settings') renderSettings(); else if(v==='fiches') renderFiches(state.section);
+  else if(v==='fiche') openFiche(state.fid); else if(v==='fedit') renderFicheEditor(); else renderList(); }
+function cnt(k){ if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
+
+function renderHome(){
+  state.section='home'; state.view='home'; $('filters').classList.add('hidden'); buildNav();
+  const ob=tutos.find(t=>t.mandatory), c=settings.cls;
+  $('app').innerHTML=`
+   <div class="panel"><h2 style="margin-top:0">${esc(T('welcome'))}${settings.name?', '+esc(settings.name):''}</h2>
+     <div class="row"><span>${esc(T('your_class'))}</span><span class="cls cls${c}">${esc(clsL(c))}</span></div>
+     <p class="meta">${esc(clsD(c))}</p></div>
+   ${!settings.chosen?`<div class="panel"><b>${esc(T('ask_level'))}</b><div class="row" style="margin-top:8px">${CLS.map((x,i)=>`<button onclick="chooseCls(${i})">${esc(clsL(i))}</button>`).join('')}</div></div>`:''}
+   ${(c<1&&ob)?`<div class="box danger"><b>${esc(T('oblig_title'))}</b><br>${esc(T('oblig_txt'))}<div style="margin-top:8px"><button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button></div></div>`:''}
+   ${settings.trained?`<div class="box" style="border-left-color:var(--ok)">${esc(T('trained_on'))} ${esc(new Date(settings.trained).toLocaleDateString(lang))}</div>`:''}
+   <div class="tiles">${NAV.slice(1,4).map(([k,i,l])=>`<div class="card" onclick="go('${k}')"><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div></div>`).join('')}</div>
+   <p class="disclaimer">${esc(T('footer'))}</p>`;
+  window.scrollTo(0,0);
+}
+function chooseCls(i){ if(i>=1&&!confirm(T('confirm_cls'))) return; settings.cls=i; settings.chosen=true; saveSettings(); renderHome(); }
+
+/*SETTINGS*/
+
+/* ---------- COMPTES / CONNEXION / PDF ---------- */
+const L=(fr,en)=>lang==='en'?en:fr;
+const UKEY='sibelco_users_v1', SESS='sibelco_session';
+let users=(()=>{try{const r=JSON.parse(localStorage.getItem(UKEY)); if(Array.isArray(r)) return r;}catch(e){} return [];})();
+function saveUsers(){ try{localStorage.setItem(UKEY,JSON.stringify(users));}catch(e){toast(T('storage_full'));} }
+const validId=v=>/^[a-z0-9._-]{2,30}$/.test(v);
+async function hash(pw,salt){
+  const d=new TextEncoder().encode(salt+':'+pw);
+  if(window.crypto&&crypto.subtle){ const b=await crypto.subtle.digest('SHA-256',d); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+  let h=5381; for(const c of salt+pw) h=((h<<5)+h+c.charCodeAt(0))|0; return 'w'+h;
+}
+function authShell(inner){
+  document.body.classList.add('nolog'); toggleNav(false);
+  $('app').innerHTML=`<div class="panel" style="max-width:380px;margin:40px auto"><div style="text-align:center"><img src="icon-192.png" alt="Sibelco" style="height:90px"><h2 style="margin:8px 0 16px">${esc(T('app_title'))}</h2></div>${inner}<div id="aerr" class="box danger hidden" style="margin-top:12px"></div></div>`;
+}
+const aerr=m=>{ const e=$('aerr'); e.textContent=m; e.classList.remove('hidden'); };
+function renderLogin(){
+  authShell(`<label>${L('Identifiant','Login')}</label><input id="li" autocomplete="username" autocapitalize="none">
+   <label>${L('Mot de passe','Password')}</label><input id="lp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+   <div style="margin-top:14px"><button class="primary" style="width:100%" onclick="doLogin()">${L('Se connecter','Log in')}</button></div>`);
+}
+function renderSetup(){
+  authShell(`<p class="meta">${L('Première utilisation : créez le compte référent (administrateur).','First use: create the referent (administrator) account.')}</p>
+   <label>${L('Identifiant (a-z, 0-9)','Login (a-z, 0-9)')}</label><input id="si" autocapitalize="none">
+   <label>${L('Nom Prénom','Full name')}</label><input id="sn">
+   <label>${L('Mot de passe (4 caractères min)','Password (min 4)')}</label><input id="sp" type="password" autocomplete="new-password">
+   <div style="margin-top:14px"><button class="primary" style="width:100%" onclick="doSetup()">${L('Créer le compte','Create account')}</button></div>`);
+}
+async function doSetup(){
+  const id=$('si').value.trim().toLowerCase(), name=$('sn').value.trim(), pw=$('sp').value;
+  if(!validId(id)||!name||pw.length<4){ aerr(L('Identifiant (a-z, 0-9), nom et mot de passe (4 car. min) requis','Login (a-z, 0-9), name and password (min 4) required')); return; }
+  const salt=uid(); const u={id,name,cls:3,salt,pw:await hash(pw,salt),chosen:true,trained:Date.now(),theme:'auto'};
+  users.push(u); saveUsers(); try{localStorage.setItem(SESS,id);}catch(e){} enter(u);
+}
+async function doLogin(){
+  const id=$('li').value.trim().toLowerCase(), u=users.find(x=>x.id===id);
+  if(!u||(await hash($('lp').value,u.salt))!==u.pw){ aerr(L('Identifiant ou mot de passe incorrect','Wrong login or password')); return; }
+  try{localStorage.setItem(SESS,u.id);}catch(e){} enter(u);
+}
+function enter(u){ settings=u; document.body.classList.remove('nolog'); applyTheme(); applyStatic(); renderHome(); }
+function logout(){
+  try{localStorage.removeItem(SESS);}catch(e){}
+  settings={name:'',cls:0,chosen:true,trained:0,theme:'auto'}; state.done={}; document.documentElement.removeAttribute('data-theme'); renderLogin();
+}
+function boot(){
+  applyStatic(); let sid=null; try{sid=localStorage.getItem(SESS);}catch(e){}
+  const u=users.find(x=>x.id===sid); if(u) enter(u); else if(!users.length) renderSetup(); else renderLogin();
+}
+
+function renderSettings(){
+  state.section='settings'; state.view='settings'; $('filters').classList.add('hidden'); buildNav();
+  const adm=settings.cls>=3;
+  $('app').innerHTML=`<div class="panel"><h2 style="margin-top:0">${esc(T('nav_set'))}</h2>
+   <div class="row"><span class="cls cls${settings.cls}">${esc(clsL(settings.cls))}</span><span class="meta">${L('Identifiant','Login')} : ${esc(settings.id||'')}</span></div>
+   <p class="meta">${esc(clsD(settings.cls))}</p>
+   <label>${esc(T('set_name'))}</label><input value="${esc(settings.name)}" oninput="settings.name=this.value;saveSettings();buildNav()">
+   <label>${esc(T('set_theme'))}</label><select onchange="settings.theme=this.value;saveSettings();applyTheme()">${[['auto','theme_auto'],['light','theme_light'],['dark','theme_dark']].map(([v,l])=>`<option value="${v}" ${v===settings.theme?'selected':''}>${esc(T(l))}</option>`).join('')}</select>
+   <label>${L('Nouveau mot de passe','New password')}</label><div class="row"><input id="np" type="password" autocomplete="new-password" style="flex:1"><button onclick="changePw()">${L('Changer','Change')}</button></div></div>`+(adm?adminHTML():'');
+}
+function adminHTML(){
+  const co=sel=>CLS.map((x,i)=>`<option value="${i}" ${i===sel?'selected':''}>${esc(clsL(i))}</option>`).join('');
+  return `<div class="panel"><h3 style="margin-top:0">${L('Travailleurs et classes','Workers and classes')}</h3>`+
+   users.map(u=>`<div class="edit-step"><div class="row" style="justify-content:space-between"><b>${esc(u.name)} <span class="meta">(${esc(u.id)})</span></b><span class="cls cls${u.cls}">${esc(clsL(u.cls))}</span></div>
+    <div class="row" style="margin-top:8px"><select style="width:auto" onchange="setUserCls('${u.id}',this.value)">${co(u.cls)}</select><button class="small" onclick="resetPw('${u.id}')">${L('Mot de passe','Password')}</button>${u.id!==settings.id?`<button class="small danger" onclick="delUser('${u.id}')">${esc(T('delete'))}</button>`:''}</div></div>`).join('')+
+   `<h4>${L('Ajouter un travailleur','Add a worker')}</h4>
+    <div class="row"><input id="nu_id" placeholder="${L('Identifiant','Login')}" autocapitalize="none" style="flex:1;min-width:130px"><input id="nu_name" placeholder="${L('Nom Prénom','Full name')}" style="flex:1;min-width:130px"><input id="nu_pw" type="text" placeholder="${L('Mot de passe initial','Initial password')}" style="flex:1;min-width:130px"></div>
+    <div class="row" style="margin-top:8px"><select id="nu_cls" style="width:auto">${co(0)}</select><button class="primary" onclick="addUser()">${L('Ajouter','Add')}</button></div></div>`;
+}
+async function addUser(){
+  const id=$('nu_id').value.trim().toLowerCase(), name=$('nu_name').value.trim(), pw=$('nu_pw').value, cls=+$('nu_cls').value;
+  if(!validId(id)||!name||pw.length<4){ toast(L('Identifiant (a-z, 0-9), nom et mot de passe (4 car. min) requis','Login (a-z, 0-9), name and password (min 4) required')); return; }
+  if(users.some(u=>u.id===id)){ toast(L('Identifiant déjà utilisé','Login already used')); return; }
+  const salt=uid(); users.push({id,name,cls,salt,pw:await hash(pw,salt),chosen:true,trained:0,theme:'auto'}); saveUsers(); toast(T('saved')); renderSettings();
+}
+function setUserCls(id,v){
+  const u=users.find(x=>x.id===id); if(!u) return; v=+v;
+  if(v<3&&u.cls>=3&&users.filter(x=>x.cls>=3).length<2){ toast(L('Il doit rester au moins un référent','At least one referent must remain')); renderSettings(); return; }
+  u.cls=v; if(v===0) u.trained=0; saveUsers(); renderSettings();
+}
+async function resetPw(id){
+  const u=users.find(x=>x.id===id), p=prompt(L('Nouveau mot de passe (4 caractères min)','New password (min 4)'));
+  if(!u||!p||p.length<4) return; u.salt=uid(); u.pw=await hash(p,u.salt); saveUsers(); toast(T('saved'));
+}
+function delUser(id){ if(!confirm(T('confirm_del'))) return; users=users.filter(u=>u.id!==id); saveUsers(); renderSettings(); }
+async function changePw(){
+  const p=$('np').value; if(p.length<4){ toast(L('4 caractères minimum','4 characters minimum')); return; }
+  settings.salt=uid(); settings.pw=await hash(p,settings.salt); saveUsers(); $('np').value=''; toast(T('saved'));
+}
+
+function idb(){ return new Promise((ok,ko)=>{ const r=indexedDB.open('sibelco_files',1); r.onupgradeneeded=()=>r.result.createObjectStore('f'); r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); }); }
+async function idbOp(m,k,v){
+  const db=await idb();
+  return new Promise((ok,ko)=>{ const tx=db.transaction('f',m==='get'?'readonly':'readwrite'), st=tx.objectStore('f'); const rq=m==='put'?st.put(v,k):m==='get'?st.get(k):st.delete(k); tx.oncomplete=()=>ok(rq.result); tx.onerror=()=>ko(tx.error); });
+}
+const idbPut=(k,v)=>idbOp('put',k,v), idbGet=k=>idbOp('get',k), idbDel=k=>idbOp('del',k);
+function pickPdf(inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  if(f.size>30e6){ toast(L('Fichier trop gros (30 Mo max)','File too large (30 MB max)')); inp.value=''; return; }
+  state.fdFile=f; state.fdRm=false; state.fd.file={name:f.name,size:f.size}; renderFicheEditor();
+}
+function rmPdf(){ state.fdFile=null; state.fdRm=true; state.fd.file=null; renderFicheEditor(); }
+async function showPdf(f){
+  try{
+    const b=await idbGet(f.id), box=$('pdfBox'); if(!b||!box) return;
+    const u=URL.createObjectURL(b);
+    box.innerHTML=`<div class="row" style="margin:12px 0"><a class="btn" href="${u}" target="_blank" rel="noopener">${L('Ouvrir le PDF','Open PDF')}</a><a class="btn" href="${u}" download="${esc(f.file.name)}">${L('Télécharger','Download')}</a></div><iframe src="${u}" title="PDF" style="width:100%;height:70vh;border:1px solid var(--line);border-radius:8px"></iframe>`;
+  }catch(e){}
+}
+
+
+function renderLocked(raw,t){
+  $('filters').classList.add('hidden');
+  const ob=tutos.find(x=>x.mandatory);
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0"><button onclick="renderList()">${esc(T('back'))}</button></div>
+   <div class="panel"><h2 style="margin-top:0">${esc(t.title)}</h2>
+    <div class="box danger"><b>${esc(T('locked_title'))}</b><br>${esc(T('locked_txt',needCls(raw)))}<br>${esc(T('locked_ref'))}</div>
+    ${(settings.cls<1&&ob)?`<button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button>`:''}</div>`;
+}
+
+/* ---------- FICHES (constructeur / présentation) ---------- */
+const FSEED=[{id:'f1',type:'presentation',title:'Principe du trieur optique verre',machine:'Tous trieurs',url:'',
+ text:'Le verre broyé (calcin) est étalé en nappe fine sur un convoyeur ou une goulotte.\nDes caméras et un éclairage analysent chaque particule.\nLes indésirables détectés sont éjectés par des jets d\'air comprimé (buses).\nÀ compléter avec les spécificités de vos machines (modèle, ligne, réglages).'}];
+let fiches=(()=>{try{const r=JSON.parse(localStorage.getItem(FKEY)); if(Array.isArray(r)) return r;}catch(e){} return JSON.parse(JSON.stringify(FSEED));})();
+function saveFiches(){ try{localStorage.setItem(FKEY,JSON.stringify(fiches));}catch(e){toast(T('storage_full'));} }
+function renderFiches(type){
+  state.section=type; state.view='fiches'; $('filters').classList.add('hidden'); buildNav();
+  const l=fiches.filter(f=>f.type===type);
+  $('app').innerHTML=`<div class="row" style="margin:12px 0;justify-content:space-between"><h2 style="margin:0">${esc(T(type==='constructeur'?'nav_cons':'nav_pres'))}</h2><button class="primary" onclick="editFiche('','${type}')">${esc(T('add_fiche'))}</button></div>`+
+   (l.length?`<div class="grid">${l.map(f=>`<div class="card" onclick="openFiche('${f.id}')"><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${f.file?'<span>PDF</span>':''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
+  window.scrollTo(0,0);
+}
+function openFiche(id){
+  const f=fiches.find(x=>x.id===id); if(!f) return;
+  state.section=f.type; state.view='fiche'; state.fid=id; $('filters').classList.add('hidden'); buildNav();
+  const ok=/^(https?:\/\/|\.?\/?[\w\-\/.]+\.(pdf|png|jpe?g|docx?|xlsx?|html?))/i.test(f.url||'');
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="renderFiches('${f.type}')">${esc(T('back'))}</button><div class="row"><button onclick="window.print()">${esc(T('print'))}</button><button onclick="editFiche('${id}')">${esc(T('edit'))}</button></div></div>
+   <div class="panel"><h2 style="margin-top:0">${esc(f.title)}</h2><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span></div>
+   <p>${esc(f.text).replace(/\n/g,'<br>')}</p><div id=\"pdfBox\"></div>${ok?`<a class="btn" href="${esc(f.url)}" target="_blank" rel="noopener">${esc(T('open_doc'))}</a>`:''}</div>`;
+  if(f.file) showPdf(f);
+  window.scrollTo(0,0);
+}
+function editFiche(id,type){
+  state.fnew=!id; state.fdFile=null; state.fdRm=false; state.fd=id?JSON.parse(JSON.stringify(fiches.find(f=>f.id===id))):{id:uid(),type,title:'',machine:'',text:'',url:''};
+  renderFicheEditor();
+}
+function renderFicheEditor(){
+  const d=state.fd; state.section=d.type; state.view='fedit'; $('filters').classList.add('hidden'); buildNav();
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="${state.fnew?`renderFiches('${d.type}')`:`openFiche('${d.id}')`}">${esc(T('cancel'))}</button>
+   <div class="row">${state.fnew?'':`<button class="danger" onclick="delFiche()">${esc(T('delete'))}</button>`}<button class="primary" onclick="saveFiche()">${esc(T('save'))}</button></div></div>
+   <div class="panel"><label>${esc(T('f_title'))}</label><input value="${esc(d.title)}" oninput="state.fd.title=this.value">
+   <label>${esc(T('f_machine'))}</label><input value="${esc(d.machine)}" oninput="state.fd.machine=this.value" placeholder="${esc(T('ph_machine'))}">
+   <label>${esc(T('f_text'))}</label><textarea style="min-height:160px" oninput="state.fd.text=this.value">${esc(d.text)}</textarea>
+   <label>${esc(T('f_url'))}</label><input value="${esc(d.url)}" oninput="state.fd.url=this.value" placeholder="${esc(T('ph_url'))}">
+   <label>PDF</label><div class="row"><input type="file" accept="application/pdf" style="max-width:320px" onchange="pickPdf(this)"><span class="meta">${esc(d.file?d.file.name:'')}</span>${d.file?`<button class="small danger" onclick="rmPdf()">${L('Retirer le PDF','Remove PDF')}</button>`:''}</div></div>`;
+}
+async function saveFiche(){
+  const d=state.fd; if(!d.title.trim()){ toast(T('need_title')); return; }
+  const i=fiches.findIndex(f=>f.id===d.id); if(i>=0) fiches[i]=d; else fiches.unshift(d);
+  try{ if(state.fdFile) await idbPut(d.id,state.fdFile); else if(state.fdRm) await idbDel(d.id); }catch(e){ toast(L('Stockage du PDF impossible','Cannot store the PDF')); return; }
+  saveFiches(); toast(T('saved')); openFiche(d.id);
+}
+function delFiche(){ if(!confirm(T('confirm_del'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(T('deleted')); renderFiches(t); }
+
 (function(){var i=new Image();i.onload=function(){document.documentElement.classList.add('photo');};i.src='fond-verre.jpg';})();
-applyStatic();
-renderList();
+boot();
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
