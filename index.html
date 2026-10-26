@@ -213,7 +213,7 @@ const I18N = {
   storage_full:'Stockage plein ou indisponible : pensez à exporter en JSON',
   footer:'Projet réalisé par Lecertisseur Gautier, Coordinateur Tri Optiques · Sibelco Reims',
   unspecified:'Non précisée', locked_tag:'Verrouillé',
-  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', items:'élément(s)',
+  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_cons2:'Pièces consommables', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', items:'élément(s)',
   welcome:'Bienvenue', your_class:'Votre classe :', ask_level:'Quel est votre niveau sur les trieurs optiques ?',
   confirm_cls:'Je confirme avoir le niveau de cette classe (déclaratif, à valider avec le référent).',
   oblig_title:'Formation obligatoire', oblig_txt:"Vous ne connaissez pas encore les trieurs optiques : terminez d'abord la formation pour débloquer les autres tutoriels.", oblig_go:'Commencer la formation',
@@ -251,7 +251,7 @@ const I18N = {
   storage_full:'Storage full or unavailable: please export to JSON',
   footer:'Project by Lecertisseur Gautier, Optical Sorting Coordinator · Sibelco Reims',
   unspecified:'Not specified', locked_tag:'Locked',
-  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', items:'item(s)',
+  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_cons2:'Consumable parts', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', items:'item(s)',
   welcome:'Welcome', your_class:'Your class:', ask_level:'What is your level on optical sorters?',
   confirm_cls:'I confirm I have the level of this class (self-declared, to be validated with the referent).',
   oblig_title:'Mandatory training', oblig_txt:'You do not know optical sorters yet: complete the training first to unlock the other tutorials.', oblig_go:'Start training',
@@ -673,7 +673,7 @@ const needCls=t=>(t.mandatory||t.category==='Sécurité')?0:(t.level==='Avancé'
 const isLocked=t=>settings.cls<needCls(t);
 function validateTraining(){ if(settings.cls<1) settings.cls=1; settings.chosen=true; settings.trained=Date.now(); saveSettings(); buildNav(); toast(T('trained_ok')); }
 
-const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['presentation','','nav_pres'],['jeux','','nav_jeux'],['settings','','nav_set']];
+const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['jeux','','nav_jeux'],['settings','','nav_set']];
 function buildNav(){
   $('side').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 4px 4px 12px"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><button class="nb" onclick="toggleNav(false)" aria-label="${L('Fermer le menu','Close menu')}" style="width:auto;padding:6px 8px"><svg viewBox="0 0 24 24" width="1.4em" height="1.4em" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div>${settings.name?`<b style="color:#fff;padding:0 12px 12px">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
    NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
@@ -825,7 +825,7 @@ function renderLocked(raw,t){
     ${(settings.cls<1&&ob)?`<button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button>`:''}</div>`;
 }
 
-/* ---------- FICHES (constructeur / présentation) ---------- */
+/* ---------- FICHES (constructeur / pièces consommables / présentation) ---------- */
 const FSEED=[{id:'f1',type:'presentation',title:'Principe du trieur optique verre',machine:'Tous trieurs',url:'',
  text:'Le verre broyé (calcin) est étalé en nappe fine sur un convoyeur ou une goulotte.\nDes caméras et un éclairage analysent chaque particule.\nLes indésirables détectés sont éjectés par des jets d\'air comprimé (buses).\nÀ compléter avec les spécificités de vos machines (modèle, ligne, réglages).'}];
 let fiches=(()=>{try{const r=JSON.parse(localStorage.getItem(FKEY)); if(Array.isArray(r)) return r;}catch(e){} return JSON.parse(JSON.stringify(FSEED));})();
@@ -833,7 +833,7 @@ function saveFiches(){ try{localStorage.setItem(FKEY,JSON.stringify(fiches));}ca
 function renderFiches(type){
   state.section=type; state.view='fiches'; $('filters').classList.add('hidden'); buildNav();
   const l=fiches.filter(f=>f.type===type);
-  $('app').innerHTML=`<div class="row" style="margin:12px 0;justify-content:space-between"><h2 style="margin:0">${esc(T(type==='constructeur'?'nav_cons':'nav_pres'))}</h2><button class="primary" onclick="editFiche('','${type}')">${esc(T('add_fiche'))}</button></div>`+
+  $('app').innerHTML=`<div class="row" style="margin:12px 0;justify-content:space-between"><h2 style="margin:0">${esc(T(type==='constructeur'?'nav_cons':type==='consommables'?'nav_cons2':'nav_pres'))}</h2><button class="primary" onclick="editFiche('','${type}')">${esc(T('add_fiche'))}</button></div>`+
    (l.length?`<div class="grid">${l.map(f=>`<div class="card" onclick="openFiche('${f.id}')"><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${f.file?'<span>PDF</span>':''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
@@ -870,7 +870,7 @@ async function saveFiche(){
 function delFiche(){ if(!confirm(T('confirm_del'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(T('deleted')); renderFiches(t); }
 
 /* ---------- JEU : TRIEUR SIBELCO (tri du verre / refus) ---------- */
-const GW=360, GH=440, GLINE=GH-56;
+const GW=360, GH=380, GLINE=GH-50;
 const GBINS=[
  {fr:'Vert',en:'Green',col:'#2e9e4f'},
  {fr:'Blanc',en:'Clear',col:'#2f8fb5'},
@@ -890,6 +890,9 @@ const GITEMS=[
  {bin:3,shape:'cap',fr:'Bouchon métal',en:'Metal cap',
   tfr:'Le métal est un indésirable : il peut abîmer le four et perturber la fusion.',
   ten:'Metal is a contaminant: it can damage the furnace and disturb melting.'},
+ {bin:3,shape:'pyrex',fr:'Pyrex / vitrocéramique',en:'Pyrex / glass-ceramic',
+  tfr:'Le Pyrex et la vitrocéramique ressemblent à du verre blanc mais fondent à bien plus haute température : ce sont des infusibles.',
+  ten:'Pyrex and glass-ceramic look like clear glass but melt at a much higher temperature: they are infusibles.'},
  {bin:3,shape:'bag',fr:'Plastique',en:'Plastic',
   tfr:'Le plastique n\'a rien à faire dans le calcin : il perturbe la fusion.',
   ten:'Plastic does not belong in cullet: it disturbs melting.'}
@@ -898,24 +901,47 @@ let G=null;
 const gBestKey=()=>'sibelco_game_best_'+(settings.id||'x');
 function gBest(){ try{ return +localStorage.getItem(gBestKey())||0; }catch(e){ return 0; } }
 function gSetBest(v){ try{ localStorage.setItem(gBestKey(),String(v)); }catch(e){} }
+const GSKEY='sibelco_game_scores_v1';
+function gScores(){ try{ const r=JSON.parse(localStorage.getItem(GSKEY)); if(r&&typeof r==='object') return r; }catch(e){} return {}; }
+function gRecord(g){
+  const all=gScores(), id=settings.id||'x', r=all[id]||{best:0,sorted:0,games:0,date:0};
+  r.games++; r.last=g.score;
+  if(g.score>=r.best){ r.best=g.score; r.sorted=g.sorted; r.date=Date.now(); }
+  r.best=Math.max(r.best,gBest());
+  all[id]=r; try{ localStorage.setItem(GSKEY,JSON.stringify(all)); }catch(e){}
+}
+function gBoard(){
+  const box=$('glb'); if(!box) return;
+  const all=gScores();
+  const rows=users.map(u=>{ const r=all[u.id]||{}; let b=r.best||0; try{ b=Math.max(b,+localStorage.getItem('sibelco_game_best_'+u.id)||0); }catch(e){}
+    return {id:u.id,name:u.name||u.id,best:b,sorted:r.sorted||0,games:r.games||0,date:r.date||0}; })
+    .filter(r=>r.best>0).sort((a,b)=>b.best-a.best||b.sorted-a.sorted||a.date-b.date);
+  const medal=i=>i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+  box.innerHTML=`<div class="panel"><h2 style="margin-top:0">🏆 ${L('Classement général','Overall ranking')}</h2>`+
+   (rows.length?`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.9rem">
+    <thead><tr style="text-align:left;color:var(--muted,inherit);font-size:.75rem"><th style="padding:6px 4px">#</th><th style="padding:6px 4px">${L('Opérateur','Operator')}</th><th style="padding:6px 4px;text-align:right">${L('Meilleur score','Best score')}</th><th style="padding:6px 4px;text-align:right">${L('Pièces','Items')}</th><th style="padding:6px 4px;text-align:right">${L('Parties','Games')}</th></tr></thead><tbody>`+
+    rows.map((r,i)=>`<tr style="border-top:1px solid var(--line);${r.id===settings.id?'font-weight:700;background:rgba(45,143,224,.15)':''}"><td style="padding:8px 4px;white-space:nowrap">${medal(i)}</td><td style="padding:8px 4px">${esc(r.name)}${r.id===settings.id?' ('+L('vous','you')+')':''}</td><td style="padding:8px 4px;text-align:right">${r.best}</td><td style="padding:8px 4px;text-align:right">${r.sorted||'–'}</td><td style="padding:8px 4px;text-align:right">${r.games||'–'}</td></tr>`).join('')+
+    `</tbody></table></div>`:`<div class="empty">${L('Aucun score pour le moment. Soyez le premier !','No score yet. Be the first!')}</div>`)+
+   `<p class="meta" style="margin:8px 0 0;font-size:.75rem">${L('Classement des comptes de cet appareil, selon le meilleur score.','Ranking of the accounts on this device, by best score.')}</p></div>`;
+}
 
 function renderGame(){
   state.section='jeux'; state.view='jeux'; $('filters').classList.add('hidden'); buildNav();
   $('app').innerHTML=`<div class="panel"><h2 style="margin-top:0">${esc(T('nav_jeux'))} · ${L('Trieur Sibelco','Sibelco Sorter')}</h2>
-   <p class="meta" style="margin:0 0 10px">${L('Les débris défilent devant le trieur. Envoyez chaque pièce dans le bon bac : verre vert, blanc ou brun, et Refus pour les indésirables (pierre, céramique, métal, plastique). La pièce la plus basse est celle ciblée. Au clavier : touches 1 à 4.','Items run past the sorter. Send each piece to the right bin: green, clear or brown glass, and Reject for contaminants (stone, ceramic, metal, plastic). The lowest piece is the one targeted. On a keyboard: keys 1 to 4.')}</p>
-   <div style="max-width:420px;margin:0 auto">
+   <p class="meta" style="margin:0 0 8px;font-size:.8rem">${L('Envoyez la pièce la plus basse (cerclée) dans le bon bac : verre vert, blanc, brun – ou Refus pour tout indésirable (pierre, céramique, Pyrex, métal, plastique). Clavier : touches 1 à 4.','Send the lowest (circled) piece to the right bin: green, clear, brown glass – or Reject for any contaminant (stone, ceramic, Pyrex, metal, plastic). Keyboard: keys 1 to 4.')}</p>
+   <div style="width:max(240px,min(100%,420px,calc((100vh - 290px)*0.947),calc((100dvh - 290px)*0.947)));margin:0 auto">
     <div class="row" style="justify-content:space-between;margin-bottom:6px"><span id="gsc"></span><span id="gli"></span><span id="gbest" class="meta"></span></div>
     <canvas id="gcv" style="display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);touch-action:manipulation"></canvas>
-    <div id="gmsg" style="min-height:3.2em;margin:8px 0;font-size:.9rem"></div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${GBINS.map((b,i)=>`<button onclick="gSort(${i})" style="background:${b.col};color:#fff;border-color:${b.col};font-weight:700;padding:14px 4px;touch-action:manipulation">${esc(L(b.fr,b.en))}<br><small style="opacity:.85">${i+1}</small></button>`).join('')}</div>
-    <div style="text-align:center;margin-top:12px"><button id="gplay" class="primary" onclick="gameStart()" style="padding:10px 28px">${L('Jouer','Play')}</button></div>
-   </div></div><p class="disclaimer">${esc(T('footer'))}</p>`;
-  gameInit(); window.scrollTo(0,0);
+    <div id="gmsg" style="min-height:2.6em;margin:6px 0;font-size:.8rem;line-height:1.25"></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${GBINS.map((b,i)=>`<button onclick="gSort(${i})" style="background:${b.col};color:#fff;border-color:${b.col};font-weight:700;padding:10px 2px;font-size:.85rem;touch-action:manipulation">${esc(L(b.fr,b.en))}<br><small style="opacity:.85">${i+1}</small></button>`).join('')}</div>
+    <div style="text-align:center;margin-top:8px"><button id="gplay" class="primary" onclick="gameStart()" style="padding:8px 28px">${L('Jouer','Play')}</button></div>
+   </div></div><div id="glb"></div><p class="disclaimer">${esc(T('footer'))}</p>`;
+  gameInit(); gBoard(); window.scrollTo(0,0);
 }
 function gMsg(t,col){ const m=$('gmsg'); if(m){ m.textContent=t||''; m.style.color=col||'var(--text)'; } }
 function gHud(g){
   const sc=$('gsc'), li=$('gli'), be=$('gbest'); if(!sc) return;
-  sc.innerHTML=`<b>Score</b> ${g.score}`+(g.combo>1?` · Combo ${g.combo}`:'');
+  sc.innerHTML=`<b>Score</b> ${g.score} · ${L('Niv.','Lv.')} ${gLevel(g)}`+(g.combo>1?` · x${g.combo}`:'');
   li.innerHTML=`<span style="color:#e04b4b;letter-spacing:2px">${'♥'.repeat(Math.max(0,g.lives))}${'♡'.repeat(Math.max(0,3-g.lives))}</span>`;
   be.textContent=L('Record','Best')+' '+gBest();
 }
@@ -940,20 +966,21 @@ function gameStart(){
   Object.assign(g,{state:'play',items:[],fx:[],score:0,lives:3,combo:0,sorted:0,spawn:.2,newBest:false});
   $('gplay').classList.add('hidden'); gMsg(''); gHud(g);
 }
-function gSpeed(g){ return 55+Math.min(120,g.sorted*2.2); }
+function gLevel(g){ return 1+Math.floor(g.sorted/8); }
+function gSpeed(g){ return 90+Math.min(150,g.sorted*3.5); }
 function gSpawn(g){
-  const glass=Math.random()<.55, pool=GITEMS.filter(i=>glass?i.bin<3:i.bin===3);
+  const glass=Math.random()<Math.max(.35,.5-g.sorted*.004), pool=GITEMS.filter(i=>glass?i.bin<3:i.bin===3);
   const t=pool[Math.floor(Math.random()*pool.length)];
-  g.items.push(Object.assign({},t,{x:40+Math.random()*(GW-80),y:-30,rot:(Math.random()-.5)*.8,vr:(Math.random()-.5)*.8}));
+  g.items.push(Object.assign({},t,{x:40+Math.random()*(GW-80),y:-30,rot:(Math.random()-.5)*.8,vr:(Math.random()-.5)*.8,vx:g.sorted>=6?(Math.random()-.5)*70:0}));
 }
 function gUpdate(g,dt){
   g.off=(g.off+(g.state==='play'?gSpeed(g):30)*dt)%40;
   g.fx=g.fx.filter(f=>(f.life-=dt)>0);
   if(g.state!=='play') return;
   g.spawn-=dt;
-  if(g.spawn<=0){ gSpawn(g); g.spawn=Math.max(.7,1.5-g.sorted*.02); }
+  if(g.spawn<=0){ gSpawn(g); if(g.sorted>=15&&Math.random()<.3) setTimeout(()=>{ if(G===g&&g.state==='play') gSpawn(g); },180); g.spawn=Math.max(.4,1.05-g.sorted*.022); }
   const sp=gSpeed(g);
-  g.items.forEach(it=>{ it.y+=sp*dt; it.rot+=it.vr*dt; });
+  g.items.forEach(it=>{ it.y+=sp*dt; it.rot+=it.vr*dt; if(it.vx){ it.x+=it.vx*dt; if(it.x<24||it.x>GW-24) it.vx=-it.vx; } });
   for(let i=g.items.length-1;i>=0&&g.state==='play';i--){
     const it=g.items[i];
     if(it.y>GLINE){ g.items.splice(i,1); gFail(g,it,L('Trop tard ! ','Too late! ')+L(it.fr,it.en)+'.'); }
@@ -971,7 +998,7 @@ function gSort(bin){
   const it=g.items.splice(k,1)[0];
   if(it.bin===bin){
     g.combo++; g.sorted++;
-    const pts=10*(1+Math.floor((g.combo-1)/5)); g.score+=pts;
+    const pts=10*(1+Math.floor((g.combo-1)/5)); g.score+=pts+Math.floor(g.sorted/8);
     g.fx.push({x:it.x,y:it.y,life:.3,max:.3,jet:true,col:GBINS[bin].col});
     g.fx.push({x:it.x,y:it.y,life:.6,max:.6,txt:'+'+pts,col:'#4cc57f'});
     gMsg(it.bin===3?L(it.fr+' : bien rejeté !',it.en+': rightly rejected!'):'','var(--ok)'); gHud(g);
@@ -987,6 +1014,7 @@ function gSort(bin){
 function gOver(g){
   g.state='over'; g.items=[];
   const b=gBest(); if(g.score>b){ gSetBest(g.score); g.newBest=true; }
+  gRecord(g); gBoard();
   gMsg(L('Partie terminée','Game over')+' – '+g.score+' pts · '+g.sorted+' '+L('pièces triées','items sorted')+(g.newBest?' · '+L('Nouveau record !','New best!'):'')+'\n'+L('Le saviez-vous ? Le verre se recycle à l\'infini sans perdre en qualité.','Did you know? Glass can be recycled endlessly without losing quality.'));
   $('gmsg').style.whiteSpace='pre-line';
   $('gplay').textContent=L('Rejouer','Play again'); $('gplay').classList.remove('hidden'); gHud(g);
@@ -1008,6 +1036,11 @@ function gItem(ctx,it){
     ctx.fillStyle='#aab2ba'; ctx.strokeStyle='#6b747c'; ctx.beginPath(); ctx.arc(0,0,14,0,6.2832); ctx.fill(); ctx.stroke();
     ctx.beginPath(); for(let a=0;a<12;a++){ const r=a*Math.PI/6; ctx.moveTo(Math.cos(r)*11,Math.sin(r)*11); ctx.lineTo(Math.cos(r)*14,Math.sin(r)*14); } ctx.stroke();
     ctx.beginPath(); ctx.arc(0,0,7,0,6.2832); ctx.stroke();
+  } else if(it.shape==='pyrex'){
+    ctx.globalAlpha=.9; ctx.fillStyle='#d9f0f7'; ctx.strokeStyle='rgba(255,255,255,.85)';
+    ctx.beginPath(); ctx.moveTo(-16,-6); ctx.lineTo(16,-6); ctx.lineTo(12,14); ctx.lineTo(-12,14); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-16,-6); ctx.lineTo(-20,-9); ctx.moveTo(16,-6); ctx.lineTo(20,-9); ctx.stroke();
+    ctx.globalAlpha=.5; ctx.fillStyle='#fff'; ctx.fillRect(-9,-2,3,12);
   } else if(it.shape==='bag'){
     ctx.globalAlpha=.85; ctx.fillStyle='#e0638a'; ctx.strokeStyle='#a8385c';
     ctx.beginPath(); ctx.moveTo(-14,-10); ctx.quadraticCurveTo(0,-16,14,-10); ctx.quadraticCurveTo(18,0,12,12); ctx.quadraticCurveTo(0,18,-12,12); ctx.quadraticCurveTo(-18,0,-14,-10); ctx.closePath(); ctx.fill(); ctx.stroke();
