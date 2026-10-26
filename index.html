@@ -83,6 +83,11 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
 .disclaimer{font-size:.8rem;color:var(--muted);margin-top:24px}
+.lang{display:flex}
+.lang button{border-radius:0;padding:8px 10px;font-size:.85rem}
+.lang button:first-child{border-radius:8px 0 0 8px}
+.lang button:last-child{border-radius:0 8px 8px 0;margin-left:-1px}
+.lang button.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
 @media print{
   header,.noprint,.toast{display:none!important}
   body{background:#fff;color:#000}
@@ -99,24 +104,23 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
     <div class="top">
       <h1 class="brand">
       <img src="icon-512.png" alt="Sibelco" class="logo">
-      <span> Tutos Maintenance <small>Trieurs optiques – verre · Sibelco Reims</small></span>
+      <span><span data-i18n="app_title"></span> <small data-i18n="app_sub"></small></span>
       </h1>
       <div class="row">
-        <button class="primary" onclick="newTuto()">+ Nouveau tutoriel</button>
-        <button onclick="exportJSON()">Exporter</button>
-        <button onclick="document.getElementById('imp').click()">Importer</button>
+        <div class="lang" role="group" aria-label="Langue / Language">
+          <button id="bFr" onclick="setLang('fr')">FR</button>
+          <button id="bEn" onclick="setLang('en')">EN</button>
+        </div>
+        <button class="primary" onclick="newTuto()" data-i18n="new"></button>
+        <button onclick="exportJSON()" data-i18n="export"></button>
+        <button onclick="document.getElementById('imp').click()" data-i18n="import"></button>
         <input id="imp" type="file" accept="application/json" class="hidden" onchange="importJSON(event)">
       </div>
     </div>
     <div class="filters" id="filters">
-      <input id="q" type="search" placeholder="Rechercher (ex : buse, vitre, calibration…)" oninput="renderList()">
+      <input id="q" type="search" data-i18n-ph="search" oninput="renderList()">
       <select id="fMachine" onchange="renderList()"></select>
-      <select id="fStatus" onchange="renderList()">
-        <option value="">Tous les statuts</option>
-        <option value="brouillon">Brouillon</option>
-        <option value="avalider">À valider</option>
-        <option value="valide">Validé</option>
-      </select>
+      <select id="fStatus" onchange="renderList()"></select>
     </div>
   </div>
 </header>
@@ -126,9 +130,83 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 
 <script>
 const KEY = 'sibelco_tutos_v1';
-const CATS = ['Sécurité','Nettoyage','Contrôle','Réglage / Calibration','Remplacement','Dépannage'];
-const STATUS = {brouillon:'Brouillon', avalider:'À valider', valide:'Validé'};
+const LANG_KEY = 'sibelco_lang';
 
+/* ---------- TRADUCTIONS DE L'INTERFACE ---------- */
+const I18N = {
+ fr:{
+  app_title:'Tutos Maintenance', app_sub:'Trieurs optiques – verre · Sibelco Reims',
+  new:'+ Nouveau tutoriel', export:'Exporter', import:'Importer',
+  search:'Rechercher (ex : buse, vitre, calibration…)',
+  all_machines:'Toutes les machines', all_status:'Tous les statuts', all:'Toutes',
+  none_found:'Aucun tutoriel trouvé.<br>Clique sur « + Nouveau tutoriel » pour en créer un.',
+  steps_n:n=>n+' étape'+(n>1?'s':''), min:'min',
+  back:'← Retour', print:'Imprimer / PDF', edit:'Modifier',
+  safety:'Sécurité', tools:'Matériel / outils', progress:'Progression',
+  step_done:'Étape réalisée', no_steps:'Aucune étape.',
+  prog:(d,n,p)=>`${d}/${n} étapes (${p}%)`, finished:'Tutoriel terminé !',
+  new_title:'Nouveau tutoriel', edit_title:'Modifier le tutoriel',
+  cancel:'← Annuler', delete:'Supprimer', save:'Enregistrer',
+  f_title:'Titre', ph_title:"Ex : Remplacement d'une buse d'éjection",
+  f_machine:'Machine (modèle / ligne)', ph_machine:'Ex : Trieur ligne 2',
+  f_cat:'Catégorie', f_level:'Niveau', f_duration:'Durée (min)', f_status:'Statut',
+  f_safety:'Consignes de sécurité (une par ligne)', f_tools:'Matériel / outils (un par ligne)',
+  steps:'Étapes', add_step:'+ Ajouter une étape', step:'Étape', remove:'Suppr.',
+  f_instr:'Instruction', ph_instr:"Décris précisément l'action à réaliser",
+  f_warn:"Avertissement / point d'attention (facultatif)",
+  f_photo:'Photo (facultatif)', rm_photo:'Retirer la photo',
+  need_title:'Donne un titre au tutoriel', saved:'Tutoriel enregistré', deleted:'Tutoriel supprimé',
+  confirm_del:'Supprimer définitivement ce tutoriel ?',
+  export_started:'Export lancé', imported:n=>n+' tutoriel(s) importé(s)', invalid:'Fichier invalide',
+  storage_full:'Stockage plein ou indisponible : pensez à exporter en JSON',
+  footer:'Projet réalisé par Lecertisseur Gautier, Coordinateur Tri Optiques · Sibelco Reims',
+  unspecified:'Non précisée'
+ },
+ en:{
+  app_title:'Maintenance Tutorials', app_sub:'Optical glass sorters · Sibelco Reims',
+  new:'+ New tutorial', export:'Export', import:'Import',
+  search:'Search (e.g. nozzle, window, calibration…)',
+  all_machines:'All machines', all_status:'All statuses', all:'All',
+  none_found:'No tutorial found.<br>Click “+ New tutorial” to create one.',
+  steps_n:n=>n+' step'+(n>1?'s':''), min:'min',
+  back:'← Back', print:'Print / PDF', edit:'Edit',
+  safety:'Safety', tools:'Tools / equipment', progress:'Progress',
+  step_done:'Step completed', no_steps:'No steps.',
+  prog:(d,n,p)=>`${d}/${n} steps (${p}%)`, finished:'Tutorial completed!',
+  new_title:'New tutorial', edit_title:'Edit tutorial',
+  cancel:'← Cancel', delete:'Delete', save:'Save',
+  f_title:'Title', ph_title:'E.g. Replacing an ejection nozzle',
+  f_machine:'Machine (model / line)', ph_machine:'E.g. Sorter line 2',
+  f_cat:'Category', f_level:'Level', f_duration:'Duration (min)', f_status:'Status',
+  f_safety:'Safety instructions (one per line)', f_tools:'Tools / equipment (one per line)',
+  steps:'Steps', add_step:'+ Add a step', step:'Step', remove:'Delete',
+  f_instr:'Instruction', ph_instr:'Describe the action to perform precisely',
+  f_warn:'Warning / point of attention (optional)',
+  f_photo:'Photo (optional)', rm_photo:'Remove photo',
+  need_title:'Please give the tutorial a title', saved:'Tutorial saved', deleted:'Tutorial deleted',
+  confirm_del:'Permanently delete this tutorial?',
+  export_started:'Export started', imported:n=>n+' tutorial(s) imported', invalid:'Invalid file',
+  storage_full:'Storage full or unavailable: please export to JSON',
+  footer:'Project by Lecertisseur Gautier, Optical Sorting Coordinator · Sibelco Reims',
+  unspecified:'Not specified'
+ }
+};
+let lang = (()=>{ try{ const l=localStorage.getItem(LANG_KEY); if(l==='fr'||l==='en') return l; }catch(e){} return (navigator.language||'fr').toLowerCase().startsWith('en')?'en':'fr'; })();
+const T = (k,...a)=>{ const v=I18N[lang][k]; return typeof v==='function'?v(...a):v; };
+
+/* Valeurs stockées en français, affichées selon la langue */
+const CATS = ['Sécurité','Nettoyage','Contrôle','Réglage / Calibration','Remplacement','Dépannage'];
+const CAT_EN = {'Sécurité':'Safety','Nettoyage':'Cleaning','Contrôle':'Inspection','Réglage / Calibration':'Adjustment / Calibration','Remplacement':'Replacement','Dépannage':'Troubleshooting'};
+const LEVELS = ['Facile','Moyen','Avancé','Obligatoire'];
+const LEVEL_EN = {'Facile':'Easy','Moyen':'Medium','Avancé':'Advanced','Obligatoire':'Mandatory'};
+const STATUS_L = {fr:{brouillon:'Brouillon',avalider:'À valider',valide:'Validé'}, en:{brouillon:'Draft',avalider:'To validate',valide:'Validated'}};
+const MACHINE_TR = {'Tous trieurs':'All sorters','Non précisée':'Not specified'};
+const catL = c => lang==='en'?(CAT_EN[c]||c):c;
+const levelL = l => lang==='en'?(LEVEL_EN[l]||l):l;
+const statusL = s => STATUS_L[lang][s]||'';
+const machineL = m => lang==='en'?(MACHINE_TR[m]||m):m;
+
+/* ---------- TUTORIELS D'EXEMPLE ---------- */
 const SEED = [
  {id:'t1',title:'Consignation avant intervention (LOTO)',machine:'Tous trieurs',category:'Sécurité',level:'Obligatoire',duration:15,
   tools:['Cadenas personnel','Étiquettes de consignation','Fiche de consignation du site'],
@@ -145,7 +223,7 @@ const SEED = [
   safety:['Machine consignée (voir tuto LOTO)','Poussières de verre : port des EPI obligatoire','Ne jamais utiliser de solvant non validé sur les optiques'],
   steps:[
    {text:'Consigner la machine (voir tutoriel « Consignation avant intervention »).',warn:'Intervention interdite sans consignation.',img:''},
-   {text:'Retirer les poussières et éclats de verre au aspirateur industriel autour de la zone de détection.',warn:'Ne pas souffler à l\'air comprimé : risque de projection de particules.',img:''},
+   {text:'Retirer les poussières et éclats de verre à l\'aspirateur industriel autour de la zone de détection.',warn:'Ne pas souffler à l\'air comprimé : risque de projection de particules.',img:''},
    {text:'Nettoyer délicatement les vitres de protection des caméras et de l\'éclairage avec un chiffon propre et le produit adapté.',warn:'Ne pas rayer les vitres.',img:''},
    {text:'Contrôler visuellement l\'absence de traces, de buée ou de rayures.',warn:'',img:''},
    {text:'Remettre les protections en place, déconsigner, redémarrer et vérifier l\'image / les alarmes sur l\'écran.',warn:'',img:''}
@@ -171,7 +249,59 @@ const SEED = [
    {text:'Faire un test avec du verre connu et vérifier la qualité de tri (rejets / acceptés).',warn:'',img:''}
   ],status:'brouillon',updated:0}
 ];
+/* Traductions anglaises des exemples (affichées tant qu'ils ne sont pas modifiés) */
+const SEED_EN = {
+ t1:{title:'Lockout / tagout before intervention (LOTO)',machine:'All sorters',
+  tools:['Personal padlock','Lockout tags','Site lockout form'],
+  safety:['No intervention without full lockout','Adapt the procedure to the site lockout rules'],
+  steps:[
+   ['Inform the control room and stop the glass feed to the sorter.',''],
+   ['Stop the machine using the normal stop sequence (not the emergency stop).',''],
+   ['Open the main electrical disconnect and fit your personal padlock + tag.','One padlock = one person.'],
+   ['Isolate and bleed the compressed air (isolation valve closed and locked, circuit purged).','Compressed air stores energy: check the pressure gauge reads 0 bar.'],
+   ['Perform a start test (zero-voltage verification) to confirm the machine does not start.','']
+  ]},
+ t2:{title:'Cleaning the windows and optical area (cameras / lighting)',machine:'All sorters',
+  tools:['Lint-free cloths','Window cleaner approved by the manufacturer','Industrial vacuum cleaner','PPE: glasses, gloves, dust mask'],
+  safety:['Machine locked out (see LOTO tutorial)','Glass dust: PPE is mandatory','Never use an unapproved solvent on the optics'],
+  steps:[
+   ['Lock out the machine (see the “Lockout / tagout before intervention” tutorial).','No intervention without lockout.'],
+   ['Remove dust and glass splinters around the detection area with an industrial vacuum cleaner.','Do not blow with compressed air: risk of particle projection.'],
+   ['Gently clean the protective windows of the cameras and lighting with a clean cloth and the suitable product.','Do not scratch the windows.'],
+   ['Visually check for marks, condensation or scratches.',''],
+   ['Refit the guards, remove the lockout, restart and check the image / alarms on the screen.','']
+  ]},
+ t3:{title:'Checking the ejection nozzles and compressed air',machine:'All sorters',
+  tools:['Machine ejection test (maintenance menu)','Pressure gauge','Wrench / tools as per manufacturer','Spare nozzles'],
+  safety:['Lockout + air bleed before disassembly','Safety glasses','Ejection test: clear area, guards closed'],
+  steps:[
+   ['Check the sorter air supply pressure and compare it with the value recommended by the manufacturer.',''],
+   ['Check the condition of the air line filters / drains (water, oil).',''],
+   ['Run the ejection test from the maintenance menu and identify nozzles that do not fire or that leak.','Keep hands and tools out of the ejection area during the test.'],
+   ['Lock out and bleed, then clean or replace the faulty nozzles.',''],
+   ['Run the ejection test again to validate and record the intervention in the CMMS / maintenance log.','']
+  ]},
+ t4:{title:'Checking the reference background and calibration (general outline)',machine:'All sorters',
+  tools:['Manufacturer procedure','Maintenance-level access on the machine'],
+  safety:['Authorised personnel only','Strictly follow the manufacturer procedure'],
+  steps:[
+   ['Check that the optical area is clean (see the cleaning tutorial) before any calibration.',''],
+   ['Empty the belt / chute so that nothing passes in front of the cameras during learning.',''],
+   ['Start the calibration procedure from the relevant menu (to be detailed for your machine).',''],
+   ['Check the values obtained and compare them with the usual values / tolerances.','Abnormal value: do not validate, inform the maintenance manager.'],
+   ['Run a test with known glass and check the sorting quality (rejected / accepted).','']
+  ]}
+};
+function view(t){
+  if(lang==='en' && t.updated===0 && SEED_EN[t.id]){
+    const e=SEED_EN[t.id];
+    return Object.assign({},t,{title:e.title,machine:e.machine,tools:e.tools,safety:e.safety,
+      steps:e.steps.map((s,i)=>({text:s[0],warn:s[1],img:(t.steps[i]&&t.steps[i].img)||''}))});
+  }
+  return t;
+}
 
+/* ---------- ÉTAT ---------- */
 let tutos = load();
 let state = {view:'list', id:null, cat:'', draft:null, done:{}};
 
@@ -181,53 +311,77 @@ function load(){
 }
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(tutos)); }
-  catch(e){ toast('Stockage plein ou indisponible : pensez à exporter en JSON'); }
+  catch(e){ toast(T('storage_full')); }
 }
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $ = id => document.getElementById(id);
 const uid = () => 't'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
 
+/* ---------- LANGUE ---------- */
+function applyStatic(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll('[data-i18n]').forEach(e=>{ e.textContent=T(e.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(e=>{ e.placeholder=T(e.dataset.i18nPh); });
+  $('bFr').classList.toggle('on',lang==='fr');
+  $('bEn').classList.toggle('on',lang==='en');
+  const fs=$('fStatus'), cur=fs.value;
+  fs.innerHTML=`<option value="">${esc(T('all_status'))}</option>`+Object.keys(STATUS_L.fr).map(k=>`<option value="${k}" ${k===cur?'selected':''}>${esc(statusL(k))}</option>`).join('');
+}
+function setLang(l){
+  lang=l;
+  try{ localStorage.setItem(LANG_KEY,l); }catch(e){}
+  $('fMachine').value='';
+  applyStatic();
+  if(state.view==='view' && state.id) openTuto(state.id);
+  else if(state.view==='edit') renderEditor();
+  else renderList();
+}
+
 /* ---------- LISTE ---------- */
-function machines(){ return [...new Set(tutos.map(t=>t.machine).filter(Boolean))].sort(); }
+function machines(){ return [...new Set(tutos.map(t=>machineL(view(t).machine)).filter(Boolean))].sort(); }
 function refreshMachineFilter(){
   const sel=$('fMachine'), cur=sel.value;
-  sel.innerHTML = '<option value="">Toutes les machines</option>'+machines().map(m=>`<option ${m===cur?'selected':''} value="${esc(m)}">${esc(m)}</option>`).join('');
+  sel.innerHTML = `<option value="">${esc(T('all_machines'))}</option>`+machines().map(m=>`<option ${m===cur?'selected':''} value="${esc(m)}">${esc(m)}</option>`).join('');
 }
 function renderList(){
   state.view='list';
   $('filters').classList.remove('hidden');
   refreshMachineFilter();
   const q=($('q').value||'').toLowerCase(), fm=$('fMachine').value, fs=$('fStatus').value;
-  const list = tutos.filter(t=>{
+  const list = tutos.map(view).filter(t=>{
     if(state.cat && t.category!==state.cat) return false;
-    if(fm && t.machine!==fm) return false;
+    if(fm && machineL(t.machine)!==fm) return false;
     if(fs && t.status!==fs) return false;
     if(q){
-      const hay=[t.title,t.machine,t.category,(t.tools||[]).join(' '),(t.steps||[]).map(s=>s.text).join(' ')].join(' ').toLowerCase();
+      const hay=[t.title,machineL(t.machine),catL(t.category),(t.tools||[]).join(' '),(t.steps||[]).map(s=>s.text).join(' ')].join(' ').toLowerCase();
       if(!hay.includes(q)) return false;
     }
     return true;
   });
-  const chips = ['',...CATS].map(c=>`<button class="chip ${state.cat===c?'on':''}" onclick="setCat('${c.replace(/'/g,"\\'")}')">${c||'Toutes'}</button>`).join('');
+  const chips = [-1,...CATS.keys()].map(i=>{
+    const c = i<0?'':CATS[i];
+    return `<button class="chip ${state.cat===c?'on':''}" onclick="setCat(${i})">${esc(i<0?T('all'):catL(c))}</button>`;
+  }).join('');
   $('app').innerHTML = `
     <div class="chips">${chips}</div>
-    ${list.length?`<div class="grid">${list.map(cardHTML).join('')}</div>`:`<div class="empty">Aucun tutoriel trouvé.<br>Clique sur « + Nouveau tutoriel » pour en créer un.</div>`}
-    <p class="disclaimer">Projet réalisé par Lecertisseur Gautier, Coordinateur Tri Optiques · Sibelco Reims</p>`;
+    ${list.length?`<div class="grid">${list.map(cardHTML).join('')}</div>`:`<div class="empty">${T('none_found')}</div>`}
+    <p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
 function cardHTML(t){
   return `<div class="card" onclick="openTuto('${t.id}')">
-    <div class="row" style="justify-content:space-between"><span class="tag">${esc(t.category)}</span><span class="tag ${esc(t.status)}">${STATUS[t.status]||''}</span></div>
+    <div class="row" style="justify-content:space-between"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span></div>
     <h3>${esc(t.title)}</h3>
-    <div class="meta"><span> ${esc(t.machine)}</span><span>⏱ ${esc(t.duration)} min</span><span>📶 ${esc(t.level)}</span><span>${(t.steps||[]).length} étapes</span></div>
+    <div class="meta"><span>${esc(machineL(t.machine))}</span><span>${esc(t.duration)} ${T('min')}</span><span>${esc(levelL(t.level))}</span><span>${T('steps_n',(t.steps||[]).length)}</span></div>
   </div>`;
 }
-function setCat(c){ state.cat=c; renderList(); }
+function setCat(i){ state.cat = i<0?'':CATS[i]; renderList(); }
 
 /* ---------- LECTURE ---------- */
 function openTuto(id){
-  const t=tutos.find(x=>x.id===id); if(!t) return;
+  const raw=tutos.find(x=>x.id===id); if(!raw) return;
+  const t=view(raw);
   state.view='view'; state.id=id;
   if(!state.done[id]) state.done[id]=[];
   $('filters').classList.add('hidden');
@@ -236,46 +390,46 @@ function openTuto(id){
       <div class="num">${i+1}</div>
       <div class="body">
         <div class="txt">${esc(s.text).replace(/\n/g,'<br>')}</div>
-        ${s.warn?`<div class="box danger">⚠️ ${esc(s.warn)}</div>`:''}
-        ${s.img?`<img src="${s.img}" alt="Illustration étape ${i+1}">`:''}
-        <label class="chk noprint"><input type="checkbox" ${state.done[id][i]?'checked':''} onchange="toggleStep('${id}',${i},this.checked)"> Étape réalisée</label>
+        ${s.warn?`<div class="box danger">${esc(s.warn)}</div>`:''}
+        ${s.img?`<img src="${s.img}" alt="${esc(T('step'))} ${i+1}">`:''}
+        <label class="chk noprint"><input type="checkbox" ${state.done[id][i]?'checked':''} onchange="toggleStep('${id}',${i},this.checked)"> ${esc(T('step_done'))}</label>
       </div>
     </div>`).join('');
   $('app').innerHTML = `
     <div class="row noprint" style="margin:12px 0;justify-content:space-between">
-      <button onclick="renderList()">← Retour</button>
+      <button onclick="renderList()">${esc(T('back'))}</button>
       <div class="row">
-        <button onclick="window.print()">🖨 Imprimer / PDF</button>
-        <button onclick="editTuto('${id}')">✏️ Modifier</button>
+        <button onclick="window.print()">${esc(T('print'))}</button>
+        <button onclick="editTuto('${id}')">${esc(T('edit'))}</button>
       </div>
     </div>
     <div class="panel">
-      <div class="row"><span class="tag">${esc(t.category)}</span><span class="tag ${esc(t.status)}">${STATUS[t.status]||''}</span></div>
+      <div class="row"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span></div>
       <h2 style="margin:8px 0">${esc(t.title)}</h2>
-      <div class="meta"><span>🏭 ${esc(t.machine)}</span><span>⏱ ${esc(t.duration)} min</span><span>📶 ${esc(t.level)}</span></div>
-      ${(t.safety&&t.safety.length)?`<div class="box danger"><b>🦺 Sécurité</b><ul>${t.safety.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
-      ${(t.tools&&t.tools.length)?`<div class="box" style="border-left-color:var(--accent);background:transparent;color:var(--text);border:1px solid var(--line);border-left:4px solid var(--accent)"><b>🧰 Matériel / outils</b><ul>${t.tools.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+      <div class="meta"><span>${esc(machineL(t.machine))}</span><span>${esc(t.duration)} ${T('min')}</span><span>${esc(levelL(t.level))}</span></div>
+      ${(t.safety&&t.safety.length)?`<div class="box danger"><b>${esc(T('safety'))}</b><ul>${t.safety.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+      ${(t.tools&&t.tools.length)?`<div class="box" style="background:transparent;color:var(--text);border:1px solid var(--line);border-left:4px solid var(--accent)"><b>${esc(T('tools'))}</b><ul>${t.tools.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
     </div>
     <div class="panel">
-      <div class="row" style="justify-content:space-between"><b>Progression</b><span id="pct" class="meta"></span></div>
+      <div class="row" style="justify-content:space-between"><b>${esc(T('progress'))}</b><span id="pct" class="meta"></span></div>
       <div class="progress"><div id="bar"></div></div>
-      ${stepsHTML||'<div class="empty">Aucune étape.</div>'}
+      ${stepsHTML||`<div class="empty">${esc(T('no_steps'))}</div>`}
     </div>`;
-  updProgress(id);
+  updProgress(id, false);
   window.scrollTo(0,0);
 }
 function toggleStep(id,i,v){
   state.done[id][i]=v;
   const el=$('st'+i); if(el) el.classList.toggle('done',v);
-  updProgress(id);
+  updProgress(id, true);
 }
-function updProgress(id){
+function updProgress(id, notify){
   const t=tutos.find(x=>x.id===id), n=(t.steps||[]).length;
   const d=(state.done[id]||[]).filter(Boolean).length;
   const p=n?Math.round(d/n*100):0;
   $('bar').style.width=p+'%';
-  $('pct').textContent=`${d}/${n} étapes (${p}%)`;
-  if(n && d===n) toast('✅ Tutoriel terminé !');
+  $('pct').textContent=T('prog',d,n,p);
+  if(notify && n && d===n) toast(T('finished'));
 }
 
 /* ---------- ÉDITION ---------- */
@@ -283,37 +437,37 @@ function blankTuto(){
   return {id:uid(),title:'',machine:'',category:CATS[1],level:'Facile',duration:30,tools:[],safety:[],steps:[{text:'',warn:'',img:''}],status:'brouillon',updated:Date.now()};
 }
 function newTuto(){ state.draft=blankTuto(); state.isNew=true; renderEditor(); }
-function editTuto(id){ state.draft=JSON.parse(JSON.stringify(tutos.find(t=>t.id===id))); state.isNew=false; renderEditor(); }
+function editTuto(id){ state.draft=JSON.parse(JSON.stringify(view(tutos.find(t=>t.id===id)))); state.isNew=false; renderEditor(); }
 function renderEditor(){
   state.view='edit';
   $('filters').classList.add('hidden');
   const d=state.draft;
-  const opt=(arr,v)=>arr.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
+  const opt=(arr,v,lab)=>arr.map(x=>`<option value="${esc(x)}" ${x===v?'selected':''}>${esc(lab(x))}</option>`).join('');
   $('app').innerHTML=`
    <div class="row noprint" style="margin:12px 0;justify-content:space-between">
-     <button onclick="cancelEdit()">← Annuler</button>
+     <button onclick="cancelEdit()">${esc(T('cancel'))}</button>
      <div class="row">
-       ${state.isNew?'':'<button class="danger" onclick="delTuto()">Supprimer</button>'}
-       <button class="primary" onclick="saveDraft()">💾 Enregistrer</button>
+       ${state.isNew?'':`<button class="danger" onclick="delTuto()">${esc(T('delete'))}</button>`}
+       <button class="primary" onclick="saveDraft()">${esc(T('save'))}</button>
      </div>
    </div>
    <div class="panel">
-     <h2 style="margin-top:0">${state.isNew?'Nouveau tutoriel':'Modifier le tutoriel'}</h2>
-     <label>Titre</label><input value="${esc(d.title)}" oninput="state.draft.title=this.value" placeholder="Ex : Remplacement d'une buse d'éjection">
+     <h2 style="margin-top:0">${esc(state.isNew?T('new_title'):T('edit_title'))}</h2>
+     <label>${esc(T('f_title'))}</label><input value="${esc(d.title)}" oninput="state.draft.title=this.value" placeholder="${esc(T('ph_title'))}">
      <div class="row" style="align-items:flex-start">
-       <div style="flex:1;min-width:200px"><label>Machine (modèle / ligne)</label><input list="ml" value="${esc(d.machine)}" oninput="state.draft.machine=this.value" placeholder="Ex : Trieur ligne 2"><datalist id="ml">${machines().map(m=>`<option value="${esc(m)}">`).join('')}</datalist></div>
-       <div style="flex:1;min-width:160px"><label>Catégorie</label><select onchange="state.draft.category=this.value">${opt(CATS,d.category)}</select></div>
-       <div style="flex:1;min-width:140px"><label>Niveau</label><select onchange="state.draft.level=this.value">${opt(['Facile','Moyen','Avancé','Obligatoire'],d.level)}</select></div>
-       <div style="flex:1;min-width:120px"><label>Durée (min)</label><input type="number" min="1" value="${esc(d.duration)}" oninput="state.draft.duration=this.value"></div>
-       <div style="flex:1;min-width:140px"><label>Statut</label><select onchange="state.draft.status=this.value">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${k===d.status?'selected':''}>${v}</option>`).join('')}</select></div>
+       <div style="flex:1;min-width:200px"><label>${esc(T('f_machine'))}</label><input list="ml" value="${esc(d.machine)}" oninput="state.draft.machine=this.value" placeholder="${esc(T('ph_machine'))}"><datalist id="ml">${machines().map(m=>`<option value="${esc(m)}">`).join('')}</datalist></div>
+       <div style="flex:1;min-width:160px"><label>${esc(T('f_cat'))}</label><select onchange="state.draft.category=this.value">${opt(CATS,d.category,catL)}</select></div>
+       <div style="flex:1;min-width:140px"><label>${esc(T('f_level'))}</label><select onchange="state.draft.level=this.value">${opt(LEVELS,d.level,levelL)}</select></div>
+       <div style="flex:1;min-width:120px"><label>${esc(T('f_duration'))}</label><input type="number" min="1" value="${esc(d.duration)}" oninput="state.draft.duration=this.value"></div>
+       <div style="flex:1;min-width:140px"><label>${esc(T('f_status'))}</label><select onchange="state.draft.status=this.value">${opt(Object.keys(STATUS_L.fr),d.status,statusL)}</select></div>
      </div>
-     <label>🦺 Consignes de sécurité (une par ligne)</label>
+     <label>${esc(T('f_safety'))}</label>
      <textarea oninput="state.draft.safety=lines(this.value)">${esc((d.safety||[]).join('\n'))}</textarea>
-     <label>🧰 Matériel / outils (un par ligne)</label>
+     <label>${esc(T('f_tools'))}</label>
      <textarea oninput="state.draft.tools=lines(this.value)">${esc((d.tools||[]).join('\n'))}</textarea>
    </div>
    <div class="panel">
-     <div class="row" style="justify-content:space-between"><b>Étapes</b><button onclick="addStep()">+ Ajouter une étape</button></div>
+     <div class="row" style="justify-content:space-between"><b>${esc(T('steps'))}</b><button onclick="addStep()">${esc(T('add_step'))}</button></div>
      <div id="stepsEd"></div>
    </div>`;
   renderStepsEditor();
@@ -323,19 +477,20 @@ const lines = v => v.split('\n').map(s=>s.trim()).filter(Boolean);
 function renderStepsEditor(){
   $('stepsEd').innerHTML = state.draft.steps.map((s,i)=>`
    <div class="edit-step">
-     <div class="row" style="justify-content:space-between"><b>Étape ${i+1}</b>
+     <div class="row" style="justify-content:space-between"><b>${esc(T('step'))} ${i+1}</b>
        <div class="row">
          <button class="small" onclick="moveStep(${i},-1)" ${i===0?'disabled':''}>↑</button>
          <button class="small" onclick="moveStep(${i},1)" ${i===state.draft.steps.length-1?'disabled':''}>↓</button>
-         <button class="small danger" onclick="delStep(${i})">Suppr.</button>
+         <button class="small danger" onclick="delStep(${i})">${esc(T('remove'))}</button>
        </div></div>
-     <label>Instruction</label>
-     <textarea oninput="state.draft.steps[${i}].text=this.value" placeholder="Décris précisément l'action à réaliser">${esc(s.text)}</textarea>
+     <label>${esc(T('f_instr'))}</label>
+     <textarea oninput="state.draft.steps[${i}].text=this.value" placeholder="${esc(T('ph_instr'))}">${esc(s.text)}</textarea>
+     <label>${esc(T('f_warn'))}</label>
      <input value="${esc(s.warn)}" oninput="state.draft.steps[${i}].warn=this.value">
-     <label>📷 Photo (facultatif)</label>
+     <label>${esc(T('f_photo'))}</label>
      <div class="row">
        <input type="file" accept="image/*" style="max-width:320px" onchange="addPhoto(${i},this)">
-       ${s.img?`<button class="small danger" onclick="rmPhoto(${i})">Retirer la photo</button>`:''}
+       ${s.img?`<button class="small danger" onclick="rmPhoto(${i})">${esc(T('rm_photo'))}</button>`:''}
      </div>
      ${s.img?`<img src="${s.img}" alt="" style="max-width:220px;border-radius:8px;margin-top:8px">`:''}
    </div>`).join('');
@@ -362,18 +517,18 @@ function addPhoto(i,input){
 }
 function saveDraft(){
   const d=state.draft;
-  if(!d.title.trim()){ toast('Donne un titre au tutoriel'); return; }
+  if(!d.title.trim()){ toast(T('need_title')); return; }
   if(!d.machine.trim()) d.machine='Non précisée';
   d.steps=d.steps.filter(s=>s.text.trim()||s.img);
   d.updated=Date.now();
   const i=tutos.findIndex(t=>t.id===d.id);
   if(i>=0) tutos[i]=d; else tutos.unshift(d);
-  save(); toast('Tutoriel enregistré'); openTuto(d.id);
+  save(); toast(T('saved')); openTuto(d.id);
 }
 function cancelEdit(){ if(state.isNew) renderList(); else openTuto(state.draft.id); }
 function delTuto(){
-  if(!confirm('Supprimer définitivement ce tutoriel ?')) return;
-  tutos=tutos.filter(t=>t.id!==state.draft.id); save(); toast('Tutoriel supprimé'); renderList();
+  if(!confirm(T('confirm_del'))) return;
+  tutos=tutos.filter(t=>t.id!==state.draft.id); save(); toast(T('deleted')); renderList();
 }
 
 /* ---------- EXPORT / IMPORT ---------- */
@@ -382,7 +537,7 @@ function exportJSON(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a'); a.href=url; a.download='tutos-maintenance-'+new Date().toISOString().slice(0,10)+'.json';
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  toast('Export lancé (si rien ne se télécharge, utilise le navigateur hors aperçu)');
+  toast(T('export_started'));
 }
 function importJSON(ev){
   const f=ev.target.files[0]; if(!f) return;
@@ -395,16 +550,17 @@ function importJSON(ev){
       d.forEach(t=>{
         if(!t||!t.title||!Array.isArray(t.steps)) return;
         t.id=t.id&&!tutos.some(x=>x.id===t.id)?t.id:uid();
-        t.tools=t.tools||[]; t.safety=t.safety||[]; t.status=STATUS[t.status]?t.status:'brouillon';
+        t.tools=t.tools||[]; t.safety=t.safety||[]; t.status=STATUS_L.fr[t.status]?t.status:'brouillon';
         tutos.push(t); n++;
       });
-      save(); renderList(); toast(n+' tutoriel(s) importé(s)');
-    }catch(e){ toast('Fichier invalide'); }
+      save(); renderList(); toast(T('imported',n));
+    }catch(e){ toast(T('invalid')); }
     ev.target.value='';
   };
   r.readAsText(f);
 }
 
+applyStatic();
 renderList();
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
