@@ -208,7 +208,7 @@ function renderList(){
   $('app').innerHTML = `
     <div class="chips">${chips}</div>
     ${list.length?`<div class="grid">${list.map(cardHTML).join('')}</div>`:`<div class="empty">Aucun tutoriel trouvé.<br>Clique sur « + Nouveau tutoriel » pour en créer un.</div>`}
-    <p class="disclaimer">...........</p>`;
+    <p class="disclaimer">Projet réalisé par Lecertisseur Gautier, Coordinateur Tri Optiques · Sibelco Reims</p>`;
   window.scrollTo(0,0);
 }
 function cardHTML(t){
