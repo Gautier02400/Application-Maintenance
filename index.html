@@ -96,6 +96,19 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 }
 .brand{display:flex;align-items:center;gap:12px}
 .logo{height:40px;width:auto;background:#fff;padding:4px 8px;border-radius:6px}
+
+/* Décor : motifs de verre (bouteille, pot, verre) en filigrane sur le fond */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22 viewBox=%220 0 240 240%22 fill=%22none%22 stroke=%22%230a5aa8%22 stroke-opacity=%220.10%22 stroke-width=%222%22 stroke-linejoin=%22round%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%2830 20%29%22%3E%3Cpath d=%22M20 0h10v8c0 6 10 12 10 28v62a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6V36C10 20 20 14 20 8z%22/%3E%3Cpath d=%22M14 56h22M14 78h22%22/%3E%3C/g%3E%3Cg transform=%22translate%28140 30%29%22%3E%3Cpath d=%22M6 0h38v10H6z%22/%3E%3Cpath d=%22M10 10h30c4 6 6 12 6 22v40a8 8 0 0 1-8 8H12a8 8 0 0 1-8-8V32c0-10 2-16 6-22z%22/%3E%3C/g%3E%3Cg transform=%22translate%2870 140%29%22%3E%3Cpath d=%22M10 0h30c0 22-4 36-15 40C14 36 10 22 10 0z%22/%3E%3Cpath d=%22M25 40v36M12 76h26%22/%3E%3C/g%3E%3Cg transform=%22translate%28200 150%29 rotate%2825%29%22%3E%3Cpath d=%22M10 0h8v6c0 5 8 9 8 22v46a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V28C2 15 10 11 10 6z%22/%3E%3C/g%3E%3Ccircle cx=%2220%22 cy=%22190%22 r=%225%22/%3E%3Ccircle cx=%22125%22 cy=%22105%22 r=%224%22/%3E%3Ccircle cx=%22215%22 cy=%2295%22 r=%226%22/%3E%3Cpath d=%22M105 215l10-12 8 10zM180 225l7-10 9 6z%22/%3E%3C/svg%3E");background-size:240px 240px}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) body::before{background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22 viewBox=%220 0 240 240%22 fill=%22none%22 stroke=%22%235aaeea%22 stroke-opacity=%220.12%22 stroke-width=%222%22 stroke-linejoin=%22round%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%2830 20%29%22%3E%3Cpath d=%22M20 0h10v8c0 6 10 12 10 28v62a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6V36C10 20 20 14 20 8z%22/%3E%3Cpath d=%22M14 56h22M14 78h22%22/%3E%3C/g%3E%3Cg transform=%22translate%28140 30%29%22%3E%3Cpath d=%22M6 0h38v10H6z%22/%3E%3Cpath d=%22M10 10h30c4 6 6 12 6 22v40a8 8 0 0 1-8 8H12a8 8 0 0 1-8-8V32c0-10 2-16 6-22z%22/%3E%3C/g%3E%3Cg transform=%22translate%2870 140%29%22%3E%3Cpath d=%22M10 0h30c0 22-4 36-15 40C14 36 10 22 10 0z%22/%3E%3Cpath d=%22M25 40v36M12 76h26%22/%3E%3C/g%3E%3Cg transform=%22translate%28200 150%29 rotate%2825%29%22%3E%3Cpath d=%22M10 0h8v6c0 5 8 9 8 22v46a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V28C2 15 10 11 10 6z%22/%3E%3C/g%3E%3Ccircle cx=%2220%22 cy=%22190%22 r=%225%22/%3E%3Ccircle cx=%22125%22 cy=%22105%22 r=%224%22/%3E%3Ccircle cx=%22215%22 cy=%2295%22 r=%226%22/%3E%3Cpath d=%22M105 215l10-12 8 10zM180 225l7-10 9 6z%22/%3E%3C/svg%3E")}
+}
+@media print{body::before{display:none}}
+
+/* Photo de fond : si le fichier fond-verre.jpg existe, il remplace le motif (voile = lisibilité) */
+html.photo body::before{background-image:linear-gradient(rgba(242,245,249,.88),rgba(242,245,249,.88)),url("fond-verre.jpg");background-size:cover;background-position:center}
+@media (prefers-color-scheme: dark){
+  html.photo:not([data-theme="light"]) body::before{background-image:linear-gradient(rgba(16,22,28,.88),rgba(16,22,28,.88)),url("fond-verre.jpg")}
+}
 </style>
 </head>
 <body>
@@ -561,6 +574,7 @@ function importJSON(ev){
   r.readAsText(f);
 }
 
+(function(){var i=new Image();i.onload=function(){document.documentElement.classList.add('photo');};i.src='fond-verre.jpg';})();
 applyStatic();
 renderList();
 if('serviceWorker' in navigator){
