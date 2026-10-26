@@ -208,7 +208,7 @@ function renderList(){
   $('app').innerHTML = `
     <div class="chips">${chips}</div>
     ${list.length?`<div class="grid">${list.map(cardHTML).join('')}</div>`:`<div class="empty">Aucun tutoriel trouvé.<br>Clique sur « + Nouveau tutoriel » pour en créer un.</div>`}
-    <p class="disclaimer">⚠️ Les tutoriels fournis sont des <b>trames d'exemple</b> à adapter à vos machines et à faire valider par le responsable maintenance / le constructeur avant usage. Ils ne remplacent pas les consignes de sécurité du site.</p>`;
+    <p class="disclaimer">...........</p>`;
   window.scrollTo(0,0);
 }
 function cardHTML(t){
@@ -326,7 +326,6 @@ function renderStepsEditor(){
        </div></div>
      <label>Instruction</label>
      <textarea oninput="state.draft.steps[${i}].text=this.value" placeholder="Décris précisément l'action à réaliser">${esc(s.text)}</textarea>
-     <label>⚠️ Avertissement / point d'attention (facultatif)</label>
      <input value="${esc(s.warn)}" oninput="state.draft.steps[${i}].warn=this.value">
      <label>📷 Photo (facultatif)</label>
      <div class="row">
