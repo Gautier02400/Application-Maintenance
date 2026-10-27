@@ -119,7 +119,7 @@ html.photo body::before{background-image:linear-gradient(rgba(242,245,249,.88),r
 @media(min-width:781px){body{padding-left:220px}}
 @media(max-width:780px){#side{transform:translateX(-100%);transition:transform .2s}#side.open{transform:none}.menu-btn{display:inline-block}#scrim.open{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:25}}
 .cls{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 10px;border-radius:999px;color:#fff}
-.cls0{background:#c0392b}.cls1{background:#b9770e}.cls2{background:#1a8a4a}.cls3{background:#0a5aa8}
+.cls4{background:#6f42c1}.cls0{background:#c0392b}.cls1{background:#b9770e}.cls2{background:#1a8a4a}.cls3{background:#0a5aa8}
 .card.locked{opacity:.6}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:12px 0}
 a.btn{display:inline-block;text-decoration:none;color:var(--accent)}
@@ -196,7 +196,6 @@ html.photo[data-theme="dark"] body::before{background-image:linear-gradient(rgba
       </h1>
       <div class="row">
         <div class="lang" role="group" aria-label="Langue / Language">
-          <button id="bAuto" onclick="setLang('auto')" title="Langue du navigateur / Browser language">Auto</button>
           <button id="bFr" onclick="setLang('fr')">FR</button>
           <button id="bEn" onclick="setLang('en')">EN</button>
         </div>
@@ -301,13 +300,7 @@ const I18N = {
   reset_train:'Reset my training', confirm_reset:'Go back to class 0?'
  }
 };
-let langMode = (()=>{ try{ const l=localStorage.getItem(LANG_KEY); if(l==='fr'||l==='en') return l; }catch(e){} return 'auto'; })();
-function detectLang(){
-  const ls=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'fr'];
-  for(const l of ls){ const p=String(l).toLowerCase(); if(p.startsWith('fr')) return 'fr'; if(p.startsWith('en')) return 'en'; }
-  return 'fr';
-}
-let lang = langMode==='auto' ? detectLang() : langMode;
+let lang = (()=>{ try{ const l=localStorage.getItem(LANG_KEY); if(l==='fr'||l==='en') return l; }catch(e){} return 'fr'; })();
 const T = (k,...a)=>{ const v=I18N[lang][k]; return typeof v==='function'?v(...a):v; };
 
 /* Valeurs stockées en français, affichées selon la langue */
@@ -462,16 +455,14 @@ function applyStatic(){
   document.documentElement.lang=lang; buildNav();
   document.querySelectorAll('[data-i18n]').forEach(e=>{ e.textContent=T(e.dataset.i18n); });
   document.querySelectorAll('[data-i18n-ph]').forEach(e=>{ e.placeholder=T(e.dataset.i18nPh); });
-  $('bAuto').classList.toggle('on',langMode==='auto');
-  $('bFr').classList.toggle('on',langMode==='fr');
-  $('bEn').classList.toggle('on',langMode==='en');
+  $('bFr').classList.toggle('on',lang==='fr');
+  $('bEn').classList.toggle('on',lang==='en');
   const fs=$('fStatus'), cur=fs.value;
   fs.innerHTML=`<option value="">${esc(T('all_status'))}</option>`+Object.keys(STATUS_L.fr).map(k=>`<option value="${k}" ${k===cur?'selected':''}>${esc(statusL(k))}</option>`).join('');
 }
 function setLang(l){
-  langMode=(l==='fr'||l==='en')?l:'auto';
-  lang=langMode==='auto'?detectLang():langMode;
-  try{ localStorage.setItem(LANG_KEY,langMode); }catch(e){}
+  lang=(l==='en')?'en':'fr';
+  try{ localStorage.setItem(LANG_KEY,lang); }catch(e){}
   $('fMachine').value='';
   applyStatic();
   if(state.view==='view' && state.id) openTuto(state.id);
@@ -746,7 +737,8 @@ const CLS=[
  {fr:'Classe 0 – Découverte',en:'Class 0 – Beginner',dfr:'Ne connaît pas les trieurs optiques : formation obligatoire avant les autres tutos.',den:'New to optical sorters: mandatory training before the other tutorials.'},
  {fr:'Classe 1 – Opérateur',en:'Class 1 – Operator',dfr:'Connaît les trieurs : accès aux tutos Facile / Moyen.',den:'Knows the sorters: access to Easy / Medium tutorials.'},
  {fr:'Classe 2 – Technicien',en:'Class 2 – Technician',dfr:'Autonome en maintenance : accès aux tutos Avancé.',den:'Autonomous in maintenance: access to Advanced tutorials.'},
- {fr:'Classe 3 – Référent',en:'Class 3 – Referent',dfr:'Référent : valide les tutos et forme les autres.',den:'Referent: validates tutorials and trains others.'}
+ {fr:'Classe 3 – Référent',en:'Class 3 – Referent',dfr:'Référent : valide les tutos et forme les autres.',den:'Referent: validates tutorials and trains others.'},
+ {fr:'Classe 4 – Administrateur',en:'Class 4 – Administrator',dfr:'Administrateur : tous les droits, gère aussi les comptes des référents et des administrateurs.',den:'Administrator: full rights, also manages referent and administrator accounts.'}
 ];
 const clsL=n=>CLS[n][lang], clsD=n=>CLS[n]['d'+lang];
 let settings={name:'',cls:0,chosen:true,trained:0,theme:'auto'};
@@ -797,7 +789,7 @@ function renderHome(){
    <div class="panel"><h2 style="margin-top:0">${esc(T('welcome'))}${settings.name?', '+esc(settings.name):''}</h2>
      <div class="row"><span>${esc(T('your_class'))}</span><span class="cls cls${c}">${esc(clsL(c))}</span></div>
      <p class="meta">${esc(clsD(c))}</p></div>
-   ${!settings.chosen?`<div class="panel"><b>${esc(T('ask_level'))}</b><div class="row" style="margin-top:8px">${CLS.map((x,i)=>`<button onclick="chooseCls(${i})">${esc(clsL(i))}</button>`).join('')}</div></div>`:''}
+   ${!settings.chosen?`<div class="panel"><b>${esc(T('ask_level'))}</b><div class="row" style="margin-top:8px">${CLS.slice(0,4).map((x,i)=>`<button onclick="chooseCls(${i})">${esc(clsL(i))}</button>`).join('')}</div></div>`:''}
    ${(c<1&&ob)?`<div class="box danger"><b>${esc(T('oblig_title'))}</b><br>${esc(T('oblig_txt'))}<div style="margin-top:8px"><button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button></div></div>`:''}
    ${settings.trained?`<div class="box" style="border-left-color:var(--ok)">${esc(T('trained_on'))} ${esc(new Date(settings.trained).toLocaleDateString(lang))}</div>`:''}
    <div class="tiles">${NAV.slice(1,5).map(([k,i,l])=>`<div class="card" onclick="go('${k}')"><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div></div>`).join('')}</div>
@@ -852,7 +844,17 @@ function logout(){
   try{localStorage.removeItem(SESS);}catch(e){}
   settings={name:'',cls:0,chosen:true,trained:0,theme:'auto'}; state.done={}; document.documentElement.removeAttribute('data-theme'); renderLogin();
 }
-function boot(){
+async function seedAdmin(){
+  try{ if(localStorage.getItem('sibelco_seed_aa')) return; }catch(e){}
+  if(!users.some(u=>u.id==='aa')){
+    const salt=uid();
+    users.push({id:'aa',name:'AA',cls:4,salt,pw:await hash('AAAA',salt),chosen:true,trained:Date.now(),theme:'auto'});
+    saveUsers();
+  }
+  try{ localStorage.setItem('sibelco_seed_aa','1'); }catch(e){}
+}
+async function boot(){
+  await seedAdmin();
   applyStatic(); let sid=null; try{sid=localStorage.getItem(SESS);}catch(e){}
   const u=users.find(x=>x.id===sid); if(u) enter(u); else if(!users.length) renderSetup(); else renderLogin();
 }
@@ -865,13 +867,13 @@ function renderSettings(){
    <p class="meta">${esc(clsD(settings.cls))}</p>
    <label>${esc(T('set_name'))}</label><input value="${esc(settings.name)}" oninput="settings.name=this.value;saveSettings();buildNav()">
    <label>${esc(T('set_theme'))}</label><select onchange="settings.theme=this.value;saveSettings();applyTheme()">${[['auto','theme_auto'],['light','theme_light'],['dark','theme_dark']].map(([v,l])=>`<option value="${v}" ${v===settings.theme?'selected':''}>${esc(T(l))}</option>`).join('')}</select>
-   <label>${L('Langue','Language')}</label><select onchange="setLang(this.value)">${[['auto',L('Automatique (langue du navigateur)','Automatic (browser language)')],['fr','Français'],['en','English']].map(([v,t])=>`<option value="${v}" ${v===langMode?'selected':''}>${esc(t)}</option>`).join('')}</select>
+   <label>${L('Langue','Language')}</label><select onchange="setLang(this.value)">${[['fr','Français'],['en','English']].map(([v,t])=>`<option value="${v}" ${v===lang?'selected':''}>${esc(t)}</option>`).join('')}</select>
    <label>${L('Nouveau mot de passe','New password')}</label><div class="row"><input id="np" type="password" autocomplete="new-password" style="flex:1"><button onclick="changePw()">${L('Changer','Change')}</button></div></div>`+(adm?adminHTML():'');
 }
 function adminHTML(){
-  const co=sel=>CLS.map((x,i)=>`<option value="${i}" ${i===sel?'selected':''}>${esc(clsL(i))}</option>`).join('');
+  const co=sel=>CLS.map((x,i)=>i<4||settings.cls>=4?`<option value="${i}" ${i===sel?'selected':''}>${esc(clsL(i))}</option>`:'').join('');
   return `<div class="panel"><h3 style="margin-top:0">${L('Travailleurs et classes','Workers and classes')}</h3>`+
-   users.map(u=>`<div class="edit-step"><div class="row" style="justify-content:space-between"><b>${esc(u.name)} <span class="meta">(${esc(u.id)})</span></b><span class="cls cls${u.cls}">${esc(clsL(u.cls))}</span></div>
+   users.map(u=>u.cls>=4&&settings.cls<4?`<div class="edit-step"><div class="row" style="justify-content:space-between"><b>${esc(u.name)} <span class="meta">(${esc(u.id)})</span></b><span class="cls cls${u.cls}">${esc(clsL(u.cls))}</span></div></div>`:`<div class="edit-step"><div class="row" style="justify-content:space-between"><b>${esc(u.name)} <span class="meta">(${esc(u.id)})</span></b><span class="cls cls${u.cls}">${esc(clsL(u.cls))}</span></div>
     <div class="row" style="margin-top:8px"><select style="width:auto" onchange="setUserCls('${u.id}',this.value)">${co(u.cls)}</select><button class="small" onclick="resetPw('${u.id}')">${L('Mot de passe','Password')}</button>${u.id!==settings.id?`<button class="small danger" onclick="delUser('${u.id}')">${esc(T('delete'))}</button>`:''}</div></div>`).join('')+
    `<h4>${L('Ajouter un travailleur','Add a worker')}</h4>
     <div class="row"><input id="nu_id" placeholder="${L('Identifiant','Login')}" autocapitalize="none" style="flex:1;min-width:130px"><input id="nu_name" placeholder="${L('Nom Prénom','Full name')}" style="flex:1;min-width:130px"><input id="nu_pw" type="text" placeholder="${L('Mot de passe initial','Initial password')}" style="flex:1;min-width:130px"></div>
@@ -885,14 +887,17 @@ async function addUser(){
 }
 function setUserCls(id,v){
   const u=users.find(x=>x.id===id); if(!u) return; v=+v;
+  if(settings.cls<4&&(v>=4||u.cls>=4)){ renderSettings(); return; }
+  if(v<4&&u.cls>=4&&users.filter(x=>x.cls>=4).length<2){ toast(L('Il doit rester au moins un administrateur','At least one administrator must remain')); renderSettings(); return; }
   if(v<3&&u.cls>=3&&users.filter(x=>x.cls>=3).length<2){ toast(L('Il doit rester au moins un référent','At least one referent must remain')); renderSettings(); return; }
   u.cls=v; if(v===0) u.trained=0; saveUsers(); renderSettings();
 }
 async function resetPw(id){
-  const u=users.find(x=>x.id===id), p=prompt(L('Nouveau mot de passe (4 caractères min)','New password (min 4)'));
+  const u=users.find(x=>x.id===id); if(u&&u.cls>=4&&settings.cls<4) return;
+  const p=prompt(L('Nouveau mot de passe (4 caractères min)','New password (min 4)'));
   if(!u||!p||p.length<4) return; u.salt=uid(); u.pw=await hash(p,u.salt); saveUsers(); toast(T('saved'));
 }
-function delUser(id){ if(!confirm(T('confirm_del'))) return; users=users.filter(u=>u.id!==id); saveUsers(); renderSettings(); }
+function delUser(id){ const t=users.find(x=>x.id===id); if(!t||(t.cls>=4&&(settings.cls<4||users.filter(x=>x.cls>=4).length<2))) return; if(!confirm(T('confirm_del'))) return; users=users.filter(u=>u.id!==id); saveUsers(); renderSettings(); }
 async function changePw(){
   const p=$('np').value; if(p.length<4){ toast(L('4 caractères minimum','4 characters minimum')); return; }
   settings.salt=uid(); settings.pw=await hash(p,settings.salt); saveUsers(); $('np').value=''; toast(T('saved'));
