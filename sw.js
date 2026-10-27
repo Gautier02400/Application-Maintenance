@@ -9,7 +9,7 @@
 
 // Nom du cache. IMPORTANT : à chaque fois que vous modifiez index.html (ou un autre fichier de la liste),
 // changez ce numéro (v3 -> v4...) pour que les appareils suppriment l'ancienne copie et récupèrent la nouvelle.
-const CACHE = 'tutos-maintenance-v7';
+const CACHE = 'tutos-maintenance-v9';
 
 // Fichiers de l'appli à mettre en cache dès l'installation (si l'un manque, l'installation échoue :
 // ils doivent donc tous exister dans le dossier). Ajoutez ici "./fond-verre.jpg" si vous utilisez une photo de fond.
