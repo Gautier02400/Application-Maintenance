@@ -311,10 +311,13 @@ header.big .menu-btn{font-size:1rem;padding:5px 8px}
 .qopt.good{border-color:var(--ok);background:rgba(26,138,74,.2)}
 .qopt.bad{border-color:var(--danger-line);background:var(--danger-bg);color:var(--danger-text)}
 .qopt:disabled{opacity:1;cursor:default}
-.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:460px;margin:0 auto}
-.mcard{aspect-ratio:1/1.05;padding:4px;font-size:1.7rem;font-weight:700;display:grid;place-items:center;background:var(--accent);color:var(--accent-text);line-height:1.1}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:560px;margin:0 auto}
+.mcard{min-height:104px;padding:5px;font-size:1.7rem;font-weight:700;display:grid;place-items:center;background:var(--accent);color:var(--accent-text);line-height:1.1}
 .mcard.up{background:var(--card);color:var(--text);border-color:var(--accent)}
-.mcard.txt.up{font-size:.78rem;word-break:break-word}
+.mcard.txt.up{font-size:.72rem;font-weight:600;word-break:break-word;hyphens:auto}
+.mcard.ico.up{font-size:.72rem;font-weight:700}
+.mcard .mc{display:block;text-align:center}
+.mcard .me{display:block;font-size:1.5rem;margin-bottom:2px}
 .mcard.done{background:rgba(26,138,74,.22);border-color:var(--ok)}
 .mcard:disabled{opacity:1;cursor:default}
 .ordlist{margin:8px 0;padding-left:0;list-style-position:inside}
@@ -591,7 +594,7 @@ const SEED = [
    {text:'Consigner et purger, puis nettoyer ou remplacer les buses défaillantes.',warn:'',img:''},
    {text:'Relancer le test d\'éjection pour valider et noter l\'intervention dans la GMAO / le cahier de maintenance.',warn:'',img:''}
   ],status:'brouillon',updated:0},
- {id:'t4',title:'Contrôle du fond de référence et calibration (trame générale)',machine:'Tous trieurs',category:'Réglage / Calibration',level:'Avancé',duration:40,
+ {id:'t4',title:'Calibration du trieur (trame générale)',machine:'Tous trieurs',category:'Réglage / Calibration',level:'Avancé',duration:40,
   tools:['Procédure constructeur','Accès niveau maintenance sur la machine'],
   safety:['Réservé au personnel habilité','Suivre strictement la procédure du constructeur'],
   steps:[
@@ -650,7 +653,7 @@ const SEED_EN = {
    ['Lock out and bleed, then clean or replace the faulty nozzles.',''],
    ['Run the ejection test again to validate and record the intervention in the CMMS / maintenance log.','']
   ]},
- t4:{title:'Checking the reference background and calibration (general outline)',machine:'All sorters',
+ t4:{title:'Sorter calibration (general outline)',machine:'All sorters',
   tools:['Manufacturer procedure','Maintenance-level access on the machine'],
   safety:['Authorised personnel only','Strictly follow the manufacturer procedure'],
   steps:[
@@ -1210,18 +1213,28 @@ function logout(){
   settings={name:'',cls:0,chosen:true,trained:0,theme:'auto'}; state.done={}; document.documentElement.removeAttribute('data-theme'); renderLogin();
 }
 /*
- seedAdmin() : au tout premier lancement, crée un compte administrateur de départ (identifiant "aa", mot de passe "AAAA").
- /!\ A CHANGER : connectez-vous avec ce compte, puis modifiez son mot de passe dans Paramètres (ou créez vos
- propres administrateurs et supprimez celui-ci). Le marqueur 'sibelco_seed_aa' évite de le recréer ensuite.
+ seedAdmin() : garantit que le compte administrateur "aa" existe et reste ADMINISTRATEUR (classe 4).
+ A chaque démarrage :
+   - si "aa" n'existe pas (supprimé, nouvel appareil...) -> il est recréé avec le mot de passe AAAA ;
+   - si "aa" existe mais n'est plus administrateur -> il est remis en classe 4 ;
+   - UNE SEULE FOIS par appareil (marqueur 'sibelco_seed_aa_v2'), son mot de passe est remis à AAAA pour
+     pouvoir se reconnecter même si l'ancien a été oublié. Ensuite, un mot de passe modifié dans Paramètres est conservé.
+ Le compte "aa" ne peut ni être supprimé ni rétrogradé depuis l'appli (voir setUserCls et delUser).
+ /!\ SECURITE : changez le mot de passe AAAA dans Paramètres une fois connecté.
 */
 async function seedAdmin(){
-  try{ if(localStorage.getItem('sibelco_seed_aa')) return; }catch(e){}
-  if(!users.some(u=>u.id==='aa')){
+  let first=true; try{ first=!localStorage.getItem('sibelco_seed_aa_v2'); }catch(e){}
+  let a=users.find(u=>u.id==='aa'), dirty=false;
+  if(!a){
     const salt=uid();
-    users.push({id:'aa',name:'AA',cls:4,salt,pw:await hash('AAAA',salt),chosen:true,trained:Date.now(),theme:'auto'});
-    saveUsers();
+    a={id:'aa',name:'AA',cls:4,salt,pw:await hash('AAAA',salt),chosen:true,trained:Date.now(),theme:'auto'};
+    users.push(a); dirty=true;
+  }else{
+    if(a.cls<4){ a.cls=4; dirty=true; }
+    if(first){ a.salt=uid(); a.pw=await hash('AAAA',a.salt); dirty=true; }
   }
-  try{ localStorage.setItem('sibelco_seed_aa','1'); }catch(e){}
+  if(dirty) saveUsers();
+  try{ localStorage.setItem('sibelco_seed_aa_v2','1'); }catch(e){}
 }
 /*
  boot() = DEMARRAGE : crée l'admin de départ, traduit l'interface, puis
@@ -1266,6 +1279,7 @@ async function addUser(){
 }
 function setUserCls(id,v){
   const u=users.find(x=>x.id===id); if(!u) return; v=+v;
+  if(id==='aa'&&v<4){ toast(L('Le compte aa reste administrateur','The aa account stays administrator')); renderSettings(); return; }
   if(settings.cls<4&&(v>=4||u.cls>=4)){ renderSettings(); return; }
   if(v<4&&u.cls>=4&&users.filter(x=>x.cls>=4).length<2){ toast(L('Il doit rester au moins un administrateur','At least one administrator must remain')); renderSettings(); return; }
   if(v<3&&u.cls>=3&&users.filter(x=>x.cls>=3).length<2){ toast(L('Il doit rester au moins un référent','At least one referent must remain')); renderSettings(); return; }
@@ -1276,7 +1290,7 @@ async function resetPw(id){
   const p=prompt(L('Nouveau mot de passe (4 caractères min)','New password (min 4)'));
   if(!u||!p||p.length<4) return; u.salt=uid(); u.pw=await hash(p,u.salt); saveUsers(); toast(T('saved'));
 }
-function delUser(id){ const t=users.find(x=>x.id===id); if(!t||(t.cls>=4&&(settings.cls<4||users.filter(x=>x.cls>=4).length<2))) return; if(!confirm(T('confirm_del'))) return; users=users.filter(u=>u.id!==id); saveUsers(); renderSettings(); }
+function delUser(id){ if(id==='aa'){ toast(L('Le compte aa ne peut pas être supprimé','The aa account cannot be deleted')); return; } const t=users.find(x=>x.id===id); if(!t||(t.cls>=4&&(settings.cls<4||users.filter(x=>x.cls>=4).length<2))) return; if(!confirm(T('confirm_del'))) return; users=users.filter(u=>u.id!==id); saveUsers(); renderSettings(); }
 async function changePw(){
   const p=$('np').value; if(p.length<4){ toast(L('4 caractères minimum','4 characters minimum')); return; }
   settings.salt=uid(); settings.pw=await hash(p,settings.salt); saveUsers(); $('np').value=''; toast(T('saved'));
@@ -1830,7 +1844,7 @@ const GAMES=[
  {k:'vf',ico:'vf',fr:'Vrai ou faux',en:'True or false',
   dfr:'10 affirmations : vraies ou fausses ? Réponse rapide, explication à chaque fois.',den:'10 statements: true or false? Quick answers, with an explanation each time.',run:"quizStart('vf')",best:()=>g2Best('vf')},
  {k:'memory',ico:'memory',fr:'Mémoire',en:'Memory',
-  dfr:'Associez chaque pictogramme (EPI, outils…) à son nom en un minimum de coups.',den:'Match each icon (PPE, tools…) with its name in as few moves as possible.',run:'memStart()',best:()=>g2Best('memory')},
+  dfr:'Associez chaque composant du trieur optique (caméra, buse, vanne…) à son rôle en un minimum de coups.',den:'Match each optical-sorter part (camera, nozzle, valve…) to its role in as few moves as possible.',run:'memStart()',best:()=>g2Best('memory')},
  {k:'order',ico:'order',fr:'Dans l’ordre',en:'Put in order',
   dfr:'Remettez dans le bon ordre les étapes de 3 procédures (consignation, nettoyage…).',den:'Put the steps of 3 procedures in the right order (lockout, cleaning…).',run:'ordStart()',best:()=>g2Best('order')}
 ];
@@ -1904,8 +1918,8 @@ const QUIZ=[
   e:['Selon le réglage, il peut aussi trier des couleurs.','Depending on settings, it can also sort colours.']},
  {q:['Avant une calibration, que faut-il vérifier d’abord ?','Before a calibration, what should you check first?'],
   o:[['Que la zone optique est propre','That the optical area is clean'],['Éteindre l’éclairage','Turn the lighting off'],['Charger le convoyeur à fond','Fill the conveyor completely'],['Désactiver les alarmes','Disable the alarms']],a:0,
-  e:['Une optique sale fausse l’apprentissage du fond de référence.','A dirty optic spoils the reference-background learning.']},
- {q:['Pendant l’apprentissage du fond de référence, le convoyeur doit être…','During reference-background learning, the conveyor must be…'],
+  e:['Une optique sale fausse la calibration.','A dirty optic spoils the calibration.']},
+ {q:['Pendant la calibration, le convoyeur doit être…','During calibration, the conveyor must be…'],
   o:[['Vide','Empty'],['Plein de verre vert','Full of green glass'],['Plein de céramique','Full of ceramic'],['Démonté','Dismantled']],a:0,
   e:['Rien ne doit passer devant les caméras pendant l’apprentissage.','Nothing may pass in front of the cameras during learning.']},
  {q:['Une valeur de calibration est anormale. Que faire ?','A calibration value is abnormal. What do you do?'],
@@ -1999,14 +2013,24 @@ function quizEnd(){                        // écran de résultat + enregistreme
   g2Board(me.kind,'g2lb');
 }
 
-/* ---------- MÉMOIRE : 8 paires pictogramme ↔ nom ---------- */
+/* ---------- MÉMOIRE : 8 paires composant du trieur ↔ son rôle ---------- */
 /*
  ===================== MEMOIRE =====================
- MEM = les 8 paires [pictogramme emoji, [nom FR, nom EN]]. POUR CHANGER UNE PAIRE : modifier l'emoji ou le nom.
+ MEM = les 8 paires du jeu : [emoji, [nom FR, nom EN], [rôle FR, rôle EN]].
+ Le joueur doit associer le COMPOSANT (carte avec emoji + nom) à son RÔLE (carte texte).
+ POUR CHANGER UNE PAIRE : modifier l'emoji, le nom ou le rôle (gardez le rôle COURT : environ 45 caractères maximum, sinon il ne tient pas dans la carte).
+ POUR AJOUTER / RETIRER UNE PAIRE : copier / supprimer une ligne (le jeu s'adapte au nombre de paires ; 8 = 16 cartes en grille de 4 x 4).
  (Les emoji sont des caractères : pour en choisir un, copiez-le depuis n'importe quel clavier d'emoji.)
 */
-const MEM=[['🥽',['Lunettes','Safety glasses']],['🧤',['Gants','Gloves']],['🔒',['Cadenas','Padlock']],['🎧',['Casque antibruit','Ear defenders']],
-           ['💨',['Air comprimé','Compressed air']],['📷',['Caméra','Camera']],['🔧',['Outillage','Tools']],['🧹',['Nettoyage','Cleaning']]];
+const MEM=[
+ ['📷',['Caméra','Camera'],['Voit la couleur et les défauts du verre','Sees the glass colour and defects']],
+ ['💡',['Éclairage','Lighting'],['Éclaire le verre pour une image nette','Lights the glass for a sharp image']],
+ ['💨',['Buse d’éjection','Ejection nozzle'],['Souffle l’indésirable hors du flux','Blows the reject out of the stream']],
+ ['⚡',['Électrovanne','Solenoid valve'],['Commande l’air envoyé à la buse','Controls the air sent to the nozzle']],
+ ['🖥️',['Écran de commande','Control screen'],['Affiche les alarmes et les réglages','Shows alarms and settings']],
+ ['🔍',['Vitre optique','Optical window'],['À nettoyer pour éviter les fausses détections','Clean it to avoid false detections']],
+ ['🔒',['Cadenas LOTO','LOTO padlock'],['Empêche tout redémarrage pendant l’intervention','Prevents any restart during the job']],
+ ['🎚️',['Manomètre','Pressure gauge'],['Air à 0 bar avant tout démontage','Air at 0 bar before any dismantling']]];
 /*
  memStart() mélange et distribue les cartes, memDraw() redessine la grille, memFlip(i) retourne une carte
  (à la 2e on teste la paire), memEnd() calcule le score selon les coups et le temps.
@@ -2014,9 +2038,9 @@ const MEM=[['🥽',['Lunettes','Safety glasses']],['🧤',['Gants','Gloves']],['
 let M=null;   // état de la partie de mémoire en cours
 function memStart(){
   if(M) clearInterval(M.timer);
-  const cards=[]; MEM.forEach((m,i)=>{ cards.push({p:i,ico:true,t:m[0]}); cards.push({p:i,ico:false,t:m[1]}); });   // p = numéro de paire
+  const cards=[]; MEM.forEach((m,i)=>{ cards.push({p:i,ico:true,t:m[0],n:m[1]}); cards.push({p:i,ico:false,t:m[2]}); });   // p = numéro de paire
   M={cards:shuffle(cards),open:[],found:{},nf:0,moves:0,t0:0,lock:false,timer:null,over:false};
-  gFrame('Mémoire','Memory',`<p class="meta" style="margin:0 0 8px">${L('Retrouvez les paires : chaque pictogramme va avec son nom. Moins de coups et de temps = plus de points.','Find the pairs: each icon goes with its name. Fewer moves and less time = more points.')}</p>
+  gFrame('Mémoire','Memory',`<p class="meta" style="margin:0 0 8px">${L('Retrouvez les paires : chaque composant du trieur optique va avec son rôle. Moins de coups et de temps = plus de points.','Find the pairs: each optical-sorter part goes with its role. Fewer moves and less time = more points.')}</p>
    <div class="row" style="justify-content:space-between;margin-bottom:8px"><span id="mhud"></span><button class="small" onclick="memStart()">${L('Recommencer','Restart')}</button></div>
    <div id="mgrid" class="mgrid"></div><div id="mfb"></div>`);
   memDraw(); g2Board('memory','g2lb');
@@ -2025,7 +2049,7 @@ function memHud(){ const h=$('mhud'); if(!h||!M) return; const sec=M.t0?Math.rou
 function memDraw(){                        // redessine la grille de cartes
   const g=$('mgrid'); if(!g||!M) return;
   g.innerHTML=M.cards.map((c,i)=>{ const up=M.found[i]||M.open.includes(i);
-    return `<button class="mcard ${c.ico?'ico':'txt'} ${up?'up':''} ${M.found[i]?'done':''}" onclick="memFlip(${i})" ${up?'disabled':''}>${up?esc(c.ico?c.t:L(c.t[0],c.t[1])):'?'}</button>`; }).join('');
+    return `<button class="mcard ${c.ico?'ico':'txt'} ${up?'up':''} ${M.found[i]?'done':''}" onclick="memFlip(${i})" ${up?'disabled':''}>${up?(c.ico?`<span class="mc"><span class="me">${c.t}</span>${esc(L(c.n[0],c.n[1]))}</span>`:esc(L(c.t[0],c.t[1]))):'?'}</button>`; }).join('');
   memHud();
 }
 function memFlip(i){                       // retourne une carte ; à la 2e carte on teste la paire
@@ -2068,7 +2092,7 @@ const ORD=[
   ['Nettoyer les vitres avec un chiffon propre et le produit adapté','Clean the windows with a clean cloth and the right product'],
   ['Contrôler l’absence de traces, de buée ou de rayures','Check for marks, mist or scratches'],
   ['Remettre les protections, déconsigner et vérifier l’écran','Refit guards, remove lockout and check the screen']]},
- {t:['Calibration du fond de référence','Reference-background calibration'],s:[
+ {t:['Calibration du trieur','Sorter calibration'],s:[
   ['Vérifier que la zone optique est propre','Check the optical area is clean'],
   ['Vider le convoyeur / la goulotte','Empty the belt / chute'],
   ['Lancer la procédure de calibration depuis le menu','Start the calibration from the menu'],
