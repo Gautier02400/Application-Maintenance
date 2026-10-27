@@ -249,9 +249,9 @@ header .logo,header.big .logo{height:clamp(30px,4vw,38px);padding:3px 8px;border
 header h1,header.big h1{font-size:.98rem;line-height:1.2}
 header h1 small,header.big h1 small{font-size:.72rem}
 header .lang button,header.big .lang button{font-size:.72rem;padding:4px 8px;line-height:1.2}
-header .tbtn{font-size:.8rem;padding:5px 10px}
-header .filters{margin-top:6px;gap:6px}
-header .filters input,header .filters select{padding:5px 9px;font-size:.88rem}
+#toolbar .tbtn{font-size:.85rem;padding:6px 12px}
+#toolbar .filters{margin-top:8px;gap:8px}
+#toolbar .filters input,#toolbar .filters select{padding:6px 10px;font-size:.9rem}
 header.big .wrap{padding:6px 14px}
 header.big .menu-btn{font-size:1rem;padding:5px 8px}
 #side .nb{font-size:.88rem;padding:7px 10px;border-radius:7px}
@@ -266,6 +266,16 @@ header.big .menu-btn{font-size:1rem;padding:5px 8px}
 .panel{padding:14px}
 .tiles{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
 .tiles .card h3{font-size:.95rem}
+/* Infobulle des classes : apparaît au survol (ou au toucher) d'une pastille de classe */
+.cls{cursor:help}
+#clstip{position:fixed;z-index:60;display:none;width:min(340px,calc(100vw - 16px));background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.35);padding:8px;font-size:.82rem;line-height:1.35;pointer-events:none}
+#clstip .cttl{font-weight:700;padding:2px 6px 6px}
+#clstip .ctr{padding:6px;border-radius:7px}
+#clstip .ctr.me{background:rgba(45,143,224,.18);outline:1px solid #2d8fe0}
+#clstip .ctr .d{color:var(--muted);margin-top:3px}
+#clstip .ctr .cls{font-size:.72rem;cursor:inherit}
+#clstip .ctr .you{font-size:.72rem;margin-left:6px;color:var(--accent)}
+@media print{#clstip{display:none!important}}
 /*
  ILLUSTRATIONS DES CARTES ET TUILES (zone .cover)
  Chaque carte/tuile a en haut un bandeau ".cover" de proportion fixe (aspect-ratio 2/1).
@@ -333,11 +343,48 @@ header.big .menu-btn{font-size:1rem;padding:5px 8px}
 .pptthumb{max-width:420px;width:100%;border-radius:8px;border:1px solid var(--line);display:block;margin:8px 0}
 .pptslide{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:8px 12px;margin:8px 0;background:var(--bg)}
 .pptslide b{display:block;font-size:.78rem;color:var(--muted);margin-bottom:2px}
-body.nav-open .menu-btn{display:none!important}
+/* Menu ouvert non épinglé : le bouton ☰ garde sa place (invisible) pour que le titre ne bouge pas ; il disparaît vraiment seulement quand le cadenas est coché */
+body.nav-open .menu-btn{visibility:hidden}
+/* Ecran large : menu ouvert (épinglé ou non) -> le bouton ☰ disparaît et le titre se décale vers la droite pour rester visible */
+@media(min-width:781px){
+  body.nav-open .menu-btn{display:none!important}
+  /* menu ouvert (épinglé ou non) : toute la page (titre + contenu) se décale pour rester visible */
+  body.nav-open{padding-left:200px}
+}
+/* Téléphone : le menu ouvert pousse la page vers la droite (sans l'écraser) */
+@media(max-width:780px){
+  html{overflow-x:hidden}
+  header,#toolbar,#app{transition:transform .2s}
+  body.nav-open header,body.nav-open #toolbar,body.nav-open #app{transform:translateX(200px)}
+}
+/* Barre d'outils SOUS le bandeau : boutons Nouveau / Exporter / Importer + recherche + filtres */
+#toolbar .wrap{padding-bottom:0}
+#toolbar .actions{display:flex;gap:8px;flex-wrap:wrap}
+#toolbar:has(#actions.hidden):has(#filters.hidden){display:none}
+header .brand>span{min-width:0}
+/* ===== TELEPHONE ===== */
+@media(max-width:640px){
+  header .top{flex-wrap:nowrap;gap:8px}
+  header h1.brand{flex:1;min-width:0}
+  header .brand>span{overflow:hidden}
+  header h1,header.big h1{font-size:.9rem}
+  header h1 small,header.big h1 small{font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #toolbar .actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  #toolbar .actions .tbtn{width:100%;padding:8px 10px;font-size:.85rem}
+  #toolbar .actions .tbtn.primary{grid-column:1/-1}
+  #toolbar .filters{grid-template-columns:1fr 1fr;gap:6px}
+  #toolbar .filters #q{grid-column:1/-1}
+  #toolbar .filters select{min-width:0;text-overflow:ellipsis}
+  header:not(.big){position:static}
+  .tiles{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .wrap{padding-left:12px;padding-right:12px}
+  header .wrap{padding-left:10px;padding-right:10px}
+}
+@media(max-width:380px){header h1 small,header.big h1 small{display:none}}
 /*
  --- body.nolog : appliquée quand personne n'est connecté -> on cache menu et bandeau, il ne reste que l'écran de connexion ---
 */
-body.nolog{padding-left:0!important}body.nolog #side,body.nolog header,body.nolog #scrim{display:none!important}
+body.nolog{padding-left:0!important}body.nolog #side,body.nolog header,body.nolog #toolbar,body.nolog #scrim{display:none!important}
 
 /*
  --- Mode sombre : fond bleu nuit en dégradés + motif de verre, cartes légèrement transparentes (effet "verre dépoli" avec blur) ---
@@ -377,11 +424,18 @@ html.photo[data-theme="dark"] body::before{background-image:linear-gradient(rgba
           <button id="bFr" onclick="setLang('fr')">FR</button>
           <button id="bEn" onclick="setLang('en')">EN</button>
         </div>
-        <button class="primary tbtn" onclick="newTuto()" data-i18n="new"></button>
-        <button class="tbtn" onclick="exportJSON()" data-i18n="export"></button>
-        <button class="tbtn" onclick="document.getElementById('imp').click()" data-i18n="import"></button>
-        <input id="imp" type="file" accept="application/json" class="hidden" onchange="importJSON(event)">
       </div>
+    </div>
+  </div>
+</header>
+<!-- BARRE D'OUTILS (sous le bandeau) : Nouveau / Exporter / Importer, recherche et filtres. Affichée uniquement dans "Tutos maintenance" (voir buildNav et renderList). -->
+<div id="toolbar" class="noprint">
+  <div class="wrap">
+    <div class="actions" id="actions">
+      <button class="primary tbtn" onclick="newTuto()" data-i18n="new"></button>
+      <button class="tbtn" onclick="exportJSON()" data-i18n="export"></button>
+      <button class="tbtn" onclick="document.getElementById('imp').click()" data-i18n="import"></button>
+      <input id="imp" type="file" accept="application/json" class="hidden" onchange="importJSON(event)">
     </div>
     <div class="filters" id="filters">
       <input id="q" type="search" data-i18n-ph="search" oninput="renderList()">
@@ -389,7 +443,7 @@ html.photo[data-theme="dark"] body::before{background-image:linear-gradient(rgba
       <select id="fStatus" onchange="renderList()"></select>
     </div>
   </div>
-</header>
+</div>
 
 <!--
  MENU LATERAL : vide au départ, rempli par la fonction buildNav() du script.
@@ -1085,6 +1139,27 @@ const CLS=[
  {fr:'Classe 4 – Administrateur',en:'Class 4 – Administrator',dfr:'Administrateur : tous les droits, gère aussi les comptes des référents et des administrateurs.',den:'Administrator: full rights, also manages referent and administrator accounts.'}
 ];
 const clsL=n=>CLS[n][lang], clsD=n=>CLS[n]['d'+lang];
+/* Infobulle des classes : survol (souris) ou toucher (téléphone) d'une pastille .cls => liste des 5 classes avec leur description.
+   La classe de la pastille survolée est surlignée. */
+function clsTipHTML(cur){
+  return `<div class="cttl">${L('Les classes et leurs droits','Classes and their rights')}</div>`+
+   CLS.map((c,i)=>`<div class="ctr ${i===cur?'me':''}"><span class="cls cls${i}">${esc(clsL(i))}</span>${i===cur?`<b class="you">◄ ${L('celle-ci','this one')}</b>`:''}<div class="d">${esc(clsD(i))}</div></div>`).join('');
+}
+function showClsTip(el){
+  let t=document.getElementById('clstip');
+  if(!t){ t=document.createElement('div'); t.id='clstip'; document.body.appendChild(t); }
+  const m=/cls([0-4])/.exec(el.className); if(!m) return;
+  t.innerHTML=clsTipHTML(+m[1]); t.style.visibility='hidden'; t.style.display='block';
+  const r=el.getBoundingClientRect(), w=t.offsetWidth, h=t.offsetHeight, vw=window.innerWidth, vh=window.innerHeight;
+  let left=Math.min(Math.max(8,r.left),vw-w-8), top=r.bottom+8;
+  if(top+h>vh-8) top=Math.max(8,r.top-h-8);
+  t.style.left=left+'px'; t.style.top=top+'px'; t.style.visibility='visible';
+}
+function hideClsTip(){ const t=document.getElementById('clstip'); if(t) t.style.display='none'; }
+document.addEventListener('mouseover',e=>{ const el=e.target.closest&&e.target.closest('.cls'); if(el&&!el.closest('#clstip')) showClsTip(el); });
+document.addEventListener('mouseout',e=>{ if(e.target.closest&&e.target.closest('.cls')) hideClsTip(); });
+document.addEventListener('click',e=>{ const el=e.target.closest&&e.target.closest('.cls'); if(el&&!el.closest('#clstip')) showClsTip(el); else hideClsTip(); });
+window.addEventListener('scroll',hideClsTip,true);
 let settings={name:'',cls:0,chosen:true,trained:0,theme:'auto'};
 function saveSettings(){ saveUsers(); }
 function applyTheme(){ const r=document.documentElement; if(settings.theme==='light'||settings.theme==='dark') r.setAttribute('data-theme',settings.theme); else r.removeAttribute('data-theme'); }
@@ -1102,7 +1177,7 @@ function buildNav(){
   $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px"><button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button>${isPinned()?'':`<button class="nb ib" onclick="toggleNav(false)" aria-label="${L('Fermer le menu','Close menu')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>`}</div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
    NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
   document.querySelector('header').classList.toggle('big',state.section!=='tutos');
-  document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('hidden',state.section!=='tutos'));
+  $('actions').classList.toggle('hidden',state.section!=='tutos');
 }
 /*
  Menu : toggleNav() l'ouvre/ferme ; togglePin() mémorise le choix "menu épinglé" (uniquement sur écran large).
