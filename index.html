@@ -128,23 +128,60 @@ a.btn{display:inline-block;text-decoration:none;color:var(--accent)}
 #side{background:var(--brand);border-right:3px solid #2d8fe0}
 #side .nb{color:#fff}#side .nb:hover{background:rgba(255,255,255,.12)}#side .nb.on{background:#2d8fe0;color:#fff}
 #side .meta{color:#c5d6ea}
-header .wrap{max-width:none;padding:10px 20px}
-.logo{height:68px;padding:6px 12px}
-.menu-btn{display:inline-block!important;font-weight:700}
-#side{transform:translateX(-100%);transition:transform .2s}#side.open{transform:none}
+header .wrap{max-width:none;padding:6px 14px}
+.menu-btn{display:inline-flex!important;align-items:center;justify-content:center;padding:5px 8px;border-radius:8px}
+.menu-btn svg{width:1.2em!important;height:1.2em!important}
+#side{transform:translateX(-100%);transition:transform .2s;width:200px;padding-left:8px;padding-right:8px}
+#side.open{transform:none;box-shadow:4px 0 18px rgba(0,0,0,.25)}
 body{transition:padding-left .2s}
-@media(min-width:781px){body{padding-left:0}body.nav-open{padding-left:220px}}
-@media(max-width:780px){.logo{height:52px}body.nav-open{padding-left:0}}
-header .logo{height:clamp(44px,5vw,64px);transition:height .2s}
-header h1,header h1 small,header .menu-btn{transition:font-size .2s}
-header.big .wrap{padding:16px 24px}
-header.big .logo{height:clamp(64px,9vw,120px);padding:8px 16px}
-header.big h1{font-size:clamp(1.3rem,2.8vw,2.6rem)}
-header.big h1 small{font-size:clamp(.85rem,1.5vw,1.3rem)}
-header.big .menu-btn{font-size:clamp(1rem,1.6vw,1.4rem);padding:12px 22px}
-header.big .lang button{font-size:clamp(.9rem,1.4vw,1.2rem);padding:10px 16px}
+@media(min-width:781px){body{padding-left:0}body.nav-pinned{padding-left:200px}}
+@media(max-width:780px){body.nav-pinned{padding-left:0}}
+header .top{gap:8px}
+header .brand{gap:8px}
+header .logo,header.big .logo{height:clamp(30px,4vw,38px);padding:3px 8px;border-radius:6px}
+header h1,header.big h1{font-size:.98rem;line-height:1.2}
+header h1 small,header.big h1 small{font-size:.72rem}
+header .lang button,header.big .lang button{font-size:.72rem;padding:4px 8px;line-height:1.2}
+header .tbtn{font-size:.8rem;padding:5px 10px}
+header .filters{margin-top:6px;gap:6px}
+header .filters input,header .filters select{padding:5px 9px;font-size:.88rem}
+header.big .wrap{padding:6px 14px}
+header.big .menu-btn{font-size:1rem;padding:5px 8px}
+#side .nb{font-size:.88rem;padding:7px 10px;border-radius:7px}
+#side .nb.ib{width:auto;padding:5px 7px;display:inline-flex;align-items:center}
+#side .nb.ib svg{width:1.15em;height:1.15em}
+#side .nb.pinbtn.on{background:rgba(255,255,255,.24)}
+#side .sidehd .cls{font-size:.68rem;white-space:nowrap;padding:2px 8px}
+#side .sidehd{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:2px 0 8px}
+@media(max-width:780px){#side .pinbtn{display:none!important}}
+/* Accueil / contenus plus compacts */
+#app h2{font-size:1.2rem}
+.panel{padding:14px}
+.tiles{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.tiles .card h3{font-size:.95rem}
+/* Cartes de tutoriel avec image d'illustration */
+.card.tcard{overflow:hidden}
+.card .cover{margin:-14px -14px 4px;aspect-ratio:2/1;overflow:hidden;background:linear-gradient(135deg,#0a2f5a,#2d8fe0);display:grid;place-items:center}
+.card .cover img{width:100%;height:100%;object-fit:cover;display:block}
+.card .cover svg{width:34%;height:34%;stroke:#fff;stroke-opacity:.55;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tcover{width:100%;max-height:320px;object-fit:cover;border-radius:10px;margin-bottom:10px;display:block}
+/* PDF affiché en entier (toutes les pages, sans cadre défilant) */
+.pdfpages{display:flex;flex-direction:column;gap:10px;align-items:center}
+.pdfpg{width:100%;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 1px 5px rgba(0,0,0,.18)}
+.pdfpg canvas{width:100%;height:auto;display:block;border-radius:6px}
 body.nav-open .menu-btn{display:none!important}
 body.nolog{padding-left:0!important}body.nolog #side,body.nolog header,body.nolog #scrim{display:none!important}
+
+/* Fond du mode sombre : dégradés bleu nuit + motifs de verre */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) body::before{background-image:radial-gradient(900px 520px at 12% -8%,rgba(45,143,224,.22),transparent 65%),radial-gradient(800px 520px at 105% 105%,rgba(10,90,168,.28),transparent 60%),radial-gradient(520px 380px at 85% 6%,rgba(90,174,234,.09),transparent 70%),url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22 viewBox=%220 0 240 240%22 fill=%22none%22 stroke=%22%235aaeea%22 stroke-opacity=%220.12%22 stroke-width=%222%22 stroke-linejoin=%22round%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%2830 20%29%22%3E%3Cpath d=%22M20 0h10v8c0 6 10 12 10 28v62a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6V36C10 20 20 14 20 8z%22/%3E%3Cpath d=%22M14 56h22M14 78h22%22/%3E%3C/g%3E%3Cg transform=%22translate%28140 30%29%22%3E%3Cpath d=%22M6 0h38v10H6z%22/%3E%3Cpath d=%22M10 10h30c4 6 6 12 6 22v40a8 8 0 0 1-8 8H12a8 8 0 0 1-8-8V32c0-10 2-16 6-22z%22/%3E%3C/g%3E%3Cg transform=%22translate%2870 140%29%22%3E%3Cpath d=%22M10 0h30c0 22-4 36-15 40C14 36 10 22 10 0z%22/%3E%3Cpath d=%22M25 40v36M12 76h26%22/%3E%3C/g%3E%3Cg transform=%22translate%28200 150%29 rotate%2825%29%22%3E%3Cpath d=%22M10 0h8v6c0 5 8 9 8 22v46a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V28C2 15 10 11 10 6z%22/%3E%3C/g%3E%3Ccircle cx=%2220%22 cy=%22190%22 r=%225%22/%3E%3Ccircle cx=%22125%22 cy=%22105%22 r=%224%22/%3E%3Ccircle cx=%22215%22 cy=%2295%22 r=%226%22/%3E%3Cpath d=%22M105 215l10-12 8 10zM180 225l7-10 9 6z%22/%3E%3C/svg%3E"),linear-gradient(180deg,#0b1118 0%,#10161c 45%,#0c1823 100%);background-size:auto,auto,auto,240px 240px,auto;background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;background-position:0 0}
+  :root:not([data-theme="light"]) .panel,:root:not([data-theme="light"]) .card{background:rgba(25,34,43,.86);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  html.photo:not([data-theme="light"]) body::before{background-image:linear-gradient(rgba(16,22,28,.88),rgba(16,22,28,.88)),url("fond-verre.jpg");background-size:cover;background-position:center;background-repeat:no-repeat}
+}
+:root[data-theme="dark"] body::before{background-image:radial-gradient(900px 520px at 12% -8%,rgba(45,143,224,.22),transparent 65%),radial-gradient(800px 520px at 105% 105%,rgba(10,90,168,.28),transparent 60%),radial-gradient(520px 380px at 85% 6%,rgba(90,174,234,.09),transparent 70%),url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22 viewBox=%220 0 240 240%22 fill=%22none%22 stroke=%22%235aaeea%22 stroke-opacity=%220.12%22 stroke-width=%222%22 stroke-linejoin=%22round%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%2830 20%29%22%3E%3Cpath d=%22M20 0h10v8c0 6 10 12 10 28v62a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6V36C10 20 20 14 20 8z%22/%3E%3Cpath d=%22M14 56h22M14 78h22%22/%3E%3C/g%3E%3Cg transform=%22translate%28140 30%29%22%3E%3Cpath d=%22M6 0h38v10H6z%22/%3E%3Cpath d=%22M10 10h30c4 6 6 12 6 22v40a8 8 0 0 1-8 8H12a8 8 0 0 1-8-8V32c0-10 2-16 6-22z%22/%3E%3C/g%3E%3Cg transform=%22translate%2870 140%29%22%3E%3Cpath d=%22M10 0h30c0 22-4 36-15 40C14 36 10 22 10 0z%22/%3E%3Cpath d=%22M25 40v36M12 76h26%22/%3E%3C/g%3E%3Cg transform=%22translate%28200 150%29 rotate%2825%29%22%3E%3Cpath d=%22M10 0h8v6c0 5 8 9 8 22v46a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V28C2 15 10 11 10 6z%22/%3E%3C/g%3E%3Ccircle cx=%2220%22 cy=%22190%22 r=%225%22/%3E%3Ccircle cx=%22125%22 cy=%22105%22 r=%224%22/%3E%3Ccircle cx=%22215%22 cy=%2295%22 r=%226%22/%3E%3Cpath d=%22M105 215l10-12 8 10zM180 225l7-10 9 6z%22/%3E%3C/svg%3E"),linear-gradient(180deg,#0b1118 0%,#10161c 45%,#0c1823 100%);background-size:auto,auto,auto,240px 240px,auto;background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;background-position:0 0}
+:root[data-theme="dark"] .panel,:root[data-theme="dark"] .card{background:rgba(25,34,43,.86);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+html.photo[data-theme="dark"] body::before{background-image:linear-gradient(rgba(16,22,28,.88),rgba(16,22,28,.88)),url("fond-verre.jpg");background-size:cover;background-position:center;background-repeat:no-repeat}
+@media print{body::before{display:none!important}}
 </style>
 </head>
 <body>
@@ -159,6 +196,7 @@ body.nolog{padding-left:0!important}body.nolog #side,body.nolog header,body.nolo
       </h1>
       <div class="row">
         <div class="lang" role="group" aria-label="Langue / Language">
+          <button id="bAuto" onclick="setLang('auto')" title="Langue du navigateur / Browser language">Auto</button>
           <button id="bFr" onclick="setLang('fr')">FR</button>
           <button id="bEn" onclick="setLang('en')">EN</button>
         </div>
@@ -263,7 +301,13 @@ const I18N = {
   reset_train:'Reset my training', confirm_reset:'Go back to class 0?'
  }
 };
-let lang = (()=>{ try{ const l=localStorage.getItem(LANG_KEY); if(l==='fr'||l==='en') return l; }catch(e){} return (navigator.language||'fr').toLowerCase().startsWith('en')?'en':'fr'; })();
+let langMode = (()=>{ try{ const l=localStorage.getItem(LANG_KEY); if(l==='fr'||l==='en') return l; }catch(e){} return 'auto'; })();
+function detectLang(){
+  const ls=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'fr'];
+  for(const l of ls){ const p=String(l).toLowerCase(); if(p.startsWith('fr')) return 'fr'; if(p.startsWith('en')) return 'en'; }
+  return 'fr';
+}
+let lang = langMode==='auto' ? detectLang() : langMode;
 const T = (k,...a)=>{ const v=I18N[lang][k]; return typeof v==='function'?v(...a):v; };
 
 /* Valeurs stockées en français, affichées selon la langue */
@@ -418,14 +462,16 @@ function applyStatic(){
   document.documentElement.lang=lang; buildNav();
   document.querySelectorAll('[data-i18n]').forEach(e=>{ e.textContent=T(e.dataset.i18n); });
   document.querySelectorAll('[data-i18n-ph]').forEach(e=>{ e.placeholder=T(e.dataset.i18nPh); });
-  $('bFr').classList.toggle('on',lang==='fr');
-  $('bEn').classList.toggle('on',lang==='en');
+  $('bAuto').classList.toggle('on',langMode==='auto');
+  $('bFr').classList.toggle('on',langMode==='fr');
+  $('bEn').classList.toggle('on',langMode==='en');
   const fs=$('fStatus'), cur=fs.value;
   fs.innerHTML=`<option value="">${esc(T('all_status'))}</option>`+Object.keys(STATUS_L.fr).map(k=>`<option value="${k}" ${k===cur?'selected':''}>${esc(statusL(k))}</option>`).join('');
 }
 function setLang(l){
-  lang=l;
-  try{ localStorage.setItem(LANG_KEY,l); }catch(e){}
+  langMode=(l==='fr'||l==='en')?l:'auto';
+  lang=langMode==='auto'?detectLang():langMode;
+  try{ localStorage.setItem(LANG_KEY,langMode); }catch(e){}
   $('fMachine').value='';
   applyStatic();
   if(state.view==='view' && state.id) openTuto(state.id);
@@ -464,8 +510,12 @@ function renderList(){
     <p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
+const PH_SVG='<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M16 5h8v7c0 3 6 6 6 14v10a3 3 0 0 1-3 3H13a3 3 0 0 1-3-3V26c0-8 6-11 6-14z"/><path d="M11 24h18"/></svg>';
+const coverOf=t=>t.cover||((t.steps||[]).find(s=>s.img)||{}).img||'';
 function cardHTML(t){
-  return `<div class="card ${isLocked(t)?'locked':''}" onclick="openTuto('${t.id}')">
+  const cv=coverOf(t);
+  return `<div class="card tcard ${isLocked(t)?'locked':''}" onclick="openTuto('${t.id}')">
+    <div class="cover">${cv?`<img src="${cv}" alt="" loading="lazy">`:PH_SVG}</div>
     <div class="row" style="justify-content:space-between"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span></div>
     <h3>${isLocked(t)?`<span class="tag">${esc(T('locked_tag'))}</span> `:''}${esc(t.title)}</h3>
     <div class="meta"><span>${esc(machineL(t.machine))}</span><span>${esc(t.duration)} ${T('min')}</span><span>${esc(levelL(t.level))}</span><span>${T('steps_n',(t.steps||[]).length)}</span></div>
@@ -500,6 +550,7 @@ function openTuto(id){
       </div>
     </div>
     <div class="panel">
+      ${t.cover?`<img class="tcover" src="${t.cover}" alt="">`:''}
       <div class="row"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span></div>
       <h2 style="margin:8px 0">${esc(t.title)}</h2>
       <div class="meta"><span>${esc(machineL(t.machine))}</span><span>${esc(t.duration)} ${T('min')}</span><span>${esc(levelL(t.level))}</span></div>
@@ -530,7 +581,7 @@ function updProgress(id, notify){
 
 /* ---------- ÉDITION ---------- */
 function blankTuto(){
-  return {id:uid(),title:'',machine:'',category:CATS[1],level:'Facile',duration:30,tools:[],safety:[],steps:[{text:'',warn:'',img:''}],status:'brouillon',updated:Date.now()};
+  return {id:uid(),title:'',cover:'',machine:'',category:CATS[1],level:'Facile',duration:30,tools:[],safety:[],steps:[{text:'',warn:'',img:''}],status:'brouillon',updated:Date.now()};
 }
 function newTuto(){ state.draft=blankTuto(); state.isNew=true; renderEditor(); }
 function editTuto(id){ state.draft=JSON.parse(JSON.stringify(view(tutos.find(t=>t.id===id)))); state.isNew=false; renderEditor(); }
@@ -550,6 +601,7 @@ function renderEditor(){
    <div class="panel">
      <h2 style="margin-top:0">${esc(state.isNew?T('new_title'):T('edit_title'))}</h2>
      <label>${esc(T('f_title'))}</label><input value="${esc(d.title)}" oninput="state.draft.title=this.value" placeholder="${esc(T('ph_title'))}">
+     <div id="coverEd">${coverEdHTML()}</div>
      <div class="row" style="align-items:flex-start">
        <div style="flex:1;min-width:200px"><label>${esc(T('f_machine'))}</label><input list="ml" value="${esc(d.machine)}" oninput="state.draft.machine=this.value" placeholder="${esc(T('ph_machine'))}"><datalist id="ml">${machines().map(m=>`<option value="${esc(m)}">`).join('')}</datalist></div>
        <div style="flex:1;min-width:160px"><label>${esc(T('f_cat'))}</label><select onchange="state.draft.category=this.value">${opt(CATS,d.category,catL)}</select></div>
@@ -594,6 +646,37 @@ function renderStepsEditor(){
 function addStep(){ state.draft.steps.push({text:'',warn:'',img:''}); renderStepsEditor(); }
 function delStep(i){ if(state.draft.steps.length<=1){ state.draft.steps=[{text:'',warn:'',img:''}]; } else state.draft.steps.splice(i,1); renderStepsEditor(); }
 function moveStep(i,dir){ const a=state.draft.steps, j=i+dir; if(j<0||j>=a.length) return; [a[i],a[j]]=[a[j],a[i]]; renderStepsEditor(); }
+function rmPhoto(i){ state.draft.steps[i].img=''; renderStepsEditor(); }
+function readImg(f,max,q,cb){
+  const r=new FileReader();
+  r.onload=()=>{
+    const im=new Image();
+    im.onload=()=>{
+      const k=Math.min(1,max/Math.max(im.width,im.height));
+      const c=document.createElement('canvas'); c.width=Math.round(im.width*k); c.height=Math.round(im.height*k);
+      const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(im,0,0,c.width,c.height);
+      cb(c.toDataURL('image/jpeg',q));
+    };
+    im.onerror=()=>toast(L('Image illisible','Unreadable image'));
+    im.src=r.result;
+  };
+  r.readAsDataURL(f);
+}
+function addPhoto(i,input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  readImg(f,800,0.7,u=>{ state.draft.steps[i].img=u; renderStepsEditor(); });
+}
+function coverEdHTML(){
+  const d=state.draft;
+  return `<label>${L('Image d’illustration (affichée sur la carte, facultatif)','Cover image (shown on the card, optional)')}</label>
+   <div class="row"><input type="file" accept="image/*" style="max-width:320px" onchange="addCover(this)">${d.cover?`<button class="small danger" onclick="rmCover()">${L('Retirer l’image','Remove image')}</button>`:''}</div>
+   ${d.cover?`<img src="${d.cover}" alt="" style="max-width:260px;border-radius:8px;margin-top:8px;display:block">`:''}`;
+}
+function addCover(inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  readImg(f,720,0.75,u=>{ state.draft.cover=u; $('coverEd').innerHTML=coverEdHTML(); });
+}
+function rmCover(){ state.draft.cover=''; $('coverEd').innerHTML=coverEdHTML(); }
 function rmPhoto(i){ state.draft.steps[i].img=''; renderStepsEditor(); }
 function addPhoto(i,input){
   const f=input.files&&input.files[0]; if(!f) return;
@@ -675,13 +758,32 @@ function validateTraining(){ if(settings.cls<1) settings.cls=1; settings.chosen=
 
 const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['jeux','','nav_jeux'],['settings','','nav_set']];
 function buildNav(){
-  $('side').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 4px 4px 12px"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><button class="nb" onclick="toggleNav(false)" aria-label="${L('Fermer le menu','Close menu')}" style="width:auto;padding:6px 8px"><svg viewBox="0 0 24 24" width="1.4em" height="1.4em" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div>${settings.name?`<b style="color:#fff;padding:0 12px 12px">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
+  $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px"><button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button>${isPinned()?'':`<button class="nb ib" onclick="toggleNav(false)" aria-label="${L('Fermer le menu','Close menu')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>`}</div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
    NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
   document.querySelector('header').classList.toggle('big',state.section!=='tutos');
   document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('hidden',state.section!=='tutos'));
 }
-function toggleNav(v){ const o=v===undefined?!$('side').classList.contains('open'):v; $('side').classList.toggle('open',o); $('scrim').classList.toggle('open',o); document.body.classList.toggle('nav-open',o); }
-function go(k){ if(window.innerWidth<=780) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else renderFiches(k); }
+const PIN_KEY='sibelco_navpin';
+let navPin=false; try{ navPin=localStorage.getItem(PIN_KEY)==='1'; }catch(e){}
+const isPinned=()=>navPin&&window.innerWidth>780;
+function toggleNav(v){
+  const o=v===undefined?!$('side').classList.contains('open'):v;
+  $('side').classList.toggle('open',o); $('scrim').classList.toggle('open',o);
+  document.body.classList.toggle('nav-open',o); document.body.classList.toggle('nav-pinned',o&&isPinned());
+}
+function togglePin(){
+  navPin=!navPin; try{ localStorage.setItem(PIN_KEY,navPin?'1':'0'); }catch(e){}
+  toggleNav(true); buildNav();
+}
+/* clic en dehors du menu (ou Échap) : il se ferme, sauf s'il est verrouillé par le cadenas */
+document.addEventListener('click',e=>{
+  if(!$('side').classList.contains('open')||isPinned()) return;
+  if(e.composedPath().some(n=>n&&((n.id==='side')||(n.classList&&n.classList.contains('menu-btn'))))) return;
+  toggleNav(false);
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('side').classList.contains('open')&&!isPinned()) toggleNav(false); });
+window.addEventListener('resize',()=>{ if($('side').classList.contains('open')){ toggleNav(true); buildNav(); } });
+function go(k){ if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else renderFiches(k); }
 function renderSection(){ const v=state.view;
   if(v==='home') renderHome(); else if(v==='settings') renderSettings(); else if(v==='fiches') renderFiches(state.section);
   else if(v==='jeux') renderGame();
@@ -745,7 +847,7 @@ async function doLogin(){
   if(!u||(await hash($('lp').value,u.salt))!==u.pw){ aerr(L('Identifiant ou mot de passe incorrect','Wrong login or password')); return; }
   try{localStorage.setItem(SESS,u.id);}catch(e){} enter(u);
 }
-function enter(u){ settings=u; document.body.classList.remove('nolog'); applyTheme(); applyStatic(); renderHome(); }
+function enter(u){ settings=u; document.body.classList.remove('nolog'); applyTheme(); applyStatic(); if(isPinned()) toggleNav(true); renderHome(); }
 function logout(){
   try{localStorage.removeItem(SESS);}catch(e){}
   settings={name:'',cls:0,chosen:true,trained:0,theme:'auto'}; state.done={}; document.documentElement.removeAttribute('data-theme'); renderLogin();
@@ -763,6 +865,7 @@ function renderSettings(){
    <p class="meta">${esc(clsD(settings.cls))}</p>
    <label>${esc(T('set_name'))}</label><input value="${esc(settings.name)}" oninput="settings.name=this.value;saveSettings();buildNav()">
    <label>${esc(T('set_theme'))}</label><select onchange="settings.theme=this.value;saveSettings();applyTheme()">${[['auto','theme_auto'],['light','theme_light'],['dark','theme_dark']].map(([v,l])=>`<option value="${v}" ${v===settings.theme?'selected':''}>${esc(T(l))}</option>`).join('')}</select>
+   <label>${L('Langue','Language')}</label><select onchange="setLang(this.value)">${[['auto',L('Automatique (langue du navigateur)','Automatic (browser language)')],['fr','Français'],['en','English']].map(([v,t])=>`<option value="${v}" ${v===langMode?'selected':''}>${esc(t)}</option>`).join('')}</select>
    <label>${L('Nouveau mot de passe','New password')}</label><div class="row"><input id="np" type="password" autocomplete="new-password" style="flex:1"><button onclick="changePw()">${L('Changer','Change')}</button></div></div>`+(adm?adminHTML():'');
 }
 function adminHTML(){
@@ -807,13 +910,48 @@ function pickPdf(inp){
   state.fdFile=f; state.fdRm=false; state.fd.file={name:f.name,size:f.size}; renderFicheEditor();
 }
 function rmPdf(){ state.fdFile=null; state.fdRm=true; state.fd.file=null; renderFicheEditor(); }
-async function showPdf(f){
-  try{
-    const b=await idbGet(f.id), box=$('pdfBox'); if(!b||!box) return;
-    const u=URL.createObjectURL(b);
-    box.innerHTML=`<div class="row" style="margin:12px 0"><a class="btn" href="${u}" target="_blank" rel="noopener">${L('Ouvrir le PDF','Open PDF')}</a><a class="btn" href="${u}" download="${esc(f.file.name)}">${L('Télécharger','Download')}</a></div><iframe src="${u}" title="PDF" style="width:100%;height:70vh;border:1px solid var(--line);border-radius:8px"></iframe>`;
-  }catch(e){}
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+let _pdfjs=null;
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(_pdfjs) return _pdfjs;
+  _pdfjs=new Promise((res,rej)=>{
+    const sc=document.createElement('script'); sc.src=PDFJS+'pdf.min.js';
+    sc.onload=()=>{ if(!window.pdfjsLib){ _pdfjs=null; return rej(new Error('pdfjs')); } pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.js'; res(pdfjsLib); };
+    sc.onerror=()=>{ _pdfjs=null; rej(new Error('pdfjs')); };
+    document.head.appendChild(sc);
+  });
+  return _pdfjs;
 }
+async function showPdf(f){
+  let b,box; try{ b=await idbGet(f.id); box=$('pdfBox'); }catch(e){} if(!b||!box) return;
+  const u=URL.createObjectURL(b);
+  box.innerHTML=`<div class="row noprint" style="margin:12px 0"><a class="btn" href="${u}" target="_blank" rel="noopener">${L('Ouvrir le PDF','Open PDF')}</a><a class="btn" href="${u}" download="${esc(f.file.name)}">${L('Télécharger','Download')}</a></div><div id="pdfPages" class="pdfpages"><div class="meta">${L('Chargement du PDF…','Loading PDF…')}</div></div>`;
+  const pages=$('pdfPages');
+  const fallback=()=>{ if(pages.isConnected) pages.innerHTML=`<iframe src="${u}" title="PDF" style="width:100%;height:90vh;border:1px solid var(--line);border-radius:8px"></iframe>`; };
+  try{
+    const lib=await loadPdfJs();
+    const doc=lib.getDocument({data:new Uint8Array(await b.arrayBuffer())});
+    const pdf=await Promise.race([doc.promise,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),20000))]);
+    if(!pages.isConnected) return;
+    pages.innerHTML='';
+    const io=new IntersectionObserver(es=>es.forEach(en=>{ if(en.isIntersecting){ io.unobserve(en.target); en.target._render(); } }),{rootMargin:'900px 0px'});
+    for(let n=1;n<=pdf.numPages;n++){
+      const pg=await pdf.getPage(n); if(!pages.isConnected) return;
+      const vp=pg.getViewport({scale:1});
+      const div=document.createElement('div'); div.className='pdfpg'; div.style.aspectRatio=vp.width+' / '+vp.height;
+      const cv=document.createElement('canvas'); div.appendChild(cv); pages.appendChild(div);
+      div._render=async()=>{
+        const w=div.clientWidth||pages.clientWidth||800;
+        const v=pg.getViewport({scale:(w/vp.width)*Math.min(window.devicePixelRatio||1,2)});
+        cv.width=Math.floor(v.width); cv.height=Math.floor(v.height);
+        try{ await pg.render({canvasContext:cv.getContext('2d'),viewport:v}).promise; }catch(e){}
+      };
+      io.observe(div);
+    }
+  }catch(e){ fallback(); }
+}
+
 
 
 function renderLocked(raw,t){
