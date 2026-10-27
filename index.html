@@ -2,8 +2,49 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<!--
+============================================================================
+ TUTOS MAINTENANCE - TRIEURS OPTIQUES VERRE (Sibelco Reims)
+ Guide de lecture du fichier index.html
+============================================================================
+ C'est une application web "tout-en-un" (PWA) : TOUT le code est dans CE fichier.
+ Elle fonctionne sans serveur et sans base de données : les données sont gardées
+ dans le navigateur de chaque appareil.
+
+ FICHIERS DU PROJET (à mettre ensemble dans le même dossier) :
+   index.html            -> ce fichier : page, styles (CSS) et programme (JavaScript)
+   sw.js                 -> "service worker" : garde l'appli en cache pour qu'elle marche hors connexion
+   manifest.webmanifest  -> carte d'identité de l'appli (nom, couleurs, icônes) pour l'installer comme une appli
+   icon-192.png / icon-512.png -> logo Sibelco : icône de l'appli ET logo en haut à gauche
+   fond-verre.jpg        -> (facultatif) photo de fond ; si le fichier existe il remplace le motif de verre
+
+ LES 3 PARTIES DE CE FICHIER :
+   1. la balise style : l'apparence (couleurs, cartes, boutons, menu, mode sombre...)
+   2. la balise body  : la structure fixe (bandeau du haut, menu latéral, zone #app)
+   3. la balise script: le cerveau. Il "dessine" les pages en remplissant la zone #app.
+
+ OU SONT STOCKEES LES DONNEES (dans le navigateur, par appareil) :
+   localStorage  : tutoriels, fiches, comptes, scores, langue, thème, menu épinglé
+   IndexedDB     : les gros fichiers (PDF et PowerPoint ajoutés aux fiches)
+   => Pour partager des tutoriels entre appareils : bouton Exporter / Importer (fichier .json).
+   => Vider les données du navigateur efface tout : pensez à exporter régulièrement.
+
+ COMMENT SONT FAITES LES ILLUSTRATIONS (résumé, détails plus bas dans le code) :
+   a) Les pictogrammes (bouteille, clé, livre...) sont des petits dessins SVG
+      (de simples traits) définis dans la liste "const ICO" du script.
+   b) Les fonds colorés des tuiles/cartes sont des dégradés CSS (classes ".cover.c-xxx").
+   c) Les photos que vous ajoutez vous-même sont réduites puis stockées dans la fiche.
+   d) Les pièces du jeu "Trieur" sont dessinées au pinceau (canvas) dans la fonction gItem.
+   e) Le motif de verre en filigrane sur le fond est un SVG intégré dans le CSS.
+============================================================================
+-->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tutos Maintenance – Tri optique verre</title>
+<!--
+ PWA : ces lignes relient la page au manifest (nom, couleurs, icônes) pour pouvoir
+ "installer" l'appli sur un téléphone / PC. theme-color = couleur de la barre du navigateur.
+ apple-touch-icon = icône utilisée sur iPhone/iPad.
+-->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0a2f5a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -12,6 +53,20 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <style>
+/*
+ ===================== 1. APPARENCE (CSS) =====================
+ Toute la feuille de style est dans la balise style. Les couleurs sont stockées dans des "variables"
+ (--bg, --card, --text...) : pour changer une couleur dans TOUTE l'appli, on change la variable.
+
+ VARIABLES DE COULEUR (thème CLAIR par défaut).
+   --bg     : fond de la page          --card  : fond des cartes / panneaux
+   --text   : couleur du texte         --muted : texte secondaire (gris)
+   --line   : traits et bordures       --brand : bleu foncé du bandeau et du menu
+   --accent : bleu des boutons         --ok    : vert (validé / étape faite)
+   --warn-* : encadrés jaunes d'avertissement   --danger-* : encadrés rouges de sécurité
+ Les 3 premières lignes (box-sizing, padding-top/bottom) servent à laisser la place
+ aux encoches / barres système des téléphones (safe-area).
+*/
 :root{
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -20,6 +75,10 @@
   --brand:#0a2f5a;--accent:#0a5aa8;--accent-text:#ffffff;--ok:#1a8a4a;--warn-bg:#fff4d6;--warn-line:#e0a800;--warn-text:#5c4300;
   --danger-bg:#fde8e8;--danger-line:#d33;--danger-text:#7a1414;
 }
+/*
+ THEME SOMBRE AUTOMATIQUE : si l'appareil est en mode sombre, on redéfinit les variables.
+ ":root:not([data-theme="light"])" = "sauf si l'utilisateur a forcé le thème clair".
+*/
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#10161c;--card:#19222b;--text:#e8edf2;--muted:#9aa9b6;--line:#2c3a47;
@@ -27,11 +86,18 @@
     --danger-bg:#3d1717;--danger-line:#e66;--danger-text:#ffb3b3;
   }
 }
+/*
+ THEME SOMBRE FORCE : appliqué quand l'utilisateur choisit "Sombre" dans Paramètres
+ (le script ajoute l'attribut data-theme="dark" sur la balise <html>, voir applyTheme()).
+*/
 :root[data-theme="dark"]{
   --bg:#10161c;--card:#19222b;--text:#e8edf2;--muted:#9aa9b6;--line:#2c3a47;
   --brand:#0a2540;--accent:#5aaeea;--accent-text:#04121f;--ok:#4cc57f;--warn-bg:#3a2f0b;--warn-line:#c99a00;--warn-text:#ffe29a;
   --danger-bg:#3d1717;--danger-line:#e66;--danger-text:#ffb3b3;
 }
+/*
+ --- Base de la page : police système, fond, texte, bandeau fixe en haut (header) ---
+*/
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
@@ -41,6 +107,9 @@ header{background:var(--brand);color:#fff;border-bottom:3px solid #2d8fe0;positi
 h1{font-size:1.15rem;margin:0}
 h1 small{display:block;font-weight:400;color:#c5d6ea;font-size:.8rem}
 header button.primary,header .lang button.on{background:#2d8fe0;border-color:#2d8fe0;color:#fff}
+/*
+ --- Boutons : un style commun ; .primary = bouton bleu plein ; .danger = rouge ; .small = petit ---
+*/
 button,.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer}
 button:hover{border-color:var(--accent)}
 button.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
@@ -55,6 +124,9 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
 .chip{border-radius:999px;padding:4px 12px;font-size:.85rem}
 .chip.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+/*
+ --- Grille de cartes (liste des tutoriels et des fiches) : autant de colonnes que la place le permet ---
+*/
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:6px}
 .card:hover{border-color:var(--accent)}
@@ -63,12 +135,18 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 .tag{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 .tag.valide{color:var(--ok);border-color:var(--ok)}
 .tag.avalider{color:var(--warn-line);border-color:var(--warn-line)}
+/*
+ --- .panel = grand bloc blanc arrondi ; .box = encadré jaune (attention) ; .box.danger = encadré rouge (sécurité) ---
+*/
 .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
 .box{border-left:4px solid var(--warn-line);background:var(--warn-bg);color:var(--warn-text);padding:10px 12px;border-radius:6px;margin:10px 0}
 .box.danger{border-left-color:var(--danger-line);background:var(--danger-bg);color:var(--danger-text)}
 .box ul{margin:4px 0 0 18px;padding:0}
 .progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
 .progress>div{height:100%;background:var(--ok);width:0;transition:width .2s}
+/*
+ --- Étapes d'un tutoriel : rond numéroté .num + texte. Classe .done = étape cochée (rond vert, texte barré) ---
+*/
 .step{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
 .step:first-of-type{border-top:0}
 .num{flex:0 0 32px;height:32px;border-radius:50%;background:var(--accent);color:var(--accent-text);display:grid;place-items:center;font-weight:700}
@@ -89,14 +167,32 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 .lang button:first-child{border-radius:8px 0 0 8px}
 .lang button:last-child{border-radius:0 8px 8px 0;margin-left:-1px}
 .lang button.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
+/*
+ --- IMPRESSION / PDF : on cache le menu, le bandeau et les boutons pour n'imprimer que le contenu ---
+*/
 @media print{
   header,.noprint,.toast{display:none!important}
   body{background:#fff;color:#000}
   .panel,.card{border-color:#999}
 }
+/*
+ --- Logo Sibelco en haut à gauche : fichier icon-512.png, fond blanc pour rester lisible sur le bandeau bleu ---
+*/
 .brand{display:flex;align-items:center;gap:12px}
 .logo{height:40px;width:auto;background:#fff;padding:4px 8px;border-radius:6px}
 
+/*
+ ILLUSTRATION : MOTIF DE VERRE EN FILIGRANE SUR LE FOND
+ Le fond de page est un petit SVG (bouteille, pot, verre...) répété en mosaïque.
+ Il est écrit directement dans le CSS sous forme d'adresse "data:image/svg+xml,..." :
+   - il n'y a donc AUCUN fichier image à fournir ;
+   - dans cette adresse, certains caractères sont codés : %3C = "<", %3E = ">", %22 = guillemet, %23 = "#" ;
+   - la couleur des traits est stroke=%230a5aa8 (= #0a5aa8) et la transparence stroke-opacity=0.10 ;
+   - width/height=240 = taille d'une tuile du motif ; chaque <g transform="translate(x y)"> = un objet placé.
+ POUR CHANGER : modifiez la couleur (%230a5aa8), l'opacité (0.10 = discret, 0.25 = marqué),
+ ou remplacez les <path> par d'autres dessins. Le mode sombre a sa propre copie du motif (plus bas).
+ Astuce : pour retirer le motif, supprimez simplement la règle body::before.
+*/
 /* Décor : motifs de verre (bouteille, pot, verre) en filigrane sur le fond */
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22 viewBox=%220 0 240 240%22 fill=%22none%22 stroke=%22%230a5aa8%22 stroke-opacity=%220.10%22 stroke-width=%222%22 stroke-linejoin=%22round%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%2830 20%29%22%3E%3Cpath d=%22M20 0h10v8c0 6 10 12 10 28v62a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6V36C10 20 20 14 20 8z%22/%3E%3Cpath d=%22M14 56h22M14 78h22%22/%3E%3C/g%3E%3Cg transform=%22translate%28140 30%29%22%3E%3Cpath d=%22M6 0h38v10H6z%22/%3E%3Cpath d=%22M10 10h30c4 6 6 12 6 22v40a8 8 0 0 1-8 8H12a8 8 0 0 1-8-8V32c0-10 2-16 6-22z%22/%3E%3C/g%3E%3Cg transform=%22translate%2870 140%29%22%3E%3Cpath d=%22M10 0h30c0 22-4 36-15 40C14 36 10 22 10 0z%22/%3E%3Cpath d=%22M25 40v36M12 76h26%22/%3E%3C/g%3E%3Cg transform=%22translate%28200 150%29 rotate%2825%29%22%3E%3Cpath d=%22M10 0h8v6c0 5 8 9 8 22v46a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V28C2 15 10 11 10 6z%22/%3E%3C/g%3E%3Ccircle cx=%2220%22 cy=%22190%22 r=%225%22/%3E%3Ccircle cx=%22125%22 cy=%22105%22 r=%224%22/%3E%3Ccircle cx=%22215%22 cy=%2295%22 r=%226%22/%3E%3Cpath d=%22M105 215l10-12 8 10zM180 225l7-10 9 6z%22/%3E%3C/svg%3E");background-size:240px 240px}
 @media (prefers-color-scheme: dark){
@@ -104,12 +200,23 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 }
 @media print{body::before{display:none}}
 
+/*
+ ILLUSTRATION : PHOTO DE FOND (facultative)
+ Le script (dernières lignes) essaie de charger "fond-verre.jpg". Si le fichier existe, il ajoute la classe
+ "photo" sur <html> et cette règle prend le dessus sur le motif. Le dégradé rgba(...,.88) est un "voile" blanc
+ (ou sombre) à 88 % posé sur la photo pour que le texte reste lisible : baissez .88 pour voir plus la photo.
+ POUR CHANGER LA PHOTO : remplacez simplement le fichier fond-verre.jpg (même nom) dans le dossier.
+*/
 /* Photo de fond : si le fichier fond-verre.jpg existe, il remplace le motif (voile = lisibilité) */
 html.photo body::before{background-image:linear-gradient(rgba(242,245,249,.88),rgba(242,245,249,.88)),url("fond-verre.jpg");background-size:cover;background-position:center}
 @media (prefers-color-scheme: dark){
   html.photo:not([data-theme="light"]) body::before{background-image:linear-gradient(rgba(16,22,28,.88),rgba(16,22,28,.88)),url("fond-verre.jpg")}
 }
 
+/*
+ --- Menu latéral (#side) : caché à gauche, il glisse quand on clique sur le bouton ☰ (classe .open).
+     Les badges .cls0 à .cls4 sont les pastilles de couleur des 5 classes d'utilisateur. ---
+*/
 /* Menu latéral + classes */
 #side{position:fixed;top:0;bottom:0;left:0;width:220px;background:var(--card);border-right:1px solid var(--line);z-index:30;padding:calc(12px + env(safe-area-inset-top,0px)) 10px calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:4px;overflow:auto}
 #side .nb{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px}
@@ -159,19 +266,79 @@ header.big .menu-btn{font-size:1rem;padding:5px 8px}
 .panel{padding:14px}
 .tiles{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
 .tiles .card h3{font-size:.95rem}
+/*
+ ILLUSTRATIONS DES CARTES ET TUILES (zone .cover)
+ Chaque carte/tuile a en haut un bandeau ".cover" de proportion fixe (aspect-ratio 2/1).
+ Il peut contenir 2 choses :
+   1) une PHOTO (<img>) : elle remplit tout le bandeau (object-fit:cover = recadrée sans déformation) ;
+   2) à défaut, un PICTOGRAMME <svg> blanc semi-transparent (34 % de la taille), posé sur un dégradé de couleur.
+ Le bandeau de base est un dégradé bleu (linear-gradient 135deg, #0a2f5a -> #2d8fe0).
+ Pour changer la taille du pictogramme : width/height de ".card .cover svg" ;
+ son épaisseur de trait : stroke-width ; sa transparence : stroke-opacity.
+*/
 /* Cartes de tutoriel avec image d'illustration */
 .card.tcard{overflow:hidden}
 .card .cover{margin:-14px -14px 4px;aspect-ratio:2/1;overflow:hidden;background:linear-gradient(135deg,#0a2f5a,#2d8fe0);display:grid;place-items:center}
 .card .cover img{width:100%;height:100%;object-fit:cover;display:block}
-.card .cover svg{width:34%;height:34%;stroke:#fff;stroke-opacity:.55;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.card .cover svg{width:34%;height:34%;stroke:#fff;stroke-opacity:.6;fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
 .tcover{width:100%;max-height:320px;object-fit:cover;border-radius:10px;margin-bottom:10px;display:block}
+
+/*
+ COULEUR DU FOND DE CHAQUE ILLUSTRATION
+ Le script écrit class="cover c-xxx" où xxx = nom de la rubrique ou du jeu (constructeur, consommables,
+ presentation, quiz, memory, vf, order...). Chaque ligne ci-dessous donne le dégradé de cette rubrique.
+ POUR CHANGER UNE COULEUR : modifiez les 2 codes couleur (#12385e = début, #3aa0c9 = fin).
+ POUR AJOUTER UNE NOUVELLE RUBRIQUE / UN NOUVEAU JEU : ajoutez une ligne ".cover.c-monnom{background:linear-gradient(135deg,#xxxxxx,#yyyyyy)}"
+ (outil pratique pour choisir des couleurs : n'importe quel "color picker" en ligne).
+*/
+/* Dégradés des illustrations par rubrique / jeu (la couleur change selon c-xxx) */
+.cover.c-constructeur{background:linear-gradient(135deg,#12385e,#3aa0c9)}
+.cover.c-consommables{background:linear-gradient(135deg,#0f5c4d,#2fb59a)}
+.cover.c-presentation{background:linear-gradient(135deg,#4a2a7a,#9a6be0)}
+.cover.c-jeux,.cover.c-order{background:linear-gradient(135deg,#8a3b12,#e8943a)}
+.cover.c-quiz{background:linear-gradient(135deg,#7a1f4a,#e0638a)}
+.cover.c-memory{background:linear-gradient(135deg,#0f5c4d,#2fb59a)}
+.cover.c-vf{background:linear-gradient(135deg,#1a6b3a,#4cc57f)}
+.tiles .card .cover{aspect-ratio:5/2}
+/*
+ --- Jeux : .qopt = bouton de réponse (vert .good / rouge .bad après réponse), .mcard = carte du jeu Mémoire,
+     .ordlist = liste des étapes remises dans l'ordre ---
+*/
+/* Jeux : quiz, vrai/faux, mémoire, remettre dans l'ordre */
+.qbar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.qbar>div{height:100%;background:var(--accent);transition:width .1s linear}
+.qopt{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px}
+.qopt.good{border-color:var(--ok);background:rgba(26,138,74,.2)}
+.qopt.bad{border-color:var(--danger-line);background:var(--danger-bg);color:var(--danger-text)}
+.qopt:disabled{opacity:1;cursor:default}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:460px;margin:0 auto}
+.mcard{aspect-ratio:1/1.05;padding:4px;font-size:1.7rem;font-weight:700;display:grid;place-items:center;background:var(--accent);color:var(--accent-text);line-height:1.1}
+.mcard.up{background:var(--card);color:var(--text);border-color:var(--accent)}
+.mcard.txt.up{font-size:.78rem;word-break:break-word}
+.mcard.done{background:rgba(26,138,74,.22);border-color:var(--ok)}
+.mcard:disabled{opacity:1;cursor:default}
+.ordlist{margin:8px 0;padding-left:0;list-style-position:inside}
+.ordlist li{background:rgba(26,138,74,.16);border-left:4px solid var(--ok);padding:6px 8px;margin:4px 0;border-radius:4px}
+/*
+ --- Affichage d'un PDF dans une fiche : chaque page est dessinée dans un <canvas> (voir showPdf) ---
+*/
 /* PDF affiché en entier (toutes les pages, sans cadre défilant) */
 .pdfpages{display:flex;flex-direction:column;gap:10px;align-items:center}
 .pdfpg{width:100%;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 1px 5px rgba(0,0,0,.18)}
 .pdfpg canvas{width:100%;height:auto;display:block;border-radius:6px}
+/* Aperçu PowerPoint (fiches de présentation) : miniature + une carte de texte par diapositive */
+.pptthumb{max-width:420px;width:100%;border-radius:8px;border:1px solid var(--line);display:block;margin:8px 0}
+.pptslide{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:8px 12px;margin:8px 0;background:var(--bg)}
+.pptslide b{display:block;font-size:.78rem;color:var(--muted);margin-bottom:2px}
 body.nav-open .menu-btn{display:none!important}
+/*
+ --- body.nolog : appliquée quand personne n'est connecté -> on cache menu et bandeau, il ne reste que l'écran de connexion ---
+*/
 body.nolog{padding-left:0!important}body.nolog #side,body.nolog header,body.nolog #scrim{display:none!important}
 
+/*
+ --- Mode sombre : fond bleu nuit en dégradés + motif de verre, cartes légèrement transparentes (effet "verre dépoli" avec blur) ---
+*/
 /* Fond du mode sombre : dégradés bleu nuit + motifs de verre */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) body::before{background-image:radial-gradient(900px 520px at 12% -8%,rgba(45,143,224,.22),transparent 65%),radial-gradient(800px 520px at 105% 105%,rgba(10,90,168,.28),transparent 60%),radial-gradient(520px 380px at 85% 6%,rgba(90,174,234,.09),transparent 70%),url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22240%22 height=%22240%22 viewBox=%220 0 240 240%22 fill=%22none%22 stroke=%22%235aaeea%22 stroke-opacity=%220.12%22 stroke-width=%222%22 stroke-linejoin=%22round%22 stroke-linecap=%22round%22%3E%3Cg transform=%22translate%2830 20%29%22%3E%3Cpath d=%22M20 0h10v8c0 6 10 12 10 28v62a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6V36C10 20 20 14 20 8z%22/%3E%3Cpath d=%22M14 56h22M14 78h22%22/%3E%3C/g%3E%3Cg transform=%22translate%28140 30%29%22%3E%3Cpath d=%22M6 0h38v10H6z%22/%3E%3Cpath d=%22M10 10h30c4 6 6 12 6 22v40a8 8 0 0 1-8 8H12a8 8 0 0 1-8-8V32c0-10 2-16 6-22z%22/%3E%3C/g%3E%3Cg transform=%22translate%2870 140%29%22%3E%3Cpath d=%22M10 0h30c0 22-4 36-15 40C14 36 10 22 10 0z%22/%3E%3Cpath d=%22M25 40v36M12 76h26%22/%3E%3C/g%3E%3Cg transform=%22translate%28200 150%29 rotate%2825%29%22%3E%3Cpath d=%22M10 0h8v6c0 5 8 9 8 22v46a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V28C2 15 10 11 10 6z%22/%3E%3C/g%3E%3Ccircle cx=%2220%22 cy=%22190%22 r=%225%22/%3E%3Ccircle cx=%22125%22 cy=%22105%22 r=%224%22/%3E%3Ccircle cx=%22215%22 cy=%2295%22 r=%226%22/%3E%3Cpath d=%22M105 215l10-12 8 10zM180 225l7-10 9 6z%22/%3E%3C/svg%3E"),linear-gradient(180deg,#0b1118 0%,#10161c 45%,#0c1823 100%);background-size:auto,auto,auto,240px 240px,auto;background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat;background-position:0 0}
@@ -186,6 +353,14 @@ html.photo[data-theme="dark"] body::before{background-image:linear-gradient(rgba
 </head>
 <body>
 
+<!--
+ ===================== 2. STRUCTURE FIXE DE LA PAGE =====================
+ BANDEAU DU HAUT : bouton menu, logo + titre, choix de langue FR/EN et boutons
+ (Nouveau / Exporter / Importer) qui ne s'affichent que dans la section "Tutos maintenance",
+ puis la barre de recherche et les filtres.
+ Les textes "data-i18n" sont remplis par le script selon la langue (voir I18N plus bas).
+ "noprint" = élément caché à l'impression.
+-->
 <header class="noprint">
   <div class="wrap">
     <div class="top">
@@ -213,14 +388,46 @@ html.photo[data-theme="dark"] body::before{background-image:linear-gradient(rgba
   </div>
 </header>
 
+<!--
+ MENU LATERAL : vide au départ, rempli par la fonction buildNav() du script.
+ #scrim = voile sombre derrière le menu sur téléphone (un clic dessus ferme le menu).
+-->
 <nav id="side" class="noprint"></nav><div id="scrim" onclick="toggleNav(false)"></div>
+<!--
+ ZONE PRINCIPALE #app : c'est ici que le script affiche chaque page (accueil, liste de tutos, fiche, jeu...).
+ À chaque changement de page, le contenu de #app est entièrement remplacé (innerHTML).
+ Le "toast" ci-dessous est la petite bulle de message qui apparaît en bas ("Tutoriel enregistré"...).
+-->
 <main class="wrap" id="app"></main>
 <div class="toast" id="toast"></div>
 
+<!--
+ ===================== 3. PROGRAMME (JavaScript) =====================
+ Plan du script :
+   - Traductions FR/EN (I18N)               - Tutoriels d'exemple (SEED) et leur traduction
+   - État et stockage (load/save)           - Liste des tutos, lecture, édition, export/import
+   - Icônes et illustrations (ICO)          - Classes d'utilisateur, menu, accueil
+   - Comptes / connexion / paramètres       - PDF et PowerPoint (IndexedDB, pdf.js, JSZip)
+   - Fiches (constructeur, consommables, présentation)
+   - Jeux : Trieur Sibelco (canvas), Quiz, Vrai/Faux, Mémoire, Dans l'ordre
+   - Démarrage : boot()
+-->
 <script>
+/*
+ Clés de stockage localStorage. Le "v1" permet de changer de version plus tard sans mélanger les anciennes données.
+   KEY      = liste des tutoriels        LANG_KEY = langue choisie (fr / en)
+*/
 const KEY = 'sibelco_tutos_v1';
 const LANG_KEY = 'sibelco_lang';
 
+/*
+ TRADUCTIONS DE L'INTERFACE
+ Chaque texte de l'appli existe en français (fr) et en anglais (en) sous une même clé.
+ Certaines valeurs sont des fonctions (ex. steps_n) parce que le texte dépend d'un nombre.
+ POUR MODIFIER UN TEXTE : changez-le ici, dans les 2 langues.
+ POUR AJOUTER UN TEXTE : créez la même clé dans fr ET en, puis utilisez T('ma_cle') dans le code,
+ ou data-i18n="ma_cle" sur un élément HTML fixe.
+*/
 /* ---------- TRADUCTIONS DE L'INTERFACE ---------- */
 const I18N = {
  fr:{
@@ -300,9 +507,20 @@ const I18N = {
   reset_train:'Reset my training', confirm_reset:'Go back to class 0?'
  }
 };
+/*
+ Langue courante : lue dans localStorage, sinon français par défaut.
+*/
 let lang = (()=>{ try{ const l=localStorage.getItem(LANG_KEY); if(l==='fr'||l==='en') return l; }catch(e){} return 'fr'; })();
+/*
+ T('cle') = renvoie le texte de la clé dans la langue courante (et appelle la fonction si c'est une fonction).
+*/
 const T = (k,...a)=>{ const v=I18N[lang][k]; return typeof v==='function'?v(...a):v; };
 
+/*
+ CATEGORIES, NIVEAUX, STATUTS : les valeurs sont TOUJOURS enregistrées en français (pour rester compatibles),
+ et on les traduit seulement à l'affichage grâce aux petites fonctions catL / levelL / statusL / machineL.
+ POUR AJOUTER UNE CATEGORIE : l'ajouter dans CATS et sa traduction dans CAT_EN.
+*/
 /* Valeurs stockées en français, affichées selon la langue */
 const CATS = ['Sécurité','Nettoyage','Contrôle','Réglage / Calibration','Remplacement','Dépannage'];
 const CAT_EN = {'Sécurité':'Safety','Nettoyage':'Cleaning','Contrôle':'Inspection','Réglage / Calibration':'Adjustment / Calibration','Remplacement':'Replacement','Dépannage':'Troubleshooting'};
@@ -315,6 +533,18 @@ const levelL = l => lang==='en'?(LEVEL_EN[l]||l):l;
 const statusL = s => STATUS_L[lang][s]||'';
 const machineL = m => lang==='en'?(MACHINE_TR[m]||m):m;
 
+/*
+ TUTORIELS D'EXEMPLE
+ Structure d'un tutoriel (un objet) :
+   id        identifiant unique              title     titre            machine   modèle / ligne
+   category  une valeur de CATS              level     une valeur de LEVELS      duration  minutes
+   tools     liste du matériel (texte)       safety    liste des consignes de sécurité
+   status    'brouillon' | 'avalider' | 'valide'
+   cover     image de couverture (texte base64) - facultatif
+   steps     liste d'étapes : { text:'instruction', warn:'avertissement', img:'photo en base64' }
+   updated   date de dernière modification (0 = jamais modifié = exemple d'origine)
+ TOBL = la formation obligatoire : la terminer (toutes les étapes cochées) débloque la classe 1.
+*/
 /* ---------- TUTORIELS D'EXEMPLE ---------- */
 const TOBL={id:'tobl',mandatory:true,title:'FORMATION OBLIGATOIRE – Les bases du trieur optique verre',machine:'Tous trieurs',category:'Sécurité',level:'Obligatoire',duration:30,
  tools:['EPI : lunettes, gants, chaussures de sécurité, protection auditive','Fiche constructeur de la machine'],
@@ -327,6 +557,9 @@ const TOBL={id:'tobl',mandatory:true,title:'FORMATION OBLIGATOIRE – Les bases 
   {text:'Règles d\'or : consigner avant d\'intervenir, ne jamais souffler à l\'air comprimé sur les optiques, mains hors de la zone d\'éjection, aucun solvant non validé.',warn:'',img:''},
   {text:'Lire le tutoriel LOTO et la fiche constructeur de votre trieur, puis noter qui est le référent à appeler.',warn:'Cochez toutes les étapes : la classe 1 se débloque automatiquement.',img:''}
  ],status:'avalider',updated:0};
+/*
+ SEED = les tutoriels fournis au premier lancement (copiés dans le localStorage). Ensuite chacun les modifie à sa guise.
+*/
 const SEED = [
  {id:'t1',title:'Consignation avant intervention (LOTO)',machine:'Tous trieurs',category:'Sécurité',level:'Obligatoire',duration:15,
   tools:['Cadenas personnel','Étiquettes de consignation','Fiche de consignation du site'],
@@ -370,6 +603,10 @@ const SEED = [
   ],status:'brouillon',updated:0}
 
 ,TOBL];
+/*
+ Version anglaise des exemples. Elle ne s'affiche que tant que le tutoriel n'a jamais été modifié (updated===0) :
+ dès qu'on le modifie, le texte saisi par l'utilisateur est conservé tel quel.
+*/
 /* Traductions anglaises des exemples (affichées tant qu'ils ne sont pas modifiés) */
 const SEED_EN = {
  tobl:{title:'MANDATORY TRAINING – Optical glass sorter basics',machine:'All sorters',
@@ -424,6 +661,9 @@ const SEED_EN = {
    ['Run a test with known glass and check the sorting quality (rejected / accepted).','']
   ]}
 };
+/*
+ view(t) = renvoie la version du tutoriel à AFFICHER dans la langue courante (traduction des exemples non modifiés).
+*/
 function view(t){
   if(lang==='en' && t.updated===0 && SEED_EN[t.id]){
     const e=SEED_EN[t.id];
@@ -433,23 +673,47 @@ function view(t){
   return t;
 }
 
+/*
+ ETAT DE L'APPLICATION
+   tutos = la liste des tutoriels en mémoire (chargée depuis le localStorage)
+   state = où l'on se trouve : view (page), section (rubrique du menu), id (tutoriel ouvert),
+           cat (filtre catégorie), draft (tutoriel en cours d'édition), done (étapes cochées)
+*/
 /* ---------- ÉTAT ---------- */
 let tutos = load(); if(!tutos.some(t=>t.id==='tobl')) tutos.unshift(JSON.parse(JSON.stringify(TOBL)));
 let state = {view:'home', section:'home', id:null, cat:'', draft:null, done:{}};
 
+/*
+ load() : relit les tutoriels enregistrés ; s'il n'y en a pas (premier lancement), prend une copie de SEED.
+*/
 function load(){
   try{ const r = localStorage.getItem(KEY); if(r){ const d = JSON.parse(r); if(Array.isArray(d)) return d; } }catch(e){}
   return JSON.parse(JSON.stringify(SEED));
 }
+/*
+ save() : enregistre la liste des tutoriels dans le localStorage (message d'erreur si le stockage est plein :
+ les photos prennent de la place, d'où l'intérêt d'exporter en .json).
+*/
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(tutos)); }
   catch(e){ toast(T('storage_full')); }
 }
+/*
+ PETITS OUTILS
+   esc(texte)  protège le texte avant de l'insérer dans la page (empêche d'injecter du HTML par erreur)
+   $('id')     raccourci pour document.getElementById('id')
+   uid()       fabrique un identifiant unique (date + hasard)
+   toast(msg)  affiche la petite bulle de message en bas de l'écran pendant 2,6 secondes
+*/
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $ = id => document.getElementById(id);
 const uid = () => 't'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
 
+/*
+ applyStatic() remplit tous les textes fixes (data-i18n) et reconstruit le menu et le filtre de statut.
+ setLang('fr'|'en') change la langue, la mémorise et réaffiche la page courante.
+*/
 /* ---------- LANGUE ---------- */
 function applyStatic(){
   document.documentElement.lang=lang; buildNav();
@@ -470,6 +734,10 @@ function setLang(l){
   else renderSection();
 }
 
+/*
+ LISTE DES TUTORIELS : filtres (recherche texte, machine, statut, catégorie) puis une carte par tutoriel.
+ La recherche regarde le titre, la machine, la catégorie, le matériel et le texte des étapes.
+*/
 /* ---------- LISTE ---------- */
 function machines(){ return [...new Set(tutos.map(t=>machineL(view(t).machine)).filter(Boolean))].sort(); }
 function refreshMachineFilter(){
@@ -501,8 +769,47 @@ function renderList(){
     <p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
-const PH_SVG='<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M16 5h8v7c0 3 6 6 6 14v10a3 3 0 0 1-3 3H13a3 3 0 0 1-3-3V26c0-8 6-11 6-14z"/><path d="M11 24h18"/></svg>';
+/*
+ ===================== ILLUSTRATIONS : LES PICTOGRAMMES (SVG) =====================
+ Chaque pictogramme est un dessin vectoriel SVG dans une grille de 24 x 24 :
+   - on ne met ici que le CONTENU du SVG (les traits) ; l'enveloppe <svg viewBox="0 0 24 24"> est ajoutée par icoSVG().
+   - <path d="..."> = un tracé : M x y = se placer ; L / h / v = ligne ; C / Q / a = courbes ; z = fermer.
+   - <circle cx cy r> = cercle ; <rect x y width height rx> = rectangle (rx = coins arrondis).
+   - La couleur et l'épaisseur du trait viennent du CSS (".card .cover svg" : blanc, stroke-width 1.3).
+ LA CLE (bottle, tutos, constructeur...) = le nom de la rubrique ou du jeu :
+   tutos / constructeur / consommables / presentation / jeux = les 5 tuiles de l'accueil et du menu ;
+   quiz / memory / vf / order = les jeux ; bottle = l'icône par défaut (tutoriel sans photo).
+ POUR CHANGER UN PICTOGRAMME : remplacez le contenu entre apostrophes par un autre tracé SVG 24x24
+   (sources gratuites de pictogrammes : lucide.dev ou tabler-icons.io -> bouton "Copy SVG" -> ne gardez que
+   les <path>, <circle>, <rect> à l'intérieur du <svg>).
+ POUR AJOUTER UN PICTOGRAMME : ajoutez une ligne  monnom:'<path d="..."/>'  puis utilisez icoSVG('monnom').
+ POUR UN PICTOGRAMME DIFFERENT SUR UNE RUBRIQUE : changez simplement le dessin de la clé correspondante.
+*/
+const ICO={
+ bottle:'<path d="M10 2h4v4c0 1.2 2 2 2 4.5V20a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-9.5C8 8 10 7.2 10 6z"/><path d="M8 14h8"/>',
+ tutos:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+ constructeur:'<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>',
+ consommables:'<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+ presentation:'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8M7 12l3-3 3 2 4-4"/>',
+ jeux:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+ quiz:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.6 2.4c-.7.4-1.1 1-1.1 1.8M12 17h.01"/>',
+ memory:'<rect x="3" y="7" width="12" height="14" rx="2"/><path d="M9 4h10a2 2 0 0 1 2 2v11"/><circle cx="9" cy="14" r="2"/>',
+ vf:'<path d="M3 12l4 4 7-8"/><path d="M16 8l5 5M21 8l-5 5"/>',
+ order:'<path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/>'
+};
+/*
+ icoSVG('cle') = construit le SVG complet à partir de la liste ICO (si la clé n'existe pas : la bouteille).
+ PH_SVG = le pictogramme "bouteille" affiché quand un tutoriel n'a pas de photo.
+ coverOf(t) = quelle image utiliser sur la carte : 1) la couverture choisie, sinon 2) la première photo
+              d'étape, sinon rien (=> on affiche le pictogramme).
+*/
+const icoSVG=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]||ICO.bottle}</svg>`;
+const PH_SVG=icoSVG('bottle');
 const coverOf=t=>t.cover||((t.steps||[]).find(s=>s.img)||{}).img||'';
+/*
+ cardHTML(t) = le HTML d'UNE carte de tutoriel : bandeau illustré (.cover), étiquettes catégorie/statut, titre
+ (avec "Verrouillé" si la classe de l'utilisateur est trop basse), puis machine / durée / niveau / nombre d'étapes.
+*/
 function cardHTML(t){
   const cv=coverOf(t);
   return `<div class="card tcard ${isLocked(t)?'locked':''}" onclick="openTuto('${t.id}')">
@@ -512,8 +819,16 @@ function cardHTML(t){
     <div class="meta"><span>${esc(machineL(t.machine))}</span><span>${esc(t.duration)} ${T('min')}</span><span>${esc(levelL(t.level))}</span><span>${T('steps_n',(t.steps||[]).length)}</span></div>
   </div>`;
 }
+/*
+ setCat(i) : clic sur une pastille de catégorie ; i = -1 pour "Toutes".
+*/
 function setCat(i){ state.cat = i<0?'':CATS[i]; renderList(); }
 
+/*
+ LECTURE D'UN TUTORIEL : page avec couverture, sécurité (encadré rouge), matériel, barre de progression
+ et étapes à cocher. Les cases cochées sont gardées en mémoire (state.done) le temps de la session.
+ Quand toutes les étapes de la formation obligatoire sont cochées => validateTraining() débloque la classe 1.
+*/
 /* ---------- LECTURE ---------- */
 function openTuto(id){
   const raw=tutos.find(x=>x.id===id); if(!raw) return;
@@ -570,6 +885,10 @@ function updProgress(id, notify){
   if(notify && n && d===n){ toast(T('finished')); if(t.mandatory) validateTraining(); }
 }
 
+/*
+ EDITION : on travaille sur une COPIE (state.draft). Rien n'est enregistré tant qu'on n'a pas cliqué sur
+ "Enregistrer" (saveDraft). "Annuler" jette la copie.
+*/
 /* ---------- ÉDITION ---------- */
 function blankTuto(){
   return {id:uid(),title:'',cover:'',machine:'',category:CATS[1],level:'Facile',duration:30,tools:[],safety:[],steps:[{text:'',warn:'',img:''}],status:'brouillon',updated:Date.now()};
@@ -612,6 +931,9 @@ function renderEditor(){
   renderStepsEditor();
   window.scrollTo(0,0);
 }
+/*
+ lines(texte) = transforme un champ "une ligne par élément" en liste (lignes vides ignorées) : sécurité, matériel.
+*/
 const lines = v => v.split('\n').map(s=>s.trim()).filter(Boolean);
 function renderStepsEditor(){
   $('stepsEd').innerHTML = state.draft.steps.map((s,i)=>`
@@ -638,6 +960,19 @@ function addStep(){ state.draft.steps.push({text:'',warn:'',img:''}); renderStep
 function delStep(i){ if(state.draft.steps.length<=1){ state.draft.steps=[{text:'',warn:'',img:''}]; } else state.draft.steps.splice(i,1); renderStepsEditor(); }
 function moveStep(i,dir){ const a=state.draft.steps, j=i+dir; if(j<0||j>=a.length) return; [a[i],a[j]]=[a[j],a[i]]; renderStepsEditor(); }
 function rmPhoto(i){ state.draft.steps[i].img=''; renderStepsEditor(); }
+/*
+ ===================== ILLUSTRATIONS : LES PHOTOS AJOUTEES =====================
+ readImg(fichier, tailleMax, qualité, callback)
+ Quand vous choisissez une photo, elle n'est PAS envoyée quelque part : elle est
+   1) lue dans le navigateur, 2) redessinée dans un <canvas> en plus petit (côté le plus long = tailleMax pixels),
+   3) convertie en JPEG de qualité "q" (0.7 = 70 %), 4) transformée en texte base64 ("data:image/jpeg;base64,...")
+   qui est enregistré DANS le tutoriel (champ cover ou steps[i].img).
+ Réglages utilisés plus bas :
+   photo d'étape  : readImg(f, 800, 0.7)   couverture : readImg(f, 720, 0.75)
+ -> Plus la taille / la qualité sont grandes, plus l'image est belle MAIS plus le stockage se remplit vite
+    (le navigateur limite le localStorage à environ 5 Mo).
+ Le fond blanc (fillRect) évite que les PNG transparents deviennent noirs en JPEG.
+*/
 function readImg(f,max,q,cb){
   const r=new FileReader();
   r.onload=()=>{
@@ -653,6 +988,10 @@ function readImg(f,max,q,cb){
   };
   r.readAsDataURL(f);
 }
+/*
+ addPhoto(i,input) : photo de l'étape numéro i.   addCover(input) : image de couverture du tutoriel.
+ coverEdHTML() : le bloc d'édition (bouton "choisir un fichier", aperçu, "Retirer l'image").
+*/
 function addPhoto(i,input){
   const f=input.files&&input.files[0]; if(!f) return;
   readImg(f,800,0.7,u=>{ state.draft.steps[i].img=u; renderStepsEditor(); });
@@ -668,23 +1007,10 @@ function addCover(inp){
   readImg(f,720,0.75,u=>{ state.draft.cover=u; $('coverEd').innerHTML=coverEdHTML(); });
 }
 function rmCover(){ state.draft.cover=''; $('coverEd').innerHTML=coverEdHTML(); }
-function rmPhoto(i){ state.draft.steps[i].img=''; renderStepsEditor(); }
-function addPhoto(i,input){
-  const f=input.files&&input.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=()=>{
-    const im=new Image();
-    im.onload=()=>{
-      const max=800, k=Math.min(1,max/Math.max(im.width,im.height));
-      const c=document.createElement('canvas'); c.width=Math.round(im.width*k); c.height=Math.round(im.height*k);
-      c.getContext('2d').drawImage(im,0,0,c.width,c.height);
-      state.draft.steps[i].img=c.toDataURL('image/jpeg',0.7);
-      renderStepsEditor();
-    };
-    im.src=r.result;
-  };
-  r.readAsDataURL(f);
-}
+/*
+ saveDraft() : contrôle le titre, retire les étapes vides, met à jour la date, remplace (ou ajoute en tête)
+ le tutoriel dans la liste puis enregistre. delTuto() supprime après confirmation.
+*/
 function saveDraft(){
   const d=state.draft;
   if(!d.title.trim()){ toast(T('need_title')); return; }
@@ -701,6 +1027,12 @@ function delTuto(){
   tutos=tutos.filter(t=>t.id!==state.draft.id); save(); toast(T('deleted')); renderList();
 }
 
+/*
+ EXPORT / IMPORT : sauvegarde de TOUS les tutoriels dans un fichier .json (photos comprises) et rechargement.
+ À l'import, les tutoriels sont AJOUTES (jamais écrasés) ; un identifiant déjà pris est remplacé par un nouveau.
+ C'est le moyen de partager des tutos entre appareils ou de faire une sauvegarde.
+ (Les PDF / PowerPoint des fiches ne sont pas inclus dans cet export : ils restent sur l'appareil.)
+*/
 /* ---------- EXPORT / IMPORT ---------- */
 function exportJSON(){
   const blob=new Blob([JSON.stringify(tutos,null,2)],{type:'application/json'});
@@ -731,6 +1063,15 @@ function importJSON(ev){
 }
 
 
+/*
+ CLASSES D'UTILISATEUR (système de droits)
+   Classe 0 Découverte : doit suivre la formation obligatoire      Classe 1 Opérateur : tutos Facile / Moyen
+   Classe 2 Technicien : + tutos Avancé                            Classe 3 Référent : gère les comptes 0 à 3
+   Classe 4 Administrateur : tous les droits (gère aussi référents et administrateurs)
+ needCls(t) = classe minimale pour ouvrir un tutoriel : 0 pour la sécurité / formation, 2 pour "Avancé", 1 sinon.
+ isLocked(t) = vrai si la classe de la personne connectée est trop basse (le tuto s'affiche "Verrouillé").
+ ATTENTION : ces droits sont gérés dans le navigateur (utile pour l'organisation, pas une sécurité informatique forte).
+*/
 /* ---------- CLASSES / PARAMÈTRES / MENU ---------- */
 const SKEY='sibelco_settings_v1', FKEY='sibelco_fiches_v1';
 const CLS=[
@@ -748,6 +1089,11 @@ const needCls=t=>(t.mandatory||t.category==='Sécurité')?0:(t.level==='Avancé'
 const isLocked=t=>settings.cls<needCls(t);
 function validateTraining(){ if(settings.cls<1) settings.cls=1; settings.chosen=true; settings.trained=Date.now(); saveSettings(); buildNav(); toast(T('trained_ok')); }
 
+/*
+ NAV = les rubriques du menu : [clé, (inutilisé), clé de traduction]. L'ordre ici = l'ordre dans le menu.
+ buildNav() redessine le menu : badge de classe, boutons épingle (garder le menu ouvert sur grand écran),
+ les rubriques, "Déconnexion". Le bouton de la rubrique active reçoit la classe "on" (bleu clair).
+*/
 const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['jeux','','nav_jeux'],['settings','','nav_set']];
 function buildNav(){
   $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px"><button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button>${isPinned()?'':`<button class="nb ib" onclick="toggleNav(false)" aria-label="${L('Fermer le menu','Close menu')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>`}</div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
@@ -755,6 +1101,9 @@ function buildNav(){
   document.querySelector('header').classList.toggle('big',state.section!=='tutos');
   document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('hidden',state.section!=='tutos'));
 }
+/*
+ Menu : toggleNav() l'ouvre/ferme ; togglePin() mémorise le choix "menu épinglé" (uniquement sur écran large).
+*/
 const PIN_KEY='sibelco_navpin';
 let navPin=false; try{ navPin=localStorage.getItem(PIN_KEY)==='1'; }catch(e){}
 const isPinned=()=>navPin&&window.innerWidth>780;
@@ -775,13 +1124,23 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('side').classList.contains('open')&&!isPinned()) toggleNav(false); });
 window.addEventListener('resize',()=>{ if($('side').classList.contains('open')){ toggleNav(true); buildNav(); } });
+/*
+ go(k) : navigation. Selon la rubrique cliquée, appelle la bonne fonction d'affichage.
+ renderSection() : réaffiche la page courante (utile après un changement de langue).
+ cnt(k) : nombre d'éléments affiché sur les tuiles de l'accueil.
+*/
 function go(k){ if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else renderFiches(k); }
 function renderSection(){ const v=state.view;
   if(v==='home') renderHome(); else if(v==='settings') renderSettings(); else if(v==='fiches') renderFiches(state.section);
   else if(v==='jeux') renderGame();
   else if(v==='fiche') openFiche(state.fid); else if(v==='fedit') renderFicheEditor(); else renderList(); }
-function cnt(k){ if(k==='jeux') return 1; if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
+function cnt(k){ if(k==='jeux') return GAMES.length; if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
 
+/*
+ ACCUEIL : bienvenue, classe de l'utilisateur, alerte "formation obligatoire" si classe 0, et les 5 tuiles illustrées
+ (une par rubrique du menu : NAV.slice(1,6)). Chaque tuile = class="cover c-<rubrique>" + pictogramme icoSVG(<rubrique>).
+ => pour changer l'illustration d'une tuile : voir ICO (dessin) et ".cover.c-<rubrique>" dans le CSS (couleurs).
+*/
 function renderHome(){
   state.section='home'; state.view='home'; $('filters').classList.add('hidden'); buildNav();
   const ob=tutos.find(t=>t.mandatory), c=settings.cls;
@@ -792,12 +1151,18 @@ function renderHome(){
    ${!settings.chosen?`<div class="panel"><b>${esc(T('ask_level'))}</b><div class="row" style="margin-top:8px">${CLS.slice(0,4).map((x,i)=>`<button onclick="chooseCls(${i})">${esc(clsL(i))}</button>`).join('')}</div></div>`:''}
    ${(c<1&&ob)?`<div class="box danger"><b>${esc(T('oblig_title'))}</b><br>${esc(T('oblig_txt'))}<div style="margin-top:8px"><button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button></div></div>`:''}
    ${settings.trained?`<div class="box" style="border-left-color:var(--ok)">${esc(T('trained_on'))} ${esc(new Date(settings.trained).toLocaleDateString(lang))}</div>`:''}
-   <div class="tiles">${NAV.slice(1,5).map(([k,i,l])=>`<div class="card" onclick="go('${k}')"><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div></div>`).join('')}</div>
+   <div class="tiles">${NAV.slice(1,6).map(([k,i,l])=>`<div class="card tcard" onclick="go('${k}')"><div class="cover c-${k}">${icoSVG(k)}</div><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div></div>`).join('')}</div>
    <p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
 function chooseCls(i){ if(i>=1&&!confirm(T('confirm_cls'))) return; settings.cls=i; settings.chosen=true; saveSettings(); renderHome(); }
 
+/*
+ ===================== COMPTES, CONNEXION, PARAMETRES =====================
+ Les comptes sont enregistrés dans le localStorage de l'appareil (clé sibelco_users_v1).
+ Le mot de passe n'est jamais gardé en clair : on stocke une empreinte SHA-256 salée (fonction hash()).
+ L(fr,en) = renvoie la phrase française ou anglaise selon la langue (pour les textes écrits directement dans le code).
+*/
 /*SETTINGS*/
 
 /* ---------- COMPTES / CONNEXION / PDF ---------- */
@@ -844,6 +1209,11 @@ function logout(){
   try{localStorage.removeItem(SESS);}catch(e){}
   settings={name:'',cls:0,chosen:true,trained:0,theme:'auto'}; state.done={}; document.documentElement.removeAttribute('data-theme'); renderLogin();
 }
+/*
+ seedAdmin() : au tout premier lancement, crée un compte administrateur de départ (identifiant "aa", mot de passe "AAAA").
+ /!\ A CHANGER : connectez-vous avec ce compte, puis modifiez son mot de passe dans Paramètres (ou créez vos
+ propres administrateurs et supprimez celui-ci). Le marqueur 'sibelco_seed_aa' évite de le recréer ensuite.
+*/
 async function seedAdmin(){
   try{ if(localStorage.getItem('sibelco_seed_aa')) return; }catch(e){}
   if(!users.some(u=>u.id==='aa')){
@@ -853,12 +1223,21 @@ async function seedAdmin(){
   }
   try{ localStorage.setItem('sibelco_seed_aa','1'); }catch(e){}
 }
+/*
+ boot() = DEMARRAGE : crée l'admin de départ, traduit l'interface, puis
+   - si une session est mémorisée -> on entre directement (enter) ; sinon écran de connexion (ou création du 1er compte).
+*/
 async function boot(){
   await seedAdmin();
   applyStatic(); let sid=null; try{sid=localStorage.getItem(SESS);}catch(e){}
   const u=users.find(x=>x.id===sid); if(u) enter(u); else if(!users.length) renderSetup(); else renderLogin();
 }
 
+/*
+ PARAMETRES : nom, thème (auto / clair / sombre), langue, mot de passe. Pour les classes 3 et 4 :
+ adminHTML() affiche aussi la gestion des travailleurs (ajouter, changer de classe, réinitialiser le mot de passe, supprimer),
+ avec des garde-fous : on ne peut pas supprimer le dernier administrateur / référent.
+*/
 function renderSettings(){
   state.section='settings'; state.view='settings'; $('filters').classList.add('hidden'); buildNav();
   const adm=settings.cls>=3;
@@ -903,18 +1282,44 @@ async function changePw(){
   settings.salt=uid(); settings.pw=await hash(p,settings.salt); saveUsers(); $('np').value=''; toast(T('saved'));
 }
 
+/*
+ ===================== GROS FICHIERS : IndexedDB =====================
+ Les PDF et PowerPoint sont trop gros pour le localStorage. On les range dans IndexedDB (base "sibelco_files",
+ magasin "f"), avec l'identifiant de la fiche comme clé. idbPut = enregistrer, idbGet = lire, idbDel = effacer.
+ Dans la fiche elle-même on ne garde que { name, size, kind } (nom, taille, 'pdf' ou 'ppt').
+*/
 function idb(){ return new Promise((ok,ko)=>{ const r=indexedDB.open('sibelco_files',1); r.onupgradeneeded=()=>r.result.createObjectStore('f'); r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); }); }
 async function idbOp(m,k,v){
   const db=await idb();
   return new Promise((ok,ko)=>{ const tx=db.transaction('f',m==='get'?'readonly':'readwrite'), st=tx.objectStore('f'); const rq=m==='put'?st.put(v,k):m==='get'?st.get(k):st.delete(k); tx.oncomplete=()=>ok(rq.result); tx.onerror=()=>ko(tx.error); });
 }
 const idbPut=(k,v)=>idbOp('put',k,v), idbGet=k=>idbOp('get',k), idbDel=k=>idbOp('del',k);
+/*
+ pickPdf(input) : appelé quand on choisit un fichier dans l'éditeur de fiche.
+   - PDF accepté partout ; PowerPoint (.pptx .ppt .ppsx .pps .odp) accepté SEULEMENT dans "Fiches présentation" ;
+   - 30 Mo maximum ; le fichier n'est réellement stocké qu'au clic sur "Enregistrer" (saveFiche).
+   - isPpt / fileKind : reconnaissent le type d'après l'extension du nom.
+ rmPdf() : retire le fichier de la fiche (supprimé au prochain enregistrement).
+*/
+const isPpt=n=>/\.(pptx?|ppsx?|odp)$/i.test(n||'');                 // vrai si le nom de fichier est un PowerPoint
+const isPdfName=n=>/\.pdf$/i.test(n||'');
+const fileKind=file=>file&&(file.kind||(isPpt(file.name)?'ppt':'pdf')); // 'ppt' ou 'pdf' (anciennes fiches : déduit du nom)
 function pickPdf(inp){
   const f=inp.files&&inp.files[0]; if(!f) return;
+  const okPpt=state.fd.type==='presentation';                          // PowerPoint autorisé uniquement dans les fiches présentation
+  if(!(isPdfName(f.name)||f.type==='application/pdf'||(okPpt&&isPpt(f.name)))){
+    toast(L(okPpt?'Choisissez un PDF ou un PowerPoint (.pptx, .ppt, .ppsx)':'Choisissez un fichier PDF','Choose a '+(okPpt?'PDF or PowerPoint (.pptx, .ppt, .ppsx) file':'PDF file'))); inp.value=''; return;
+  }
   if(f.size>30e6){ toast(L('Fichier trop gros (30 Mo max)','File too large (30 MB max)')); inp.value=''; return; }
-  state.fdFile=f; state.fdRm=false; state.fd.file={name:f.name,size:f.size}; renderFicheEditor();
+  state.fdFile=f; state.fdRm=false; state.fd.file={name:f.name,size:f.size,kind:isPpt(f.name)?'ppt':'pdf'}; renderFicheEditor();
 }
 function rmPdf(){ state.fdFile=null; state.fdRm=true; state.fd.file=null; renderFicheEditor(); }
+/*
+ AFFICHAGE DES PDF : bibliothèque pdf.js (Mozilla) chargée depuis cdnjs seulement quand on ouvre un PDF
+ (et mise en cache par sw.js pour le hors-ligne). showPdf(f) dessine chaque page dans un <canvas>
+ (mise en page "à la demande" : une page n'est dessinée que quand on s'en approche - IntersectionObserver).
+ Si pdf.js ne se charge pas (pas d'Internet, pas encore en cache), on se rabat sur un cadre <iframe> du navigateur.
+*/
 const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 let _pdfjs=null;
 function loadPdfJs(){
@@ -959,6 +1364,73 @@ async function showPdf(f){
 
 
 
+/*
+ ===================== POWERPOINT (ajout dans "Fiches présentation") =====================
+ Un navigateur ne sait pas dessiner un PowerPoint tout seul. Ce qu'on fait ici :
+   1) le fichier est stocké dans IndexedDB (comme un PDF) ;
+   2) un bouton permet de le TELECHARGER / l'ouvrir dans PowerPoint ;
+   3) pour les .pptx / .ppsx : un .pptx est en réalité un ZIP de fichiers XML. La bibliothèque JSZip (chargée
+      à la demande depuis cdnjs) l'ouvre ; on lit alors l'ordre des diapositives, le TEXTE de chacune
+      (balises <a:t> regroupées par paragraphe <a:p>) et la miniature de la 1re diapo (docProps/thumbnail.jpeg) ;
+   4) l'ancien format .ppt (binaire) ne peut pas être lu : seul le téléchargement est proposé.
+ Pour un rendu IDENTIQUE à l'écran PowerPoint (images, mise en page, animations figées), le plus simple est
+ d'exporter la présentation en PDF (PowerPoint : Fichier > Exporter > Créer un document PDF) et de l'ajouter comme PDF.
+*/
+/* ---------- POWERPOINT : affichage d'une présentation ajoutée dans une fiche ---------- */
+const JSZIP='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+let _jszip=null;
+function loadJsZip(){                       // charge JSZip (lecteur de .zip) à la demande, comme pdf.js
+  if(window.JSZip) return Promise.resolve(window.JSZip);
+  if(_jszip) return _jszip;
+  _jszip=new Promise((res,rej)=>{
+    const sc=document.createElement('script'); sc.src=JSZIP;
+    sc.onload=()=>window.JSZip?res(window.JSZip):(_jszip=null,rej(new Error('jszip')));
+    sc.onerror=()=>{ _jszip=null; rej(new Error('jszip')); };
+    document.head.appendChild(sc);
+  });
+  return _jszip;
+}
+async function showPpt(f){
+  let b,box; try{ b=await idbGet(f.id); box=$('pdfBox'); }catch(e){} if(!b||!box) return;
+  const u=URL.createObjectURL(b);           // lien temporaire vers le fichier stocké dans IndexedDB
+  const kb=f.file.size?' · '+(f.file.size>1048576?(f.file.size/1048576).toFixed(1)+' Mo':Math.round(f.file.size/1024)+' Ko'):'';
+  box.innerHTML=`<div class="row noprint" style="margin:12px 0"><a class="btn" href="${u}" download="${esc(f.file.name)}">${L('Télécharger / ouvrir dans PowerPoint','Download / open in PowerPoint')}</a><span class="meta">${esc(f.file.name)}${kb}</span></div><div id="pptInfo" class="meta">${L('Chargement de l’aperçu…','Loading preview…')}</div>`;
+  const info=$('pptInfo');
+  const none=()=>{ if(info&&info.isConnected) info.textContent=L('Aperçu indisponible (ancien format .ppt, hors ligne ou fichier non standard) : utilisez le bouton de téléchargement.','Preview unavailable (old .ppt format, offline or non-standard file): use the download button.'); };
+  if(!/\.(pptx|ppsx)$/i.test(f.file.name)) return none();   // seuls les formats XML modernes (.pptx/.ppsx) sont lisibles ici
+  try{
+    const Z=await loadJsZip();
+    const zip=await Z.loadAsync(b);          // un .pptx est un zip contenant des fichiers XML
+    const parse=async p=>{ const z=zip.file(p); return z?new DOMParser().parseFromString(await z.async('string'),'application/xml'):null; };
+    // ordre réel des diapositives : ppt/presentation.xml (liste des r:id) + ppt/_rels/presentation.xml.rels (r:id -> fichier)
+    let order=[];
+    try{
+      const pres=await parse('ppt/presentation.xml'), rels=await parse('ppt/_rels/presentation.xml.rels');
+      const map={}; [...rels.getElementsByTagName('Relationship')].forEach(r=>{ map[r.getAttribute('Id')]=r.getAttribute('Target'); });
+      order=[...pres.getElementsByTagName('p:sldId')].map(s=>map[s.getAttribute('r:id')]).filter(Boolean)
+        .map(t=>'ppt/'+t.replace(/^\/?(ppt\/)?/,''));
+    }catch(e){ order=[]; }
+    if(!order.length) order=Object.keys(zip.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a,b)=>parseInt(a.match(/\d+/)[0])-parseInt(b.match(/\d+/)[0]));
+    const slides=[];
+    for(const p of order){
+      const d=await parse(p); if(!d) continue;
+      // chaque paragraphe <a:p> regroupe des morceaux de texte <a:t>
+      const paras=[...d.getElementsByTagName('a:p')].map(pp=>[...pp.getElementsByTagName('a:t')].map(t=>t.textContent).join('')).filter(s=>s.trim());
+      slides.push(paras);
+    }
+    let thumb=''; const th=zip.file('docProps/thumbnail.jpeg');   // miniature de la 1re diapo (présente dans la plupart des .pptx)
+    if(th) thumb=URL.createObjectURL(await th.async('blob'));
+    if(!info||!info.isConnected) return;
+    if(!slides.length){ return none(); }
+    info.outerHTML=`<div id="pptInfo">${thumb?`<img class="pptthumb" src="${thumb}" alt="">`:''}
+      <div class="meta" style="margin:6px 0">${slides.length} ${L('diapositive(s) – texte de la présentation :','slide(s) – text of the presentation:')}</div>
+      ${slides.map((s,i)=>`<div class="pptslide"><b>${L('Diapo','Slide')} ${i+1}</b>${s.length?s.map((x,j)=>j===0?`<div style="font-weight:600">${esc(x)}</div>`:`<div>${esc(x)}</div>`).join(''):`<span class="meta">${L('(pas de texte – images / schémas)','(no text – images / diagrams)')}</span>`}</div>`).join('')}</div>`;
+  }catch(e){ none(); }
+}
+
+/*
+ renderLocked : page "Tutoriel verrouillé" quand la classe de l'utilisateur est insuffisante.
+*/
 function renderLocked(raw,t){
   $('filters').classList.add('hidden');
   const ob=tutos.find(x=>x.mandatory);
@@ -968,42 +1440,84 @@ function renderLocked(raw,t){
     ${(settings.cls<1&&ob)?`<button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button>`:''}</div>`;
 }
 
+/*
+ ===================== FICHES =====================
+ 3 rubriques qui partagent le MEME code, distinguées par le champ "type" :
+   'constructeur' (fiches constructeur), 'consommables' (pièces consommables), 'presentation' (fiches présentation).
+ Une fiche = { id, type, title, cover (image), machine, text, url (lien facultatif), file (PDF/PowerPoint) }.
+ Elles sont enregistrées dans le localStorage sous la clé FKEY ; le fichier lui-même dans IndexedDB.
+*/
 /* ---------- FICHES (constructeur / pièces consommables / présentation) ---------- */
+/*
+ FSEED = fiche d'exemple fournie au départ (rubrique "présentation").
+ fiches = la liste en mémoire ; saveFiches() l'enregistre.
+*/
 const FSEED=[{id:'f1',type:'presentation',title:'Principe du trieur optique verre',machine:'Tous trieurs',url:'',
  text:'Le verre broyé (calcin) est étalé en nappe fine sur un convoyeur ou une goulotte.\nDes caméras et un éclairage analysent chaque particule.\nLes indésirables détectés sont éjectés par des jets d\'air comprimé (buses).\nÀ compléter avec les spécificités de vos machines (modèle, ligne, réglages).'}];
 let fiches=(()=>{try{const r=JSON.parse(localStorage.getItem(FKEY)); if(Array.isArray(r)) return r;}catch(e){} return JSON.parse(JSON.stringify(FSEED));})();
 function saveFiches(){ try{localStorage.setItem(FKEY,JSON.stringify(fiches));}catch(e){toast(T('storage_full'));} }
+/*
+ renderFiches(type) : liste des fiches d'une rubrique, en cartes illustrées (class="cover c-<type>").
+ Image de la carte : la photo ajoutée (f.cover) sinon le pictogramme de la rubrique (icoSVG(type)).
+ L'étiquette PDF / PowerPoint apparaît à côté de la machine quand un fichier est attaché.
+*/
 function renderFiches(type){
   state.section=type; state.view='fiches'; $('filters').classList.add('hidden'); buildNav();
   const l=fiches.filter(f=>f.type===type);
   $('app').innerHTML=`<div class="row" style="margin:12px 0;justify-content:space-between"><h2 style="margin:0">${esc(T(type==='constructeur'?'nav_cons':type==='consommables'?'nav_cons2':'nav_pres'))}</h2><button class="primary" onclick="editFiche('','${type}')">${esc(T('add_fiche'))}</button></div>`+
-   (l.length?`<div class="grid">${l.map(f=>`<div class="card" onclick="openFiche('${f.id}')"><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${f.file?'<span>PDF</span>':''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
+   (l.length?`<div class="grid">${l.map(f=>`<div class="card tcard" onclick="openFiche('${f.id}')"><div class="cover c-${type}">${f.cover?`<img src="${f.cover}" alt="" loading="lazy">`:icoSVG(type)}</div><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${f.file?`<span>${fileKind(f.file)==='ppt'?'PowerPoint':'PDF'}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
+/*
+ openFiche(id) : page d'une fiche = couverture, titre, texte, lien (si une adresse valide est saisie),
+ puis le fichier attaché : PDF -> showPdf(f) ; PowerPoint -> showPpt(f). Les deux écrivent dans <div id="pdfBox">.
+ La regex "ok" accepte les liens http(s) et les fichiers locaux de type pdf, images, Word, Excel, PowerPoint, html.
+*/
 function openFiche(id){
   const f=fiches.find(x=>x.id===id); if(!f) return;
   state.section=f.type; state.view='fiche'; state.fid=id; $('filters').classList.add('hidden'); buildNav();
-  const ok=/^(https?:\/\/|\.?\/?[\w\-\/.]+\.(pdf|png|jpe?g|docx?|xlsx?|html?))/i.test(f.url||'');
+  const ok=/^(https?:\/\/|\.?\/?[\w\-\/.]+\.(pdf|png|jpe?g|docx?|xlsx?|pptx?|ppsx?|html?))/i.test(f.url||'');
   $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="renderFiches('${f.type}')">${esc(T('back'))}</button><div class="row"><button onclick="window.print()">${esc(T('print'))}</button><button onclick="editFiche('${id}')">${esc(T('edit'))}</button></div></div>
-   <div class="panel"><h2 style="margin-top:0">${esc(f.title)}</h2><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span></div>
+   <div class="panel">${f.cover?`<img class="tcover" src="${f.cover}" alt="">`:''}<h2 style="margin-top:0">${esc(f.title)}</h2><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span></div>
    <p>${esc(f.text).replace(/\n/g,'<br>')}</p><div id=\"pdfBox\"></div>${ok?`<a class="btn" href="${esc(f.url)}" target="_blank" rel="noopener">${esc(T('open_doc'))}</a>`:''}</div>`;
-  if(f.file) showPdf(f);
+  if(f.file) (fileKind(f.file)==='ppt'?showPpt(f):showPdf(f));
   window.scrollTo(0,0);
 }
+/*
+ editFiche(id,type) : ouvre l'éditeur (id vide = nouvelle fiche). state.fd = la fiche en cours,
+ state.fdFile = nouveau fichier choisi (pas encore enregistré), state.fdRm = demande de suppression du fichier.
+ fCoverEdHTML / addFCover / rmFCover : choix de l'image d'illustration de la fiche (même principe que readImg).
+*/
 function editFiche(id,type){
-  state.fnew=!id; state.fdFile=null; state.fdRm=false; state.fd=id?JSON.parse(JSON.stringify(fiches.find(f=>f.id===id))):{id:uid(),type,title:'',machine:'',text:'',url:''};
+  state.fnew=!id; state.fdFile=null; state.fdRm=false; state.fd=id?JSON.parse(JSON.stringify(fiches.find(f=>f.id===id))):{id:uid(),type,title:'',cover:'',machine:'',text:'',url:''};
   renderFicheEditor();
 }
+function fCoverEdHTML(){
+  const d=state.fd;
+  return `<label>${L('Image d’illustration (affichée sur la carte, facultatif)','Cover image (shown on the card, optional)')}</label>
+   <div class="row"><input type="file" accept="image/*" style="max-width:320px" onchange="addFCover(this)">${d.cover?`<button class="small danger" onclick="rmFCover()">${L('Retirer l’image','Remove image')}</button>`:''}</div>
+   ${d.cover?`<img src="${d.cover}" alt="" style="max-width:260px;border-radius:8px;margin-top:8px;display:block">`:''}`;
+}
+function addFCover(inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  readImg(f,720,0.75,u=>{ state.fd.cover=u; $('fcoverEd').innerHTML=fCoverEdHTML(); });
+}
+function rmFCover(){ state.fd.cover=''; $('fcoverEd').innerHTML=fCoverEdHTML(); }
 function renderFicheEditor(){
   const d=state.fd; state.section=d.type; state.view='fedit'; $('filters').classList.add('hidden'); buildNav();
   $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="${state.fnew?`renderFiches('${d.type}')`:`openFiche('${d.id}')`}">${esc(T('cancel'))}</button>
    <div class="row">${state.fnew?'':`<button class="danger" onclick="delFiche()">${esc(T('delete'))}</button>`}<button class="primary" onclick="saveFiche()">${esc(T('save'))}</button></div></div>
    <div class="panel"><label>${esc(T('f_title'))}</label><input value="${esc(d.title)}" oninput="state.fd.title=this.value">
+   <div id="fcoverEd">${fCoverEdHTML()}</div>
    <label>${esc(T('f_machine'))}</label><input value="${esc(d.machine)}" oninput="state.fd.machine=this.value" placeholder="${esc(T('ph_machine'))}">
    <label>${esc(T('f_text'))}</label><textarea style="min-height:160px" oninput="state.fd.text=this.value">${esc(d.text)}</textarea>
    <label>${esc(T('f_url'))}</label><input value="${esc(d.url)}" oninput="state.fd.url=this.value" placeholder="${esc(T('ph_url'))}">
-   <label>PDF</label><div class="row"><input type="file" accept="application/pdf" style="max-width:320px" onchange="pickPdf(this)"><span class="meta">${esc(d.file?d.file.name:'')}</span>${d.file?`<button class="small danger" onclick="rmPdf()">${L('Retirer le PDF','Remove PDF')}</button>`:''}</div></div>`;
+   <label>${d.type==='presentation'?'PDF / PowerPoint':'PDF'}</label><div class="row"><input type="file" accept="${d.type==='presentation'?'.pdf,application/pdf,.ppt,.pptx,.pps,.ppsx,.odp,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint':'application/pdf'}" style="max-width:320px" onchange="pickPdf(this)"><span class="meta">${esc(d.file?d.file.name:'')}</span>${d.file?`<button class="small danger" onclick="rmPdf()">${d.file&&fileKind(d.file)==='ppt'?L('Retirer le PowerPoint','Remove PowerPoint'):L('Retirer le PDF','Remove PDF')}</button>`:''}</div>${d.type==='presentation'?`<p class="meta" style="margin:6px 0 0">${L('Un seul fichier par fiche (PDF ou PowerPoint, 30 Mo max). Un PowerPoint peut être téléchargé et son texte est affiché ; pour un affichage identique à l’écran, exportez-le en PDF depuis PowerPoint.','One file per sheet (PDF or PowerPoint, 30 MB max). A PowerPoint can be downloaded and its text is shown; for a pixel-perfect display, export it to PDF from PowerPoint.')}</p>`:''}</div>`;
 }
+/*
+ saveFiche() : enregistre la fiche (localStorage) ET son fichier (IndexedDB), puis réaffiche la fiche.
+ delFiche() : supprime la fiche et son fichier.
+*/
 async function saveFiche(){
   const d=state.fd; if(!d.title.trim()){ toast(T('need_title')); return; }
   const i=fiches.findIndex(f=>f.id===d.id); if(i>=0) fiches[i]=d; else fiches.unshift(d);
@@ -1012,8 +1526,19 @@ async function saveFiche(){
 }
 function delFiche(){ if(!confirm(T('confirm_del'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(T('deleted')); renderFiches(t); }
 
+/*
+ ===================== JEU 1 : TRIEUR SIBELCO (dessiné dans un <canvas>) =====================
+ Des pièces tombent ; il faut les envoyer dans le bon bac avant la ligne des buses.
+ GW x GH = taille du terrain (en pixels logiques) ; GLINE = hauteur de la ligne des buses.
+*/
 /* ---------- JEU : TRIEUR SIBELCO (tri du verre / refus) ---------- */
 const GW=360, GH=380, GLINE=GH-50;
+/*
+ GBINS = les 4 boutons / bacs (nom FR/EN + couleur). GITEMS = les pièces possibles :
+   bin = numéro du bon bac (0 vert, 1 blanc, 2 brun, 3 refus) ; shape = forme dessinée par gItem() ; col = couleur ;
+   tfr / ten = phrase pédagogique affichée quand on se trompe sur un indésirable.
+ POUR AJOUTER UNE PIECE : ajouter une ligne ici ET une forme correspondante dans gItem() (si c'est une nouvelle forme).
+*/
 const GBINS=[
  {fr:'Vert',en:'Green',col:'#2e9e4f'},
  {fr:'Blanc',en:'Clear',col:'#2f8fb5'},
@@ -1040,6 +1565,10 @@ const GITEMS=[
   tfr:'Le plastique n\'a rien à faire dans le calcin : il perturbe la fusion.',
   ten:'Plastic does not belong in cullet: it disturbs melting.'}
 ];
+/*
+ G = l'état de la partie en cours (pièces, score, vies, combo...). Scores : record personnel (gBest) et
+ classement de l'appareil (gScores / gRecord / gBoard), par compte utilisateur.
+*/
 let G=null;
 const gBestKey=()=>'sibelco_game_best_'+(settings.id||'x');
 function gBest(){ try{ return +localStorage.getItem(gBestKey())||0; }catch(e){ return 0; } }
@@ -1068,9 +1597,12 @@ function gBoard(){
    `<p class="meta" style="margin:8px 0 0;font-size:.75rem">${L('Classement des comptes de cet appareil, selon le meilleur score.','Ranking of the accounts on this device, by best score.')}</p></div>`;
 }
 
-function renderGame(){
+/*
+ renderSortGame() : page du jeu (canvas + 4 gros boutons + classement). Clavier : touches 1 à 4.
+*/
+function renderSortGame(){
   state.section='jeux'; state.view='jeux'; $('filters').classList.add('hidden'); buildNav();
-  $('app').innerHTML=`<div class="panel"><h2 style="margin-top:0">${esc(T('nav_jeux'))} · ${L('Trieur Sibelco','Sibelco Sorter')}</h2>
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0"><button onclick="renderGame()">${L('← Jeux','← Games')}</button></div><div class="panel"><h2 style="margin-top:0">${esc(T('nav_jeux'))} · ${L('Trieur Sibelco','Sibelco Sorter')}</h2>
    <p class="meta" style="margin:0 0 8px;font-size:.8rem">${L('Envoyez la pièce la plus basse (cerclée) dans le bon bac : verre vert, blanc, brun – ou Refus pour tout indésirable (pierre, céramique, Pyrex, métal, plastique). Clavier : touches 1 à 4.','Send the lowest (circled) piece to the right bin: green, clear, brown glass – or Reject for any contaminant (stone, ceramic, Pyrex, metal, plastic). Keyboard: keys 1 to 4.')}</p>
    <div style="width:max(240px,min(100%,420px,calc((100vh - 290px)*0.947),calc((100dvh - 290px)*0.947)));margin:0 auto">
     <div class="row" style="justify-content:space-between;margin-bottom:6px"><span id="gsc"></span><span id="gli"></span><span id="gbest" class="meta"></span></div>
@@ -1088,6 +1620,13 @@ function gHud(g){
   li.innerHTML=`<span style="color:#e04b4b;letter-spacing:2px">${'♥'.repeat(Math.max(0,g.lives))}${'♡'.repeat(Math.max(0,3-g.lives))}</span>`;
   be.textContent=L('Record','Best')+' '+gBest();
 }
+/*
+ MOTEUR DU JEU :
+   gameInit()  prépare le canvas (netteté sur écrans haute densité : dpr)   gameStart()  lance la partie
+   gLevel / gSpeed  niveau et vitesse qui augmentent avec le nombre de pièces triées
+   gSpawn()  fait apparaître une pièce   gUpdate(g,dt)  fait avancer les pièces (dt = temps écoulé)
+   gSort(bin)  vérifie le choix du joueur   gFail  perd une vie   gOver  fin de partie + enregistrement du score
+*/
 function gameInit(){
   if(G&&G.raf) cancelAnimationFrame(G.raf);
   const cv=$('gcv'), dpr=Math.min(2,window.devicePixelRatio||1);
@@ -1162,6 +1701,17 @@ function gOver(g){
   $('gmsg').style.whiteSpace='pre-line';
   $('gplay').textContent=L('Rejouer','Play again'); $('gplay').classList.remove('hidden'); gHud(g);
 }
+/*
+ ===================== ILLUSTRATIONS : LES PIECES DU JEU =====================
+ Les pièces ne sont pas des images : elles sont DESSINEES à chaque image avec l'API canvas.
+   gPoly(ctx,[x1,y1,x2,y2,...]) trace un polygone à partir d'une liste de points.
+   gItem(ctx,it) : dessine la pièce "it" selon sa forme (it.shape). On se place au centre de la pièce
+   (translate) et on la fait tourner (rotate), donc toutes les coordonnées sont relatives au CENTRE (0,0).
+   fillStyle = couleur de remplissage, strokeStyle = couleur du contour, globalAlpha = transparence,
+   moveTo/lineTo = lignes, quadraticCurveTo = courbes, arc = cercle.
+ POUR CHANGER L'ASPECT D'UNE PIECE : modifier les couleurs (#7d7f83 ...) ou les points dans la branche de sa forme.
+ POUR AJOUTER UNE PIECE : ajouter un "else if(it.shape==='monobjet'){ ... }" puis une ligne dans GITEMS.
+*/
 function gPoly(ctx,pts){ ctx.beginPath(); ctx.moveTo(pts[0],pts[1]); for(let i=2;i<pts.length;i+=2) ctx.lineTo(pts[i],pts[i+1]); ctx.closePath(); }
 function gItem(ctx,it){
   ctx.save(); ctx.translate(it.x,it.y); ctx.rotate(it.rot); ctx.lineWidth=1.5; ctx.lineJoin='round';
@@ -1191,6 +1741,9 @@ function gItem(ctx,it){
   }
   ctx.restore();
 }
+/*
+ gRender(g) : dessine une image complète : fond bleu, bacs, ligne des buses, pièces, effets, messages.
+*/
 function gRender(g){
   const c=g.ctx;
   c.clearRect(0,0,GW,GH);
@@ -1221,6 +1774,366 @@ function gRender(g){
   }
 }
 
+/*
+ (Les 4 jeux suivants réutilisent le même système de comptes pour les scores.)
+*/
+/* ======================================================================
+   JEUX : MENU + QUIZ / VRAI-FAUX / MÉMOIRE / REMETTRE DANS L’ORDRE
+   (le jeu « Trieur Sibelco » est plus haut ; ceux-ci réutilisent les mêmes
+   comptes pour enregistrer les scores et afficher un classement)
+   ====================================================================== */
+/*
+ SCORES DES 4 JEUX : stockés dans le localStorage sous G2KEY, par jeu puis par utilisateur.
+   g2Record(jeu,score) enregistre une partie et indique si c'est un nouveau record ;
+   g2Board(jeu,idDeLaZone) affiche le classement.   shuffle(tableau) mélange un tableau.
+*/
+const G2KEY='sibelco_games2_v1';   // scores : { jeu : { idUtilisateur : {best,games,date,last} } }
+const shuffle=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const G2NAME={quiz:['Quiz maintenance','Maintenance quiz'],vf:['Vrai ou faux','True or false'],memory:['Mémoire','Memory'],order:['Dans l’ordre','Put in order']};
+
+/* Lecture / écriture des scores (localStorage) */
+function g2All(){ try{ const r=JSON.parse(localStorage.getItem(G2KEY)); if(r&&typeof r==='object') return r; }catch(e){} return {}; }
+function g2Best(game){ const r=(g2All()[game]||{})[settings.id||'x']; return r?r.best:0; }
+function g2Record(game,score){            // renvoie true si c’est un nouveau record personnel
+  const all=g2All(), t=all[game]||(all[game]={}), id=settings.id||'x';
+  const r=t[id]||(t[id]={best:0,games:0,date:0});
+  r.games++; r.last=score;
+  const nb=score>r.best; if(nb){ r.best=score; r.date=Date.now(); }
+  try{ localStorage.setItem(G2KEY,JSON.stringify(all)); }catch(e){}
+  return nb;
+}
+/* Classement des comptes de l’appareil pour un jeu, affiché dans #boxId */
+function g2Board(game,boxId){
+  const box=$(boxId); if(!box) return;
+  const t=g2All()[game]||{};
+  const rows=users.map(u=>({id:u.id,name:u.name||u.id,best:(t[u.id]||{}).best||0,games:(t[u.id]||{}).games||0}))
+    .filter(r=>r.best>0).sort((a,b)=>b.best-a.best||a.games-b.games);
+  const medal=i=>i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+  box.innerHTML=`<div class="panel"><h2 style="margin-top:0">🏆 ${L('Classement','Ranking')}</h2>`+
+   (rows.length?`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.9rem"><thead><tr style="text-align:left;color:var(--muted);font-size:.75rem"><th style="padding:6px 4px">#</th><th style="padding:6px 4px">${L('Joueur','Player')}</th><th style="padding:6px 4px;text-align:right">${L('Meilleur score','Best score')}</th><th style="padding:6px 4px;text-align:right">${L('Parties','Games')}</th></tr></thead><tbody>`+
+    rows.map((r,i)=>`<tr style="border-top:1px solid var(--line);${r.id===settings.id?'font-weight:700;background:rgba(45,143,224,.15)':''}"><td style="padding:8px 4px">${medal(i)}</td><td style="padding:8px 4px">${esc(r.name)}${r.id===settings.id?' ('+L('vous','you')+')':''}</td><td style="padding:8px 4px;text-align:right">${r.best}</td><td style="padding:8px 4px;text-align:right">${r.games}</td></tr>`).join('')+
+    `</tbody></table></div>`:`<div class="empty">${L('Aucun score pour le moment. Soyez le premier !','No score yet. Be the first!')}</div>`)+
+   `<p class="meta" style="margin:8px 0 0;font-size:.75rem">${L('Classement des comptes de cet appareil.','Ranking of the accounts on this device.')}</p></div>`;
+}
+
+/* Liste des jeux affichés dans le menu « Jeux » (run = fonction lancée au clic) */
+/*
+ GAMES = les tuiles du menu "Jeux". Pour chacune : k = nom (sert aussi à la couleur .cover.c-k), ico = pictogramme (clé de ICO),
+ fr/en = titre, dfr/den = description, run = fonction lancée au clic, best = fonction qui donne le record.
+ POUR AJOUTER UN JEU : ajouter un objet ici, un pictogramme dans ICO et une couleur ".cover.c-k" dans le CSS.
+*/
+const GAMES=[
+ {k:'sort',ico:'bottle',fr:'Trieur Sibelco',en:'Sibelco Sorter',
+  dfr:'Triez le verre vert, blanc, brun et rejetez les indésirables avant les buses.',den:'Sort green, clear and brown glass and reject contaminants before the nozzles.',run:'renderSortGame()',best:()=>gBest()},
+ {k:'quiz',ico:'quiz',fr:'Quiz maintenance',en:'Maintenance quiz',
+  dfr:'10 questions à choix sur la sécurité et la maintenance. Répondez vite pour gagner plus de points.',den:'10 multiple-choice questions on safety and maintenance. Answer fast to score more.',run:"quizStart('quiz')",best:()=>g2Best('quiz')},
+ {k:'vf',ico:'vf',fr:'Vrai ou faux',en:'True or false',
+  dfr:'10 affirmations : vraies ou fausses ? Réponse rapide, explication à chaque fois.',den:'10 statements: true or false? Quick answers, with an explanation each time.',run:"quizStart('vf')",best:()=>g2Best('vf')},
+ {k:'memory',ico:'memory',fr:'Mémoire',en:'Memory',
+  dfr:'Associez chaque pictogramme (EPI, outils…) à son nom en un minimum de coups.',den:'Match each icon (PPE, tools…) with its name in as few moves as possible.',run:'memStart()',best:()=>g2Best('memory')},
+ {k:'order',ico:'order',fr:'Dans l’ordre',en:'Put in order',
+  dfr:'Remettez dans le bon ordre les étapes de 3 procédures (consignation, nettoyage…).',den:'Put the steps of 3 procedures in the right order (lockout, cleaning…).',run:'ordStart()',best:()=>g2Best('order')}
+];
+/* Menu « Jeux » : une tuile illustrée par jeu */
+/*
+ renderGame() : menu des jeux, une tuile illustrée par jeu.   gFrame() : cadre commun d'une page de jeu.
+*/
+function renderGame(){
+  state.section='jeux'; state.view='jeux'; $('filters').classList.add('hidden'); buildNav();
+  $('app').innerHTML=`<div class="row" style="margin:12px 0 4px"><h2 style="margin:0">${esc(T('nav_jeux'))}</h2></div>
+   <p class="meta" style="margin:0 0 6px">${L('Jouez pour réviser les bons gestes tout en vous amusant.','Play to revise good practice while having fun.')}</p>
+   <div class="tiles gametiles">${GAMES.map(g=>`<div class="card tcard" onclick="${g.run}"><div class="cover c-${g.k}">${icoSVG(g.ico)}</div><h3>${esc(L(g.fr,g.en))}</h3><div class="meta" style="display:block">${esc(L(g.dfr,g.den))}</div><div class="meta"><span>🏆 ${L('Record','Best')} : ${g.best()}</span></div></div>`).join('')}</div>
+   <p class="disclaimer">${esc(T('footer'))}</p>`;
+  window.scrollTo(0,0);
+}
+/* Cadre commun d’une page de jeu : bouton retour, titre, zone de jeu, classement */
+function gFrame(titleFr,titleEn,inner){
+  state.section='jeux'; state.view='jeux'; $('filters').classList.add('hidden'); buildNav();
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0"><button onclick="renderGame()">${L('← Jeux','← Games')}</button></div>
+   <div class="panel"><h2 style="margin-top:0">${esc(T('nav_jeux'))} · ${L(titleFr,titleEn)}</h2>${inner}</div><div id="g2lb"></div><p class="disclaimer">${esc(T('footer'))}</p>`;
+  window.scrollTo(0,0);
+}
+
+/* ---------- QUIZ (choix multiples) et VRAI / FAUX : même moteur ---------- */
+/* q = question [fr,en] ; o = 4 réponses [fr,en] ; a = index de la bonne ; e = explication [fr,en] */
+/*
+ ===================== QUIZ ET VRAI / FAUX (même moteur) =====================
+ QUIZ : q = question [fr,en] ; o = 4 réponses [fr,en] ; a = numéro (0 à 3) de la bonne réponse ; e = explication [fr,en].
+ POUR AJOUTER UNE QUESTION : copier une entrée existante, changer les textes et le numéro de bonne réponse.
+ Chaque partie tire 10 questions au hasard ; le score dépend de la rapidité de réponse (chronomètre).
+*/
+const QUIZ=[
+ {q:['Avant de nettoyer les vitres de la zone optique, que faut-il faire en premier ?','Before cleaning the optical-area windows, what must you do first?'],
+  o:[['Souffler à l’air comprimé','Blow with compressed air'],['Consigner la machine','Lock out the machine'],['Retirer les protections machine en marche','Remove guards while running'],['Appeler le fournisseur','Call the supplier']],a:1,
+  e:['Aucune intervention sans consignation complète.','No intervention without a full lockout.']},
+ {q:['Que signifie « VAT » ?','What does “VAT” stand for here?'],
+  o:[['Vérification d’Absence de Tension','Verification of Absence of Voltage'],['Variation Automatique de Température','Automatic Temperature Variation'],['Vanne d’Air Totale','Total Air Valve'],['Validation des Alarmes Techniques','Technical Alarm Validation']],a:0,
+  e:['L’essai de démarrage confirme que la machine ne démarre pas : elle est bien consignée.','The start test confirms the machine does not start: it is properly locked out.']},
+ {q:['Combien de personnes peuvent utiliser le même cadenas de consignation personnel ?','How many people can use the same personal lockout padlock?'],
+  o:[['Une seule','Only one'],['Deux','Two'],['Toute l’équipe','The whole team'],['Le chef d’équipe et son adjoint','The team leader and deputy']],a:0,
+  e:['Un cadenas = une personne.','One padlock = one person.']},
+ {q:['Pourquoi purger l’air comprimé avant de démonter quelque chose sur le circuit ?','Why bleed compressed air before dismantling part of the circuit?'],
+  o:[['Pour économiser de l’énergie','To save energy'],['Parce que l’air comprimé stocke de l’énergie','Because compressed air stores energy'],['Pour refroidir les buses','To cool the nozzles'],['Ce n’est pas nécessaire si la machine est arrêtée','It is not needed if the machine is stopped']],a:1,
+  e:['Vérifiez que le manomètre indique 0 bar avant d’intervenir.','Check the gauge reads 0 bar before working.']},
+ {q:['Peut-on souffler à l’air comprimé sur les caméras et les vitres ?','May you blow compressed air onto the cameras and windows?'],
+  o:[['Oui, c’est le plus rapide','Yes, it is the fastest'],['Oui, à faible pression seulement','Yes, at low pressure only'],['Non : risque de projection de particules','No: risk of throwing particles'],['Oui, avec un masque','Yes, wearing a mask']],a:2,
+  e:['Utilisez l’aspirateur industriel puis un chiffon propre.','Use the industrial vacuum, then a clean cloth.']},
+ {q:['Quels EPI sont demandés en zone machine ?','Which PPE is required in the machine area?'],
+  o:[['Lunettes, gants, chaussures de sécurité, protection auditive','Glasses, gloves, safety shoes, hearing protection'],['Aucun','None'],['Seulement un casque','A helmet only'],['Seulement des gants','Gloves only']],a:0,
+  e:['Poussières et éclats de verre, bruit, pièces en mouvement : les EPI sont obligatoires.','Glass dust and splinters, noise, moving parts: PPE is mandatory.']},
+ {q:['Comment arrêter la machine avant une consignation ?','How do you stop the machine before a lockout?'],
+  o:[['Arrêt d’urgence systématique','Always use the emergency stop'],['Séquence d’arrêt normale depuis l’écran','Normal stop sequence from the screen'],['Couper le sectionneur en marche','Open the disconnect while running'],['Débrancher un câble','Unplug a cable']],a:1,
+  e:['L’arrêt d’urgence est réservé aux situations de danger.','The emergency stop is only for dangerous situations.']},
+ {q:['Dans le doute sur une intervention, que faut-il faire ?','When in doubt about a task, what should you do?'],
+  o:[['Continuer prudemment','Carry on carefully'],['S’arrêter et appeler le référent','Stop and call the referent'],['Essayer sur une autre machine','Try it on another machine'],['Demander à la production','Ask production']],a:1,
+  e:['Dans le doute, on s’arrête et on appelle le référent.','When in doubt, stop and call the referent.']},
+ {q:['Avec quoi nettoie-t-on les vitres optiques ?','What do you clean the optical windows with?'],
+  o:[['Chiffon non pelucheux + produit validé par le constructeur','Lint-free cloth + manufacturer-approved product'],['Un solvant au choix','Any solvent'],['Une brosse métallique','A wire brush'],['Du papier de verre fin','Fine sandpaper']],a:0,
+  e:['Aucun solvant non validé sur les optiques, et on évite de rayer les vitres.','No unapproved solvent on optics, and avoid scratching the windows.']},
+ {q:['Qu’est-ce que le calcin ?','What is cullet?'],
+  o:[['Du verre broyé destiné au recyclage','Crushed glass for recycling'],['Un four de fusion','A melting furnace'],['Un type de caméra','A type of camera'],['Un produit de nettoyage','A cleaning product']],a:0,
+  e:['Le calcin défile en nappe fine devant les caméras du trieur.','Cullet runs in a thin layer in front of the sorter cameras.']},
+ {q:['Quel est le rôle des buses d’éjection ?','What is the role of the ejection nozzles?'],
+  o:[['Refroidir les caméras','Cool the cameras'],['Éjecter les indésirables par jets d’air comprimé','Eject contaminants with jets of compressed air'],['Éclairer le verre','Light the glass'],['Mesurer la pression','Measure pressure']],a:1,
+  e:['Elles se trouvent dans le bloc d’éjection.','They are located in the ejection block.']},
+ {q:['Où se trouvent les caméras et l’éclairage ?','Where are the cameras and lighting?'],
+  o:[['Dans la zone optique','In the optical area'],['Dans le bloc d’éjection','In the ejection block'],['Uniquement dans l’armoire électrique','Only in the electrical cabinet'],['Sur le convoyeur d’alimentation','On the feed conveyor']],a:0,
+  e:['Les 4 zones : alimentation, zone optique, bloc d’éjection, écran / automate.','The 4 zones: feed, optical area, ejection block, screen / PLC.']},
+ {q:['Quels indésirables un trieur optique verre repère-t-il ?','Which contaminants does a glass optical sorter detect?'],
+  o:[['Céramique, pierre, porcelaine','Ceramic, stone, porcelain'],['Uniquement le papier','Paper only'],['Uniquement l’eau','Water only'],['Uniquement les étiquettes','Labels only']],a:0,
+  e:['Selon le réglage, il peut aussi trier des couleurs.','Depending on settings, it can also sort colours.']},
+ {q:['Avant une calibration, que faut-il vérifier d’abord ?','Before a calibration, what should you check first?'],
+  o:[['Que la zone optique est propre','That the optical area is clean'],['Éteindre l’éclairage','Turn the lighting off'],['Charger le convoyeur à fond','Fill the conveyor completely'],['Désactiver les alarmes','Disable the alarms']],a:0,
+  e:['Une optique sale fausse l’apprentissage du fond de référence.','A dirty optic spoils the reference-background learning.']},
+ {q:['Pendant l’apprentissage du fond de référence, le convoyeur doit être…','During reference-background learning, the conveyor must be…'],
+  o:[['Vide','Empty'],['Plein de verre vert','Full of green glass'],['Plein de céramique','Full of ceramic'],['Démonté','Dismantled']],a:0,
+  e:['Rien ne doit passer devant les caméras pendant l’apprentissage.','Nothing may pass in front of the cameras during learning.']},
+ {q:['Une valeur de calibration est anormale. Que faire ?','A calibration value is abnormal. What do you do?'],
+  o:[['La valider quand même','Validate it anyway'],['Ne pas valider et prévenir le responsable maintenance','Do not validate and inform the maintenance manager'],['La recopier d’une autre machine','Copy it from another machine'],['Redémarrer sans rien noter','Restart without noting anything']],a:1,
+  e:['On compare toujours aux valeurs et tolérances habituelles.','Always compare with the usual values and tolerances.']},
+ {q:['Que faut-il pour réaliser un test d’éjection en sécurité ?','What is needed to run an ejection test safely?'],
+  o:[['Zone dégagée et protections fermées','Clear area and guards closed'],['Les mains près des buses','Hands near the nozzles'],['Protections ouvertes','Guards open'],['Capot retiré pour mieux voir','Cover removed to see better']],a:0,
+  e:['Les jets d’air comprimé peuvent projeter des éclats.','Compressed-air jets can throw glass fragments.']},
+ {q:['En fin d’intervention, que faut-il faire ?','At the end of the job, what must you do?'],
+  o:[['Remettre les protections, déconsigner, vérifier l’écran et les alarmes','Refit guards, remove lockout, check screen and alarms'],['Partir sans rien vérifier','Leave without checking'],['Laisser les protections ouvertes','Leave the guards open'],['Garder le cadenas pour le lendemain','Keep the padlock on for tomorrow']],a:0,
+  e:['On vérifie aussi l’image et les alarmes avant de rendre la machine.','Also check the image and alarms before handing the machine back.']},
+ {q:['Pourquoi les pierres sont-elles un problème dans le calcin ?','Why are stones a problem in cullet?'],
+  o:[['Elles ne fondent pas et laissent des défauts dans le verre neuf','They do not melt and leave defects in new glass'],['Elles colorent le verre en vert','They turn the glass green'],['Elles rendent le verre plus léger','They make glass lighter'],['Elles améliorent la fusion','They improve melting']],a:0,
+  e:['Ce sont des infusibles : elles doivent être rejetées.','They are infusibles: they must be rejected.']},
+ {q:['Le Pyrex mélangé au verre blanc est…','Pyrex mixed with clear glass is…'],
+  o:[['Un infusible : il fond à bien plus haute température','An infusible: it melts at a much higher temperature'],['Un verre blanc comme un autre','Just another clear glass'],['Un verre brun','A brown glass'],['Un métal','A metal']],a:0,
+  e:['Il ressemble à du verre blanc mais doit être rejeté.','It looks like clear glass but must be rejected.']}
+];
+/* q = affirmation [fr,en] ; a = true si elle est vraie ; e = explication [fr,en] */
+/*
+ VF : même idée mais a = true (affirmation vraie) ou false (fausse).
+*/
+const VF=[
+ {q:['On peut intervenir sur la zone optique sans consigner si c’est rapide.','You may work in the optical area without lockout if it is quick.'],a:false,e:['Aucune intervention sans consignation, même courte.','No intervention without lockout, however short.']},
+ {q:['L’air comprimé peut rester sous pression même machine arrêtée.','Compressed air can stay pressurised even when the machine is stopped.'],a:true,e:['C’est de l’énergie stockée : purgez et contrôlez le manomètre.','It is stored energy: bleed it and check the gauge.']},
+ {q:['Le verre peut être recyclé à l’infini sans perte de qualité.','Glass can be recycled endlessly without loss of quality.'],a:true,e:['C’est un atout majeur du verre, à condition de bien trier.','A major strength of glass, provided it is well sorted.']},
+ {q:['Un cadenas de consignation peut être partagé entre collègues.','A lockout padlock can be shared between colleagues.'],a:false,e:['Un cadenas = une personne.','One padlock = one person.']},
+ {q:['Le Pyrex se trie avec le verre blanc.','Pyrex goes with clear glass.'],a:false,e:['C’est un infusible : il doit être rejeté.','It is an infusible: it must be rejected.']},
+ {q:['Il faut porter des lunettes de protection en zone machine.','Safety glasses must be worn in the machine area.'],a:true,e:['Éclats et poussières de verre : EPI obligatoires.','Glass splinters and dust: PPE is mandatory.']},
+ {q:['On peut nettoyer les optiques avec n’importe quel solvant.','Optics can be cleaned with any solvent.'],a:false,e:['Seulement un produit validé par le constructeur.','Only a manufacturer-approved product.']},
+ {q:['L’arrêt d’urgence sert à l’arrêt normal de la machine.','The emergency stop is for the normal stopping of the machine.'],a:false,e:['Arrêt normal depuis l’écran ; arrêt d’urgence seulement en cas de danger.','Normal stop from the screen; emergency stop only in case of danger.']},
+ {q:['Mélanger les couleurs de verre change la teinte du verre recyclé.','Mixing glass colours changes the colour of recycled glass.'],a:true,e:['D’où l’importance du tri par couleur.','Hence the importance of sorting by colour.']},
+ {q:['Les buses d’éjection fonctionnent à l’air comprimé.','The ejection nozzles work with compressed air.'],a:true,e:['Un jet d’air éjecte chaque indésirable détecté.','A jet of air ejects each detected contaminant.']},
+ {q:['Les bouchons métalliques sont des indésirables dans le calcin.','Metal caps are contaminants in cullet.'],a:true,e:['Le métal peut abîmer le four et perturber la fusion.','Metal can damage the furnace and disturb melting.']},
+ {q:['La céramique fond plus facilement que le verre.','Ceramic melts more easily than glass.'],a:false,e:['Elle fond à plus haute température et laisse des inclusions.','It melts at a higher temperature and leaves inclusions.']},
+ {q:['Après une intervention, on peut redémarrer sans remettre les protections.','After a job you may restart without refitting the guards.'],a:false,e:['On remet les protections, puis on déconsigne.','Refit the guards, then remove the lockout.']},
+ {q:['En cas de doute, on continue seul pour gagner du temps.','When in doubt, carry on alone to save time.'],a:false,e:['On s’arrête et on appelle le référent.','Stop and call the referent.']},
+ {q:['Le manomètre doit indiquer 0 bar avant de démonter sur le circuit d’air.','The gauge must read 0 bar before dismantling on the air circuit.'],a:true,e:['C’est la preuve que le circuit est purgé.','It proves the circuit is bled.']},
+ {q:['Le plastique a sa place dans le calcin.','Plastic belongs in cullet.'],a:false,e:['Il perturbe la fusion : il doit être rejeté.','It disturbs melting: it must be rejected.']}
+];
+/*
+ Moteur du quiz : quizStart(kind) prépare la partie, quizShow() affiche la question + lance le chrono,
+ quizAnswer(i) corrige (i = -1 si le temps est écoulé), quizNext() passe à la suivante, quizEnd() affiche le résultat.
+*/
+let Q=null;   // état de la partie de quiz / vrai-faux en cours
+function quizStart(kind){
+  const bank=kind==='vf'?VF:QUIZ;
+  const qs=shuffle(bank.slice()).slice(0,10).map(q=>kind==='vf'
+    ?{q:q.q,e:q.e,o:[{t:['Vrai','True'],c:q.a},{t:['Faux','False'],c:!q.a}]}              // vrai/faux : 2 boutons fixes
+    :{q:q.q,e:q.e,o:shuffle(q.o.map((t,i)=>({t,c:i===q.a})))});                            // quiz : réponses mélangées
+  if(Q) clearInterval(Q.timer);
+  Q={kind,qs,i:0,score:0,ok:0,streak:0,left:0,total:kind==='vf'?12:20,locked:false,timer:null};
+  gFrame(G2NAME[kind][0],G2NAME[kind][1],'<div id="qz"></div>');
+  quizShow(); g2Board(kind,'g2lb');
+}
+function quizShow(){                       // affiche la question courante et lance le chrono
+  const me=Q, box=$('qz'); if(!me||!box) return;
+  const q=me.qs[me.i]; me.locked=false; me.left=me.total;
+  box.innerHTML=`<div class="row" style="justify-content:space-between"><b>${L('Question','Question')} ${me.i+1}/${me.qs.length}</b><span class="meta">Score ${me.score}${me.streak>1?' · 🔥 x'+me.streak:''}</span></div>
+   <div class="qbar"><div id="qbar" style="width:100%"></div></div>
+   <p style="font-size:1.05rem;font-weight:600;margin:10px 0">${esc(L(q.q[0],q.q[1]))}</p>
+   <div id="qopts">${q.o.map((o,i)=>`<button class="qopt" onclick="quizAnswer(${i})">${esc(L(o.t[0],o.t[1]))}</button>`).join('')}</div><div id="qfb"></div>`;
+  clearInterval(me.timer);
+  const t0=Date.now();
+  me.timer=setInterval(()=>{
+    if(Q!==me||!box.isConnected){ clearInterval(me.timer); return; }   // on a quitté la page : on arrête le chrono
+    me.left=Math.max(0,me.total-(Date.now()-t0)/1000);
+    const b=$('qbar'); if(b) b.style.width=(me.left/me.total*100)+'%';
+    if(me.left<=0) quizAnswer(-1);                                        // temps écoulé = mauvaise réponse
+  },100);
+}
+function quizAnswer(i){                    // i = bouton choisi (-1 si temps écoulé)
+  const me=Q; if(!me||me.locked) return; me.locked=true; clearInterval(me.timer);
+  const q=me.qs[me.i], good=i>=0&&q.o[i].c;
+  let pts=0;
+  if(good){ pts=10+Math.ceil(me.left/me.total*5)+Math.min(me.streak,5)*2; me.score+=pts; me.ok++; me.streak++; }   // 10 pts + bonus rapidité + bonus série
+  else me.streak=0;
+  document.querySelectorAll('#qopts .qopt').forEach((b,k)=>{ b.disabled=true; if(q.o[k].c) b.classList.add('good'); else if(k===i) b.classList.add('bad'); });
+  const last=me.i>=me.qs.length-1;
+  $('qfb').innerHTML=`<div class="box ${good?'':'danger'}" style="${good?'border-left-color:var(--ok);background:rgba(26,138,74,.14);color:var(--text)':''}"><b>${good?L('Bonne réponse ! +'+pts,'Correct! +'+pts):(i<0?L('Temps écoulé.','Time is up.'):L('Raté.','Not quite.'))}</b><br>${esc(L(q.e[0],q.e[1]))}</div>
+   <div style="margin-top:10px;text-align:right"><button class="primary" onclick="${last?'quizEnd()':'quizNext()'}">${last?L('Voir le résultat','See result'):L('Suivante →','Next →')}</button></div>`;
+}
+function quizNext(){ if(!Q) return; Q.i++; quizShow(); }
+function quizEnd(){                        // écran de résultat + enregistrement du score
+  const me=Q; if(!me) return; clearInterval(me.timer);
+  const nb=g2Record(me.kind,me.score), n=me.qs.length, r=me.ok/n;
+  const msg=r>=.9?L('Excellent, vous maîtrisez !','Excellent, you know your stuff!'):r>=.6?L('Bien joué, continuez à réviser.','Well done, keep revising.'):L('À revoir : relisez les tutos et rejouez !','Needs work: reread the tutorials and play again!');
+  $('qz').innerHTML=`<div style="text-align:center;padding:10px 0"><div style="font-size:2.4rem;font-weight:800">${me.score} pts</div>
+   <p>${me.ok}/${n} ${L('bonnes réponses','correct answers')}${nb?' · 🏆 '+L('Nouveau record !','New best!'):''}</p><p class="meta">${msg}</p>
+   <div class="row" style="justify-content:center"><button class="primary" onclick="quizStart('${me.kind}')">${L('Rejouer','Play again')}</button><button onclick="renderGame()">${L('Autres jeux','Other games')}</button></div></div>`;
+  g2Board(me.kind,'g2lb');
+}
+
+/* ---------- MÉMOIRE : 8 paires pictogramme ↔ nom ---------- */
+/*
+ ===================== MEMOIRE =====================
+ MEM = les 8 paires [pictogramme emoji, [nom FR, nom EN]]. POUR CHANGER UNE PAIRE : modifier l'emoji ou le nom.
+ (Les emoji sont des caractères : pour en choisir un, copiez-le depuis n'importe quel clavier d'emoji.)
+*/
+const MEM=[['🥽',['Lunettes','Safety glasses']],['🧤',['Gants','Gloves']],['🔒',['Cadenas','Padlock']],['🎧',['Casque antibruit','Ear defenders']],
+           ['💨',['Air comprimé','Compressed air']],['📷',['Caméra','Camera']],['🔧',['Outillage','Tools']],['🧹',['Nettoyage','Cleaning']]];
+/*
+ memStart() mélange et distribue les cartes, memDraw() redessine la grille, memFlip(i) retourne une carte
+ (à la 2e on teste la paire), memEnd() calcule le score selon les coups et le temps.
+*/
+let M=null;   // état de la partie de mémoire en cours
+function memStart(){
+  if(M) clearInterval(M.timer);
+  const cards=[]; MEM.forEach((m,i)=>{ cards.push({p:i,ico:true,t:m[0]}); cards.push({p:i,ico:false,t:m[1]}); });   // p = numéro de paire
+  M={cards:shuffle(cards),open:[],found:{},nf:0,moves:0,t0:0,lock:false,timer:null,over:false};
+  gFrame('Mémoire','Memory',`<p class="meta" style="margin:0 0 8px">${L('Retrouvez les paires : chaque pictogramme va avec son nom. Moins de coups et de temps = plus de points.','Find the pairs: each icon goes with its name. Fewer moves and less time = more points.')}</p>
+   <div class="row" style="justify-content:space-between;margin-bottom:8px"><span id="mhud"></span><button class="small" onclick="memStart()">${L('Recommencer','Restart')}</button></div>
+   <div id="mgrid" class="mgrid"></div><div id="mfb"></div>`);
+  memDraw(); g2Board('memory','g2lb');
+}
+function memHud(){ const h=$('mhud'); if(!h||!M) return; const sec=M.t0?Math.round(((M.over?M.tend:Date.now())-M.t0)/1000):0; h.textContent=L('Coups','Moves')+' '+M.moves+' · '+L('Temps','Time')+' '+sec+' s'; }
+function memDraw(){                        // redessine la grille de cartes
+  const g=$('mgrid'); if(!g||!M) return;
+  g.innerHTML=M.cards.map((c,i)=>{ const up=M.found[i]||M.open.includes(i);
+    return `<button class="mcard ${c.ico?'ico':'txt'} ${up?'up':''} ${M.found[i]?'done':''}" onclick="memFlip(${i})" ${up?'disabled':''}>${up?esc(c.ico?c.t:L(c.t[0],c.t[1])):'?'}</button>`; }).join('');
+  memHud();
+}
+function memFlip(i){                       // retourne une carte ; à la 2e carte on teste la paire
+  const m=M; if(!m||m.lock||m.over||m.found[i]||m.open.includes(i)) return;
+  if(!m.t0){ m.t0=Date.now(); m.timer=setInterval(()=>{ if(M!==m||!$('mhud')){ clearInterval(m.timer); return; } memHud(); },500); }
+  m.open.push(i);
+  if(m.open.length===2){
+    m.moves++; const [a,b]=m.open;
+    if(m.cards[a].p===m.cards[b].p){ m.found[a]=m.found[b]=true; m.nf++; m.open=[]; if(m.nf===MEM.length) memEnd(); }   // paire trouvée
+    else { m.lock=true; setTimeout(()=>{ if(M===m){ m.open=[]; m.lock=false; memDraw(); } },900); }                       // raté : on recache après 0,9 s
+  }
+  memDraw();
+}
+function memEnd(){
+  const m=M; m.over=true; m.tend=Date.now(); clearInterval(m.timer);
+  const sec=Math.round((m.tend-m.t0)/1000), pts=Math.max(50,Math.round(500-(m.moves-MEM.length)*15-sec*2));   // 500 pts max, moins avec coups et secondes
+  const nb=g2Record('memory',pts);
+  $('mfb').innerHTML=`<div class="box" style="border-left-color:var(--ok);background:rgba(26,138,74,.14);color:var(--text);margin-top:12px"><b>${L('Bravo !','Well done!')} ${pts} pts</b>${nb?' · 🏆 '+L('Nouveau record !','New best!'):''}<br>${m.moves} ${L('coups','moves')} · ${sec} s
+   <div style="margin-top:8px"><button class="primary" onclick="memStart()">${L('Rejouer','Play again')}</button></div></div>`;
+  g2Board('memory','g2lb');
+}
+
+/* ---------- DANS L’ORDRE : remettre les étapes d’une procédure dans le bon ordre ---------- */
+/* t = titre [fr,en] ; s = étapes dans le BON ordre [[fr,en],…] */
+/*
+ ===================== DANS L'ORDRE =====================
+ ORD : t = titre de la procédure [fr,en] ; s = liste des étapes dans le BON ordre [[fr,en],...].
+ Le jeu les mélange et le joueur doit les toucher dans l'ordre correct. POUR AJOUTER UNE PROCEDURE : copier une entrée.
+*/
+const ORD=[
+ {t:['Consignation (LOTO)','Lockout / tagout'],s:[
+  ['Prévenir le poste de conduite et arrêter l’alimentation en verre','Warn the control room and stop the glass feed'],
+  ['Arrêter la machine par la séquence d’arrêt normale','Stop the machine with the normal stop sequence'],
+  ['Ouvrir le sectionneur général et poser son cadenas + étiquette','Open the main disconnect and fit your padlock + tag'],
+  ['Isoler et purger l’air comprimé (manomètre à 0 bar)','Isolate and bleed compressed air (gauge at 0 bar)'],
+  ['Faire l’essai de démarrage (VAT) : la machine ne doit pas démarrer','Run the start test (VAT): the machine must not start']]},
+ {t:['Nettoyage de la zone optique','Cleaning the optical area'],s:[
+  ['Consigner la machine','Lock out the machine'],
+  ['Aspirer poussières et éclats autour de la zone de détection','Vacuum dust and splinters around the detection area'],
+  ['Nettoyer les vitres avec un chiffon propre et le produit adapté','Clean the windows with a clean cloth and the right product'],
+  ['Contrôler l’absence de traces, de buée ou de rayures','Check for marks, mist or scratches'],
+  ['Remettre les protections, déconsigner et vérifier l’écran','Refit guards, remove lockout and check the screen']]},
+ {t:['Calibration du fond de référence','Reference-background calibration'],s:[
+  ['Vérifier que la zone optique est propre','Check the optical area is clean'],
+  ['Vider le convoyeur / la goulotte','Empty the belt / chute'],
+  ['Lancer la procédure de calibration depuis le menu','Start the calibration from the menu'],
+  ['Comparer les valeurs obtenues aux tolérances','Compare the values obtained with the tolerances'],
+  ['Faire un essai avec du verre connu','Run a test with known glass']]},
+ {t:['Contrôle des buses d’éjection','Ejection nozzle check'],s:[
+  ['Vérifier la pression d’air d’alimentation','Check the supply air pressure'],
+  ['Consigner et purger l’air avant tout démontage','Lock out and bleed the air before dismantling'],
+  ['Contrôler visuellement les buses suspectes','Visually inspect the suspect nozzles'],
+  ['Remplacer les buses défectueuses','Replace the faulty nozzles'],
+  ['Relancer le test d’éjection et noter l’intervention','Run the ejection test again and log the job']]}
+];
+/*
+ ordStart / ordRound / ordDraw / ordTap / ordNext / ordEnd : démarrer, préparer une procédure, dessiner la liste,
+ gérer un clic, passer à la suivante, afficher le score (maximum 300 points).
+*/
+let O=null;   // état de la partie « Dans l’ordre » en cours
+function ordStart(){
+  const rounds=shuffle(ORD.slice()).slice(0,3);          // 3 procédures tirées au hasard
+  O={rounds,r:0,total:0,cur:null};
+  gFrame('Dans l’ordre','Put in order','<div id="ordbox"></div>');
+  ordRound(); g2Board('order','g2lb');
+}
+function ordRound(){                       // prépare la procédure courante (étapes mélangées)
+  const p=O.rounds[O.r];
+  O.cur={p,order:shuffle(p.s.map((s,i)=>i)),next:0,mist:0,pts:0};
+  ordDraw();
+}
+function ordDraw(){
+  const c=O.cur, p=c.p, box=$('ordbox'); if(!box) return;
+  const done=c.next>=p.s.length, last=O.r>=O.rounds.length-1;
+  box.innerHTML=`<div class="row" style="justify-content:space-between"><b>${L('Procédure','Procedure')} ${O.r+1}/${O.rounds.length} : ${esc(L(p.t[0],p.t[1]))}</b><span class="meta">Score ${O.total}</span></div>
+   <p class="meta" style="margin:6px 0">${L('Touchez les étapes dans le bon ordre, de la première à la dernière.','Tap the steps in the right order, from first to last.')}</p>
+   <ol class="ordlist">${p.s.slice(0,c.next).map(s=>`<li>${esc(L(s[0],s[1]))}</li>`).join('')}</ol>
+   ${done?'':`<div>${c.order.filter(ix=>ix>=c.next).map(ix=>`<button class="qopt" onclick="ordTap(${ix})">${esc(L(p.s[ix][0],p.s[ix][1]))}</button>`).join('')}</div>`}
+   <div id="ordfb" style="min-height:1.4em;color:var(--danger-line);font-size:.9rem"></div>
+   ${done?`<div class="box" style="border-left-color:var(--ok);background:rgba(26,138,74,.14);color:var(--text)"><b>${L('Procédure réussie !','Procedure complete!')} +${c.pts} pts</b> (${c.mist} ${L('erreur(s)','mistake(s)')})
+     <div style="margin-top:8px"><button class="primary" onclick="${last?'ordEnd()':'ordNext()'}">${last?L('Voir le résultat','See result'):L('Procédure suivante →','Next procedure →')}</button></div></div>`:''}`;
+}
+function ordTap(ix){                       // ix = index de l’étape touchée (dans l’ordre correct d’origine)
+  const c=O&&O.cur; if(!c||c.next>=c.p.s.length) return;
+  if(ix===c.next){                         // bonne étape
+    c.next++;
+    if(c.next>=c.p.s.length){ c.pts=Math.max(10,100-15*c.mist); O.total+=c.pts; }   // 100 pts par procédure, -15 par erreur (min. 10)
+    ordDraw();
+  } else {                                 // mauvaise étape
+    c.mist++; const f=$('ordfb'); if(f) f.textContent=L('Pas encore : ce n’est pas l’étape suivante.','Not yet: that is not the next step.');
+  }
+}
+function ordNext(){ O.r++; ordRound(); }
+function ordEnd(){
+  const nb=g2Record('order',O.total);
+  $('ordbox').innerHTML=`<div style="text-align:center;padding:10px 0"><div style="font-size:2.4rem;font-weight:800">${O.total} pts</div>
+   <p class="meta">${nb?'🏆 '+L('Nouveau record !','New best!')+' · ':''}${L('Maximum possible : 300 pts','Maximum possible: 300 pts')}</p>
+   <div class="row" style="justify-content:center"><button class="primary" onclick="ordStart()">${L('Rejouer','Play again')}</button><button onclick="renderGame()">${L('Autres jeux','Other games')}</button></div></div>`;
+  g2Board('order','g2lb');
+}
+
+/*
+ ===================== DEMARRAGE =====================
+ 1) Test de la photo de fond : si fond-verre.jpg se charge, on active la classe "photo" sur <html>.
+ 2) boot() lance l'appli (connexion ou accueil).
+ 3) Enregistrement du service worker sw.js : c'est lui qui permet d'ouvrir l'appli hors connexion
+    et de l'installer comme une application.
+*/
 (function(){var i=new Image();i.onload=function(){document.documentElement.classList.add('photo');};i.src='fond-verre.jpg';})();
 boot();
 if('serviceWorker' in navigator){
