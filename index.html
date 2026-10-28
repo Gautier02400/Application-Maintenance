@@ -36,6 +36,11 @@
    c) Les photos que vous ajoutez vous-même sont réduites puis stockées dans la fiche.
    d) Les pièces du jeu "Trieur" sont dessinées au pinceau (canvas) dans la fonction gItem.
    e) Le motif de verre en filigrane sur le fond est un SVG intégré dans le CSS.
+   f) LE LOGO 3D (globe qui tourne) est dessiné par le code dans un canvas : voir "LOGO_CFG" dans le script (section 4, vers
+      la fin) pour régler vitesse, taille, éclatement, nombre de triangles, anneau... et LOGO_COL / RING_COL pour les couleurs.
+      Pour l'afficher à un nouvel endroit : ajouter <div class="logo3d"></div> dans une page, il devient un globe tout seul.
+   g) Les nouveautés visuelles (dégradés, animations, carte d'accueil "hero", fenêtre du logo, confettis) sont regroupées :
+      CSS -> bloc "SIBELCO 2.0" à la fin de la balise style ; JS -> section 4 à la fin du script.
 ============================================================================
 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -468,7 +473,12 @@ a.btn.primary{background:linear-gradient(135deg,var(--accent),#2d8fe0);color:var
 .tiles .card:nth-child(4),.grid .card:nth-child(4){animation-delay:.18s}.tiles .card:nth-child(5),.grid .card:nth-child(5){animation-delay:.24s}
 .tiles .card:nth-child(n+6),.grid .card:nth-child(n+6){animation-delay:.3s}
 
-/* ===== LOGO 3D ===== */
+/* ===== LOGO 3D : mise en page autour du canvas =====
+ .logo3d = le cadre carré (240 px max) qui contient le dessin 3D ; changez "240px" pour agrandir/réduire PARTOUT.
+ .logo3d.big = taille dans la fenêtre agrandie ; .shadow = ombre ovale sous le globe ; .hint = "Cliquez ou faites glisser".
+ .wordmark = le texte SIBELCO sous le globe (du vrai texte, pas une image : dégradé bleu, police Arial Black).
+ touch-action:pan-y = sur téléphone, glisser le doigt vers le haut/bas fait défiler la page, vers la gauche/droite tourne le logo. */
+
 .logo3d{position:relative;width:min(240px,100%);aspect-ratio:1;margin:0 auto 20px;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;-webkit-tap-highlight-color:transparent;border-radius:50%}
 .logo3d:active{cursor:grabbing}
 .logo3d:focus-visible{outline-offset:-6px}
@@ -502,7 +512,9 @@ a.btn.primary{background:linear-gradient(135deg,var(--accent),#2d8fe0);color:var
 .authcard h2{font-size:1.1rem;text-align:center;color:var(--muted);font-weight:600}
 .pwwrap{position:relative}
 .pwwrap input{padding-right:42px}
-.pweye{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;padding:6px 8px;opacity:.55;box-shadow:none!important}
+.pweye{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;padding:6px 8px;color:var(--muted);box-shadow:none!important;display:grid;place-items:center}
+.pweye:hover{color:var(--accent)}
+.pweye svg{display:block}
 .capswarn{color:var(--warn-line);margin-top:4px}
 
 /* Agrandissement du logo (clic sur le logo du bandeau) */
@@ -521,7 +533,13 @@ header .row{gap:6px;flex-wrap:nowrap}
 #bInstall{font-size:.72rem;padding:4px 10px;line-height:1.2;white-space:nowrap}
 .updbar{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;display:flex;gap:12px;align-items:center;background:var(--brand);color:#fff;padding:8px 10px 8px 18px;border-radius:999px;box-shadow:var(--shadow-hi);animation:pop .35s var(--ease);font-size:.9rem;max-width:94vw}
 .confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:100}
-@media (max-width:480px){#bInstall{display:none!important}}
+@media (max-width:480px){.instlbl{display:none}#bInstall{padding:6px 10px;font-size:.9rem}}
+.instov{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:16px;background:rgba(6,18,34,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadein .2s}
+.instbox{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-hi);padding:18px 18px 14px;max-width:440px;width:100%;max-height:90vh;overflow:auto;animation:pop .3s var(--ease)}
+.instbox h2{margin:0 0 8px;font-size:1.1rem}
+.instbox p{margin:6px 0;font-size:.92rem;line-height:1.45}
+.instbox .instnote{color:var(--muted);font-size:.82rem}
+.instbox .instact{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:14px}
 @media print{.logo3d,.logoov,.updbar,.confetti,.netpill,#bInstall{display:none!important}.hero{display:block}}
 
 /* Animations coupées si l'appareil demande de les réduire */
@@ -550,7 +568,7 @@ header .row{gap:6px;flex-wrap:nowrap}
       </h1>
       <div class="row">
         <span id="net" class="netpill hidden" role="status"></span>
-        <button id="bInstall" class="primary hidden" type="button"></button>
+        <button id="bInstall" class="primary" type="button"></button>
         <div class="lang" role="group" aria-label="Langue / Language">
           <button id="bFr" onclick="setLang('fr')">FR</button>
           <button id="bEn" onclick="setLang('en')">EN</button>
@@ -2408,6 +2426,41 @@ function ordEnd(){
  ============================================================================
 */
 
+/* ============================ COMMENT EST FAIT LE LOGO 3D ============================
+ Il n'y a AUCUNE image ni bibliothèque 3D (pas de Three.js) : tout est calculé et dessiné par le code, 60 fois par seconde,
+ dans un <canvas> (une zone de dessin). Les étapes, dans l'ordre :
+   1) LA FORME   : on part d'un "icosaèdre" (une boule à 20 faces triangulaires) qu'on découpe 3 fois en petits triangles
+                   -> environ 1300 triangles qui forment une sphère. Chaque sommet a 3 coordonnées (x, y, z).
+                   (voir LOGO_GEO ci-dessous ; calculé UNE seule fois au démarrage)
+   2) LA ROTATION: à chaque image, on fait tourner tous les points avec 2 angles : "yaw" (gauche-droite) et "pitch"
+                   (haut-bas). Quand vous glissez la souris, on ajoute à ces angles le déplacement de la souris.
+                   Quand vous lâchez, la vitesse de rotation (vy) diminue doucement = l'inertie.
+   3) LA PERSPECTIVE : les points proches de nous sont dessinés plus grands que ceux du fond (fonction prj).
+   4) LA LUMIERE : chaque triangle est plus ou moins clair selon qu'il est tourné vers la lumière (en haut à gauche).
+                   Couleur = mélange entre LOGO_COL.dark (bleu foncé) et LOGO_COL.light (bleu clair), + un reflet blanc.
+   5) L'EFFET "LOGO SIBELCO" : chaque triangle est dessiné RETRECI vers son centre (variable s) : on voit du blanc entre
+                   les triangles, comme sur votre logo. Ceux tournés vers le bord de la boule sont plus petits.
+   6) L'ANNEAU   : un ruban en croissant (fin aux 2 bouts, large au milieu) tourne autour. La moitié derrière la boule est
+                   dessinée AVANT elle, la moitié devant APRES -> l'anneau passe bien devant/derrière.
+   7) LE CLIC    : un "ressort" (spring) pousse les triangles vers l'extérieur puis les ramène (= l'éclatement), la vitesse
+                   de rotation est boostée (spin), un halo (glow) et des ondes (ripples) sont dessinés.
+ Si le dessin échoue (navigateur très ancien), le code affiche simplement l'image icon-512.png à la place.
+
+ >>> POUR MODIFIER : changez uniquement les chiffres de LOGO_CFG ci-dessous (le reste n'a pas besoin d'être touché). <<<
+===================================================================================== */
+const LOGO_CFG = {
+  size    : 0.29,   // taille du globe dans son cadre (0.20 = petit, 0.35 = très grand ; au-delà l'anneau est coupé)
+  idle    : 0.007,  // vitesse de rotation quand on ne touche pas (0 = immobile, 0.02 = rapide)
+  spin    : 0.38,   // force du tour sur lui-même au clic (0.2 = doux, 0.6 = toupie)
+  explode : 0.30,   // force de l'éclatement au clic (0 = aucun, 0.5 = gros éclatement)
+  detail  : 3,      // nombre de triangles : 2 = 320 (facetté, rapide), 3 = 1280 (joli), 4 = 5120 (lent sur vieux téléphone)
+  tri     : 0.54,   // taille des triangles : 0.3 = beaucoup de blanc entre eux, 0.95 = globe presque plein
+  ringR   : 1.45,   // rayon de l'anneau (1 = colle au globe, 1.8 = très large)
+  ringW   : 0.34,   // épaisseur du croissant (0.15 = fin, 0.5 = épais)
+  ringArc : 4.9,    // longueur du croissant en radians (3.1 = demi-tour, 6.28 = anneau complet)
+  ringTilt: -0.5    // inclinaison de l'anneau sur le côté (0 = horizontal)
+};
+
 /* ---------- LOGO 3D ----------
  Principe : une sphère faite de ~1300 petits triangles (icosphère), un anneau en croissant autour,
  le tout éclairé et dessiné face par face. Interactions :
@@ -2416,7 +2469,9 @@ function ordEnd(){
    - SURVOL                   : le globe s'incline légèrement vers le pointeur
    - CLAVIER                  : flèches = tourner, Entrée/Espace = éclat
  Pour changer les couleurs : voir LOGO_COL (bleu foncé -> bleu clair) et RING_COL.            */
+/* Couleurs du globe (rouge,vert,bleu de 0 à 255). Pour un autre bleu, changez ces 6 chiffres. */
 const LOGO_COL = { dark:[5,48,126], light:[118,204,250] };
+/* Couleurs de l'anneau (même principe) */
 const RING_COL = { dark:[8,42,104], light:[38,122,212] };
 const LOGO_GEO = (()=>{
   const nrm = v => { const l=Math.hypot(v[0],v[1],v[2])||1; return [v[0]/l,v[1]/l,v[2]/l]; };
@@ -2426,7 +2481,7 @@ const LOGO_GEO = (()=>{
   const cache={};
   const mid=(a,b)=>{ const k=a<b?a+'_'+b:b+'_'+a; if(cache[k]!==undefined) return cache[k];
     V.push(nrm([(V[a][0]+V[b][0])/2,(V[a][1]+V[b][1])/2,(V[a][2]+V[b][2])/2])); return cache[k]=V.length-1; };
-  for(let s=0;s<3;s++){ const N=[]; for(const [a,b,c] of F){ const ab=mid(a,b),bc=mid(b,c),ca=mid(c,a); N.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca]); } F=N; }
+  for(let s=0;s<LOGO_CFG.detail;s++){ const N=[]; for(const [a,b,c] of F){ const ab=mid(a,b),bc=mid(b,c),ca=mid(c,a); N.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca]); } F=N; }
   const faces=F.map((f,i)=>({ i:f, n:nrm([V[f[0]][0]+V[f[1]][0]+V[f[2]][0],V[f[0]][1]+V[f[1]][1]+V[f[2]][1],V[f[0]][2]+V[f[1]][2]+V[f[2]][2]]),
                               r:((Math.imul(i+1,2654435761)>>>0)%10007)/10007 }));
   return { V, faces };
@@ -2444,18 +2499,22 @@ function Logo3D(host,opt){
   const { V, faces } = LOGO_GEO, nV=V.length;
   const PX=new Float32Array(nV), PY=new Float32Array(nV), PZ=new Float32Array(nV);
   let W=0, DPR=Math.min(2,window.devicePixelRatio||1);
-  // état de rotation / animation
-  let yaw=-0.5, pitch=0.32, vy=reduce?0:0.007, vp=0, hx=0, hy=0, hxT=0, hyT=0;
+  // ETAT : yaw/pitch = angles actuels ; vy/vp = vitesses (l'inertie) ; spring = éclatement ; glow/pulse = lueur du clic
+  let yaw=-0.5, pitch=0.32, vy=reduce?0:LOGO_CFG.idle, vp=0, hx=0, hy=0, hxT=0, hyT=0;
   let spring=0, springV=0, glow=0, pulse=0, ringSpin=0; const ripples=[];
   let drag=false, lx=0, ly=0, moved=0, t0=0, lastT=performance.now(), running=true, ptrId=null;
-  const IDLE = reduce?0:0.007;
+  const IDLE = reduce?0:LOGO_CFG.idle;
 
+  // fit() : adapte la résolution du canvas à la taille réelle (et aux écrans Retina) -> le dessin reste net
   function fit(){ const w=Math.max(90,Math.round(host.clientWidth)); if(w!==W){ W=w; cv.width=cv.height=Math.round(W*DPR); cv.style.width=cv.style.height=W+'px'; } }
+  // burst() = ce qui se passe au CLIC : éclatement + rotation rapide + lueur + onde. Appelé aussi par Entrée/Espace.
   function burst(dir){
     if(host._hint){ host._hint.classList.add('gone'); }
-    springV=reduce?0:0.3; glow=1; pulse=1; ripples.push({t:0});
-    if(!reduce) vy=(dir||1)*(0.38+Math.random()*0.12);
+    springV=reduce?0:LOGO_CFG.explode; glow=1; pulse=1; ripples.push({t:0});
+    if(!reduce) vy=(dir||1)*(LOGO_CFG.spin+Math.random()*0.12);
   }
+  // SOURIS / DOIGT : pointerdown = on attrape, pointermove = on tourne, pointerup = on lâche.
+  // Bougé de moins de 6 px en moins de 0,45 s = c'est un CLIC (burst) et non un glissement.
   host.addEventListener('pointerdown',e=>{
     drag=true; ptrId=e.pointerId; lx=e.clientX; ly=e.clientY; moved=0; t0=performance.now();
     try{ host.setPointerCapture(e.pointerId); }catch(x){}
@@ -2490,14 +2549,16 @@ function Logo3D(host,opt){
   const hx0=LX/HL, hy0=LY/HL, hz0=(LZ+1)/HL;
   const DCAM=3.6;
 
+  // frame() = UNE IMAGE d'animation, appelée ~60 fois/s par le navigateur (requestAnimationFrame).
+  // Elle s'arrête toute seule quand le logo disparaît de la page (host.isConnected).
   function frame(now){
     if(!host.isConnected){ running=false; return; }
     requestAnimationFrame(frame);
     if(document.hidden) { lastT=now; return; }
     const dt=Math.min(3,(now-lastT)/16.667); lastT=now;
-    fit(); const S=W*DPR, cx=S/2, cy=S/2, R0=S*0.29*(1+pulse*0.05);
+    fit(); const S=W*DPR, cx=S/2, cy=S/2, R0=S*LOGO_CFG.size*(1+pulse*0.05);
 
-    // --- mouvement ---
+    // --- 1. MOUVEMENT : inertie (la vitesse revient doucement vers la vitesse de repos IDLE), ressort, lueur ---
     if(!drag){
       yaw+=vy*dt; pitch+=vp*dt;
       vy+=(IDLE-vy)*0.022*dt; vp*=Math.pow(0.92,dt);
@@ -2520,7 +2581,7 @@ function Logo3D(host,opt){
 
     // --- anneau en croissant : partie ARRIERE (z<0) dessinée avant le globe ---
     const ringQuads=[];
-    { const N=56, arc=4.9, Rr=1.45, Wm=0.34, tz=-0.5;
+    { const N=56, arc=LOGO_CFG.ringArc, Rr=LOGO_CFG.ringR, Wm=LOGO_CFG.ringW, tz=LOGO_CFG.ringTilt;
       const cz=Math.cos(tz), sz=Math.sin(tz);
       const pt=(a,r)=>{ const x=Math.cos(a)*r, y=0, z=Math.sin(a)*r;     // anneau à plat, puis incliné sur le côté
         return rot(x*cz-y*sz, x*sz+y*cz, z); };
@@ -2541,9 +2602,10 @@ function Logo3D(host,opt){
     };
     drawRing(false);
 
-    // --- globe : rotation de tous les sommets puis dessin des faces tournées vers nous ---
+    // --- 3. GLOBE : rotation de tous les sommets puis dessin des faces tournées vers nous ---
     for(let i=0;i<nV;i++){ const v=V[i], r=rot(v[0],v[1],v[2]); PX[i]=r[0]; PY[i]=r[1]; PZ[i]=r[2]; }
     const exp=Math.max(-0.04,spring);
+    // pour chaque petit triangle : tourné vers nous ? quelle lumière ? quelle taille ? -> puis on le dessine
     for(const f of faces){
       const n=rot(f.n[0],f.n[1],f.n[2]);
       if(n[2]<=-0.02 && exp<0.05) continue;
@@ -2551,7 +2613,7 @@ function Logo3D(host,opt){
       const mx=(PX[a]+PX[b]+PX[c])/3, my=(PY[a]+PY[b]+PY[c])/3, mz=(PZ[a]+PZ[b]+PZ[c])/3;
       const lam=Math.max(0,n[0]*lx0+n[1]*ly0+n[2]*lz0);
       const face=Math.max(0,Math.min(1,n[2]*1.5+0.1));
-      const s=(0.54+0.44*Math.min(1,0.4*face+0.6*lam+0.1))*(0.86+0.14*f.r);           // taille du triangle (effet "pixels")
+      const s=(LOGO_CFG.tri+(0.98-LOGO_CFG.tri)*Math.min(1,0.4*face+0.6*lam+0.1))*(0.86+0.14*f.r);           // taille du triangle (effet "pixels")
       const off=exp*(0.5+f.r*1.1);                                                         // éclatement au clic
       const spec=Math.pow(Math.max(0,n[0]*hx0+n[1]*hy0+n[2]*hz0),28);
       let col=mix(LOGO_COL.dark,LOGO_COL.light,Math.max(0,Math.min(1,0.06+lam*0.9+(f.r-0.5)*0.26)));
@@ -2566,7 +2628,7 @@ function Logo3D(host,opt){
     }
     drawRing(true);
 
-    // --- ondes lumineuses du clic ---
+    // --- 5. ONDES lumineuses du clic (cercles qui s'agrandissent en s'effaçant) ---
     for(let i=ripples.length-1;i>=0;i--){ const r=ripples[i]; r.t+=dt;
       if(r.t>40){ ripples.splice(i,1); continue; }
       ctx.strokeStyle=`rgba(60,160,240,${Math.pow(1-r.t/40,1.5)*0.7})`; ctx.lineWidth=Math.max(1,2.2*DPR*(1-r.t/60));
@@ -2633,12 +2695,72 @@ function confetti(){
 /* ---------- HORS LIGNE / INSTALLATION / MISE A JOUR ---------- */
 let deferredInstall=null;
 function netUpdate(){ const n=$('net'); if(!n) return; n.textContent='● '+L('Hors ligne','Offline'); n.classList.toggle('hidden',navigator.onLine!==false); }
-function instUpdate(){ const b=$('bInstall'); if(!b) return; b.textContent='⤓ '+L('Installer','Install'); b.classList.toggle('hidden',!deferredInstall); }
+function isStandalone(){ return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true; }
+function instUpdate(){
+  const b=$('bInstall'); if(!b) return;
+  const st=isStandalone(), lbl=st?L('Désinstaller','Uninstall'):L('Installer','Install');
+  b.innerHTML='<span aria-hidden="true">'+(st?'✕':'⤓')+'</span><span class="instlbl"> '+lbl+'</span>';
+  b.title=lbl; b.setAttribute('aria-label',lbl);
+  b.classList.toggle('primary',!st);
+  b.classList.remove('hidden');
+}
 window.addEventListener('online',()=>{ netUpdate(); toast(L('Connexion rétablie','Back online')); });
 window.addEventListener('offline',()=>{ netUpdate(); toast(L('Mode hors ligne : l’appli reste utilisable','Offline mode: the app still works')); });
 window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; instUpdate(); });
 window.addEventListener('appinstalled',()=>{ deferredInstall=null; instUpdate(); toast(L('Application installée','App installed')); });
-$('bInstall').addEventListener('click',async()=>{ if(!deferredInstall) return; deferredInstall.prompt(); try{ await deferredInstall.userChoice; }catch(e){} deferredInstall=null; instUpdate(); });
+try{ matchMedia('(display-mode: standalone)').addEventListener('change',instUpdate); }catch(e){}
+
+/* Fenêtre d'aide Installer / Désinstaller.
+   Un site web ne peut pas désinstaller lui-même une appli : seul l'appareil le peut. On explique donc comment faire,
+   et on propose en plus de supprimer la copie hors ligne gardée par l'appli (service worker + cache). */
+function instPlatform(){
+  const ua=navigator.userAgent||'';
+  if(/iphone|ipad|ipod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)) return 'ios';
+  if(/android/i.test(ua)) return 'android';
+  return 'desktop';
+}
+function instClose(){ const o=$('instov'); if(o) o.remove(); document.removeEventListener('keydown',instKey); }
+function instKey(e){ if(e.key==='Escape') instClose(); }
+async function instClearOffline(){
+  if(!confirm(L('Supprimer la copie hors ligne de l’appli ? Vos données (comptes, tutos) ne sont pas touchées, mais l’appli ne s’ouvrira plus sans Internet tant que vous ne l’aurez pas rouverte avec une connexion.','Delete the app’s offline copy? Your data (accounts, tutorials) is not affected, but the app will not open without Internet until you reopen it while online.'))) return;
+  try{
+    if('serviceWorker' in navigator){ const regs=await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r=>r.unregister())); }
+    if(window.caches){ const ks=await caches.keys(); await Promise.all(ks.map(k=>caches.delete(k))); }
+    toast(L('Copie hors ligne supprimée','Offline copy deleted'));
+  }catch(e){ toast(L('Impossible de supprimer la copie hors ligne','Could not delete the offline copy')); }
+  instClose();
+}
+function instDialog(mode){
+  instClose();
+  const pf=instPlatform(), un=mode==='uninstall';
+  const steps={
+    install:{
+      ios:L('Dans <b>Safari</b>, appuyez sur le bouton <b>Partager</b> (carré avec une flèche vers le haut), puis sur <b>« Sur l’écran d’accueil »</b>, puis <b>Ajouter</b>.','In <b>Safari</b>, tap the <b>Share</b> button (square with an up arrow), then <b>“Add to Home Screen”</b>, then <b>Add</b>.'),
+      android:L('Ouvrez le <b>menu ⋮</b> du navigateur (Chrome), puis appuyez sur <b>« Installer l’application »</b> (ou « Ajouter à l’écran d’accueil »).','Open the browser <b>⋮ menu</b> (Chrome), then tap <b>“Install app”</b> (or “Add to Home screen”).'),
+      desktop:L('Dans <b>Chrome</b> ou <b>Edge</b>, cliquez sur l’<b>icône d’installation</b> à droite de la barre d’adresse, ou ouvrez le <b>menu ⋮</b> puis <b>« Installer Tutos Maintenance »</b>.','In <b>Chrome</b> or <b>Edge</b>, click the <b>install icon</b> at the right of the address bar, or open the <b>⋮ menu</b> then <b>“Install Tutos Maintenance”</b>.')
+    },
+    uninstall:{
+      ios:L('Sur l’écran d’accueil, <b>appui long</b> sur l’icône de l’appli, puis <b>« Supprimer l’app »</b> et confirmez.','On the Home Screen, <b>long-press</b> the app icon, then <b>“Remove App”</b> and confirm.'),
+      android:L('Sur l’écran d’accueil ou dans la liste des applis, <b>appui long</b> sur l’icône, puis <b>« Désinstaller »</b> (ou « Supprimer »).','On the Home Screen or app list, <b>long-press</b> the icon, then <b>“Uninstall”</b> (or “Remove”).'),
+      desktop:L('Dans la fenêtre de l’appli, ouvrez le <b>menu ⋮</b> en haut à droite puis <b>« Désinstaller Tutos Maintenance »</b>. Vous pouvez aussi ouvrir <b>chrome://apps</b> (ou <b>edge://apps</b>), clic droit sur l’appli puis <b>Supprimer</b>.','In the app window, open the <b>⋮ menu</b> at the top right then <b>“Uninstall Tutos Maintenance”</b>. You can also open <b>chrome://apps</b> (or <b>edge://apps</b>), right-click the app then <b>Remove</b>.')
+    }
+  };
+  const o=document.createElement('div'); o.id='instov'; o.className='instov noprint'; o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true');
+  o.innerHTML='<div class="instbox"><h2>'+(un?L('Désinstaller l’appli','Uninstall the app'):L('Installer l’appli','Install the app'))+'</h2>'
+    +'<p>'+steps[mode][pf]+'</p>'
+    +(un?'':'<p class="instnote">'+L('Si l’option n’apparaît pas, vérifiez que la page est ouverte en https et dans Chrome, Edge ou Safari (Firefox ne propose pas l’installation sur ordinateur).','If the option does not appear, make sure the page is opened over https in Chrome, Edge or Safari (Firefox does not offer installation on desktop).')+'</p>')
+    +(un?'<p class="instnote">'+L('Un site ne peut pas se désinstaller lui-même : c’est l’appareil qui le fait avec les étapes ci-dessus.','A website cannot uninstall itself: the device does it using the steps above.')+'</p>':'')
+    +'<div class="instact">'+(un?'<button type="button" id="instClr" class="small">'+L('Supprimer la copie hors ligne','Delete offline copy')+'</button>':'')
+    +'<button type="button" id="instOk" class="primary small">'+L('Fermer','Close')+'</button></div></div>';
+  o.addEventListener('click',e=>{ if(e.target===o) instClose(); });
+  document.body.appendChild(o); document.addEventListener('keydown',instKey);
+  $('instOk').onclick=instClose; if($('instClr')) $('instClr').onclick=instClearOffline;
+}
+$('bInstall').addEventListener('click',async()=>{
+  if(isStandalone()){ instDialog('uninstall'); return; }
+  if(deferredInstall){ deferredInstall.prompt(); try{ await deferredInstall.userChoice; }catch(e){} deferredInstall=null; instUpdate(); return; }
+  instDialog('install');
+});
 (function(){ const _as=applyStatic; applyStatic=function(){ _as(); netUpdate(); instUpdate(); }; })();
 if('serviceWorker' in navigator){
   let hadCtl=!!navigator.serviceWorker.controller;
@@ -2659,8 +2781,12 @@ if('serviceWorker' in navigator){
     _auth(inner);
     document.querySelectorAll('#app input[type=password]').forEach(inp=>{
       const w=document.createElement('div'); w.className='pwwrap'; inp.parentNode.insertBefore(w,inp); w.appendChild(inp);
-      const b=document.createElement('button'); b.type='button'; b.className='pweye'; b.setAttribute('aria-label',L('Afficher le mot de passe','Show password')); b.textContent='👁';
-      b.onclick=()=>{ const s=inp.type==='password'; inp.type=s?'text':'password'; b.style.opacity=s?1:.55; };
+      const b=document.createElement('button'); b.type='button'; b.className='pweye'; b.setAttribute('aria-label',L('Afficher le mot de passe','Show password')); // Icônes "œil" classiques en SVG (traits). Œil ouvert = mot de passe caché ; œil barré = mot de passe visible.
+      const EYE='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+      const EYEOFF='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg>';
+      b.innerHTML=EYE;
+      b.onclick=()=>{ const show=inp.type==='password'; inp.type=show?'text':'password'; b.innerHTML=show?EYEOFF:EYE;
+        b.setAttribute('aria-label',show?L('Masquer le mot de passe','Hide password'):L('Afficher le mot de passe','Show password')); };
       w.appendChild(b);
       const c=document.createElement('div'); c.className='meta capswarn hidden'; c.textContent='⇪ '+L('Verrouillage majuscules activé','Caps Lock is on'); w.after(c);
       inp.addEventListener('keydown',ev=>{ if(ev.getModifierState) c.classList.toggle('hidden',!ev.getModifierState('CapsLock')); });
@@ -2681,10 +2807,119 @@ document.addEventListener('pointerdown',e=>{
   s.className='ripple'; s.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
   b.appendChild(s); setTimeout(()=>s.remove(),600);
 },{passive:true});
+
+/* ============================================================================
+ ===================== 5. PROTECTION DES DONNEES (tutos, fiches, comptes) =====================
+ PROBLEME : les tutos que vous créez sont gardés dans le navigateur de l'appareil (localStorage). Le navigateur peut les
+ effacer (nettoyage du cache, manque de place, désinstallation...). Cette section ajoute 4 protections :
+   1) "STOCKAGE PERSISTANT" : on demande au navigateur de ne JAMAIS effacer nos données tout seul (navigator.storage.persist).
+   2) COPIE DE SECOURS AUTOMATIQUE : à chaque enregistrement, une 2e copie est faite dans IndexedDB (autre zone du navigateur,
+      base "sibelco_backup"). Au démarrage, si les données principales ont disparu, elles sont RESTAUREES toutes seules.
+   3) SAUVEGARDE COMPLETE EN FICHIER (Paramètres > "Sauvegarde des données") : tutos + fiches + comptes + scores dans un seul
+      fichier .json à garder (mail, clé USB, Drive...) et à réimporter sur n'importe quel appareil.
+   4) RAPPEL sur l'accueil (classes 3 et 4) si aucune sauvegarde fichier depuis 14 jours.
+ LIMITES A CONNAITRE : les PDF/PowerPoint ajoutés aux fiches sont dans une autre zone (sibelco_files) : ils ne sont pas
+ dans la copie de secours ni dans le fichier .json (trop volumineux). Et chaque appareil a SES données : pour partager
+ des tutos entre téléphones, utilisez la sauvegarde en fichier (ou un vrai serveur, non prévu ici).
+ ============================================================================ */
+const BK_KEYS=[KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
+const LAST_EXPORT='sibelco_last_export';
+// petite base IndexedDB "sibelco_backup" : un seul enregistrement "snap" = copie de toutes les clés ci-dessus
+function bkDb(){ return new Promise((ok,ko)=>{ const r=indexedDB.open('sibelco_backup',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); }); }
+async function bkPut(v){ const db=await bkDb(); return new Promise((ok,ko)=>{ const tx=db.transaction('kv','readwrite'); tx.objectStore('kv').put(v,'snap'); tx.oncomplete=()=>ok(); tx.onerror=()=>ko(tx.error); }); }
+async function bkGet(){ const db=await bkDb(); return new Promise((ok,ko)=>{ const tx=db.transaction('kv','readonly'), rq=tx.objectStore('kv').get('snap'); tx.oncomplete=()=>ok(rq.result); tx.onerror=()=>ko(tx.error); }); }
+function bkSnapshot(){ const data={}; BK_KEYS.forEach(k=>{ try{ const v=localStorage.getItem(k); if(v!==null) data[k]=v; }catch(e){} }); return data; }
+let bkTimer=null;
+function bkSchedule(){ clearTimeout(bkTimer); bkTimer=setTimeout(bkNow,700); }       // attend 0,7 s après le dernier enregistrement
+async function bkNow(){ try{ const data=bkSnapshot(); if(data[KEY]||data[UKEY]) await bkPut({ts:Date.now(),data}); }catch(e){} }
+// on "enveloppe" les fonctions d'enregistrement existantes : elles font leur travail PUIS déclenchent la copie de secours
+(function(){
+  const a=save, b=saveFiches, c=saveUsers;
+  save=function(){ a(); bkSchedule(); };
+  saveFiches=function(){ b(); bkSchedule(); };
+  saveUsers=function(){ c(); bkSchedule(); };
+  const e=exportJSON; exportJSON=function(){ e(); try{ localStorage.setItem(LAST_EXPORT,String(Date.now())); }catch(x){} bkSchedule(); };
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) bkNow(); });   // copie aussi quand on quitte l'appli
+})();
+// stockage persistant : le navigateur ne doit plus effacer nos données de lui-même
+async function askPersist(){ try{ if(navigator.storage&&navigator.storage.persist&&!(await navigator.storage.persisted())) await navigator.storage.persist(); }catch(e){} }
+// RESTAURATION : appelée AVANT le démarrage. Si tout a disparu du stockage principal mais que la copie de secours existe -> on remet tout.
+async function safeBoot(){
+  let restored=false;
+  try{
+    const lost=localStorage.getItem(KEY)===null&&localStorage.getItem(UKEY)===null;
+    if(lost&&!sessionStorage.getItem('sibelco_restoring')){
+      const b=await bkGet();
+      if(b&&b.data&&(b.data[KEY]||b.data[UKEY])){ Object.keys(b.data).forEach(k=>localStorage.setItem(k,b.data[k])); sessionStorage.setItem('sibelco_restoring','1'); restored=true; }
+    }
+  }catch(e){}
+  if(restored){ location.reload(); return; }          // le script relit alors les données restaurées
+  try{ sessionStorage.removeItem('sibelco_restoring'); }catch(e){}
+  boot(); askPersist(); setTimeout(bkNow,1500);
+}
+// SAUVEGARDE COMPLETE en fichier / RESTAURATION depuis un fichier
+function fullBackup(){
+  const data=bkSnapshot(); const blob=new Blob([JSON.stringify({app:'sibelco-tutos',version:2,date:new Date().toISOString(),data},null,1)],{type:'application/json'});
+  const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='sibelco-sauvegarde-complete-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
+  try{ localStorage.setItem(LAST_EXPORT,String(Date.now())); }catch(e){} bkSchedule();
+  toast(L('Sauvegarde complète téléchargée','Full backup downloaded')); setTimeout(()=>{ if(state.view==='settings') renderSettings(); },300);
+}
+function fullRestore(ev){
+  const f=ev.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=()=>{ try{
+      const d=JSON.parse(r.result); if(!d||d.app!=='sibelco-tutos'||!d.data||typeof d.data!=='object') throw 0;
+      if(!confirm(L('Remplacer TOUTES les données de cet appareil (tutos, fiches, comptes, scores) par celles de la sauvegarde ?','Replace ALL data on this device (tutorials, sheets, accounts, scores) with the backup?'))) return;
+      Object.keys(d.data).forEach(k=>{ if(BK_KEYS.includes(k)&&typeof d.data[k]==='string') localStorage.setItem(k,d.data[k]); });
+      localStorage.removeItem(SESS); location.reload();
+    }catch(e){ toast(T('invalid')); } ev.target.value=''; };
+  r.readAsText(f);
+}
+const fmtD=t=>t?new Date(+t).toLocaleString(lang,{dateStyle:'short',timeStyle:'short'}):L('jamais','never');
+// Panneau "Sauvegarde des données" ajouté en bas des Paramètres
+(function(){
+  const rs=renderSettings;
+  renderSettings=function(){
+    rs();
+    const adm=settings.cls>=3;
+    $('app').insertAdjacentHTML('beforeend',`<div class="panel" id="safepanel"><h3 style="margin-top:0">${L('Sauvegarde des données','Data backup')}</h3>
+      <p class="meta">${L('Les tutos sont enregistrés sur CET appareil. Une copie de secours automatique est faite, mais gardez aussi un fichier de sauvegarde.','Tutorials are stored on THIS device. An automatic safety copy is made, but also keep a backup file.')}</p>
+      <div id="safest" class="meta" style="display:block;line-height:1.9">…</div>
+      ${adm?`<div class="row" style="margin-top:10px"><button class="primary" onclick="fullBackup()">${L('Télécharger la sauvegarde complète','Download full backup')}</button>
+      <button onclick="document.getElementById('fullimp').click()">${L('Restaurer depuis un fichier','Restore from file')}</button>
+      <input id="fullimp" type="file" accept="application/json" class="hidden" onchange="fullRestore(event)"></div>`:''}</div>`);
+    (async()=>{
+      let per=false, use='', snap=null;
+      try{ per=!!(navigator.storage&&navigator.storage.persisted&&await navigator.storage.persisted()); }catch(e){}
+      try{ const es=await navigator.storage.estimate(); use=(es.usage/1048576).toFixed(1)+' Mo / '+(es.quota/1048576/1024).toFixed(1)+' Go'; }catch(e){}
+      try{ snap=await bkGet(); }catch(e){}
+      const el=$('safest'); if(!el) return;
+      el.innerHTML=`<div>${per?'✅':'⚠️'} ${L('Protection du navigateur','Browser protection')} : <b>${per?L('activée (non effaçable automatiquement)','on (not auto-erased)'):L('non accordée','not granted')}</b>${per?'':` <button class="small" onclick="askPersist().then(()=>renderSettings())">${L('Activer','Enable')}</button>`}</div>
+        <div>${snap?'✅':'⚠️'} ${L('Copie de secours automatique','Automatic safety copy')} : <b>${snap?fmtD(snap.ts):L('aucune pour l’instant','none yet')}</b></div>
+        <div>${localStorage.getItem(LAST_EXPORT)?'✅':'⚠️'} ${L('Dernière sauvegarde en fichier','Last backup file')} : <b>${fmtD(localStorage.getItem(LAST_EXPORT))}</b></div>
+        ${use?`<div>${L('Espace utilisé','Space used')} : ${use}</div>`:''}`;
+    })();
+  };
+})();
+// Rappel sur l'accueil (classes 3 et 4) : pas de sauvegarde fichier depuis 14 jours alors que des tutos ont été créés
+(function(){
+  const rh=renderHome;
+  renderHome=function(){
+    rh();
+    try{
+      const last=+localStorage.getItem(LAST_EXPORT)||0, mine=tutos.some(t=>t.updated>0);
+      if(settings.cls>=3&&mine&&Date.now()-last>14*864e5){
+        const t=document.querySelector('#app .tiles');
+        if(t) t.insertAdjacentHTML('beforebegin',`<div class="box"><b>${L('Pensez à sauvegarder','Remember to back up')}</b><br>${L('Dernière sauvegarde en fichier','Last backup file')} : ${fmtD(last)}. ${L('Un fichier de sauvegarde protège vos tutos si le téléphone est réinitialisé.','A backup file protects your tutorials if the phone is reset.')}<div style="margin-top:8px"><button class="primary small" onclick="fullBackup()">${L('Sauvegarder maintenant','Back up now')}</button></div></div>`);
+      }
+    }catch(e){}
+  };
+})();
+
 mountLogos(); netUpdate(); instUpdate();
 
 (function(){var i=new Image();i.onload=function(){document.documentElement.classList.add('photo');};i.src='fond-verre.jpg';})();
-boot();
+safeBoot();
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
