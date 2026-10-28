@@ -2901,21 +2901,6 @@ const fmtD=t=>t?new Date(+t).toLocaleString(lang,{dateStyle:'short',timeStyle:'s
     })();
   };
 })();
-// Rappel sur l'accueil (classes 3 et 4) : pas de sauvegarde fichier depuis 14 jours alors que des tutos ont été créés
-(function(){
-  const rh=renderHome;
-  renderHome=function(){
-    rh();
-    try{
-      const last=+localStorage.getItem(LAST_EXPORT)||0, mine=tutos.some(t=>t.updated>0);
-      if(settings.cls>=3&&mine&&Date.now()-last>14*864e5){
-        const t=document.querySelector('#app .tiles');
-        if(t) t.insertAdjacentHTML('beforebegin',`<div class="box"><b>${L('Pensez à sauvegarder','Remember to back up')}</b><br>${L('Dernière sauvegarde en fichier','Last backup file')} : ${fmtD(last)}. ${L('Un fichier de sauvegarde protège vos tutos si le téléphone est réinitialisé.','A backup file protects your tutorials if the phone is reset.')}<div style="margin-top:8px"><button class="primary small" onclick="fullBackup()">${L('Sauvegarder maintenant','Back up now')}</button></div></div>`);
-      }
-    }catch(e){}
-  };
-})();
-
 mountLogos(); netUpdate(); instUpdate();
 
 (function(){var i=new Image();i.onload=function(){document.documentElement.classList.add('photo');};i.src='fond-verre.jpg';})();
