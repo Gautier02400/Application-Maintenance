@@ -47,6 +47,8 @@
 -->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0a2f5a">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Tutoriels de maintenance des trieurs optiques verre – Sibelco Reims">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tutos Maintenance">
@@ -398,6 +400,134 @@ body.nolog{padding-left:0!important}body.nolog #side,body.nolog header,body.nolo
 :root[data-theme="dark"] .panel,:root[data-theme="dark"] .card{background:rgba(25,34,43,.86);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 html.photo[data-theme="dark"] body::before{background-image:linear-gradient(rgba(16,22,28,.88),rgba(16,22,28,.88)),url("fond-verre.jpg");background-size:cover;background-position:center;background-repeat:no-repeat}
 @media print{body::before{display:none!important}}
+
+/*
+ ============================================================================
+ ===================== SIBELCO 2.0 : DESIGN MODERNE (NOUVEAU) =====================
+ Cette partie AJOUTE du style par-dessus l'existant (rien n'est supprimé plus haut) :
+ dégradés, ombres douces, animations d'apparition, effets au survol, logo 3D, accueil "hero".
+ Pour désactiver un effet : supprimez simplement le bloc concerné.
+ Les animations s'arrêtent automatiquement si l'appareil demande "réduire les animations".
+ ============================================================================
+*/
+:root{--shadow:0 4px 18px rgba(10,47,90,.09);--shadow-hi:0 16px 36px rgba(10,47,90,.20);--ease:cubic-bezier(.2,.7,.2,1)}
+:root[data-theme="dark"]{--shadow:0 4px 18px rgba(0,0,0,.35);--shadow-hi:0 16px 36px rgba(0,0,0,.5)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--shadow:0 4px 18px rgba(0,0,0,.35);--shadow-hi:0 16px 36px rgba(0,0,0,.5)}}
+::selection{background:#2d8fe0;color:#fff}
+html{scroll-behavior:smooth}
+:focus-visible{outline:3px solid #2d8fe0;outline-offset:2px;border-radius:6px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,143,224,.28)}
+*{scrollbar-width:thin;scrollbar-color:#2d8fe0 transparent}
+
+/* Bandeau et menu : dégradé bleu Sibelco + liseré lumineux */
+header{background:linear-gradient(100deg,#071f3a 0%,#0a2f5a 45%,#0c4a8e 100%);box-shadow:0 4px 18px rgba(8,37,68,.35)}
+header .logo{transition:transform .35s var(--ease),box-shadow .35s;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+header .logo:hover{transform:rotateY(360deg) scale(1.06)}
+header a{perspective:300px}
+#side{background:linear-gradient(180deg,#0a2f5a,#071f3a);border-right:0}
+#side .nb{transition:background .15s,transform .15s}
+#side .nb:hover{transform:translateX(3px)}
+#side .nb.on{background:linear-gradient(90deg,#2d8fe0,#4aa6f0);box-shadow:0 2px 10px rgba(45,143,224,.45)}
+
+/* Boutons */
+button{transition:transform .12s,box-shadow .2s,border-color .2s,background .2s;position:relative;overflow:hidden}
+button:hover{box-shadow:0 2px 10px rgba(10,90,168,.18)}
+button:active{transform:scale(.97)}
+button.primary{background:linear-gradient(135deg,var(--accent),#2d8fe0);border-color:transparent}
+button.primary:hover{box-shadow:0 4px 16px rgba(45,143,224,.5);filter:brightness(1.06)}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.45);transform:scale(0);animation:rip .6s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+a.btn.primary{background:linear-gradient(135deg,var(--accent),#2d8fe0);color:var(--accent-text);padding:8px 16px;border-radius:8px;font-weight:600}
+
+/* Cartes et panneaux */
+.panel{border-radius:16px;box-shadow:var(--shadow)}
+.card{border-radius:16px;box-shadow:var(--shadow);transition:transform .22s var(--ease),box-shadow .22s,border-color .22s}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-hi)}
+.card:active{transform:translateY(-1px)}
+.card .cover{position:relative}
+.card .cover::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.28) 50%,transparent 65%);transform:translateX(-120%);transition:transform .7s}
+.card:hover .cover::after{transform:translateX(120%)}
+.card .cover svg{transition:transform .35s var(--ease)}
+.card:hover .cover svg{transform:scale(1.18) rotate(-4deg)}
+.progress{height:10px}
+.progress>div{background:linear-gradient(90deg,#1a8a4a,#4cc57f);transition:width .45s var(--ease)}
+.chip{transition:transform .12s,background .2s}
+.chip:hover{transform:translateY(-1px)}
+.step{transition:background .2s}
+.num{box-shadow:0 2px 8px rgba(10,90,168,.35);transition:transform .25s var(--ease),background .25s}
+.step.done .num{transform:scale(1.08);box-shadow:0 2px 8px rgba(26,138,74,.4)}
+.toast{border-radius:999px;padding:10px 20px;box-shadow:var(--shadow-hi);transition:opacity .25s,transform .25s;transform:translate(-50%,10px)}
+.toast.show{transform:translate(-50%,0)}
+
+/* Apparition douce des pages (le contenu "monte" légèrement) */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+#app>*{animation:rise .45s var(--ease) backwards}
+#app>*:nth-child(2){animation-delay:.05s}#app>*:nth-child(3){animation-delay:.1s}#app>*:nth-child(4){animation-delay:.15s}#app>*:nth-child(n+5){animation-delay:.2s}
+.tiles .card,.grid .card{animation:rise .5s var(--ease) backwards}
+.tiles .card:nth-child(2),.grid .card:nth-child(2){animation-delay:.06s}.tiles .card:nth-child(3),.grid .card:nth-child(3){animation-delay:.12s}
+.tiles .card:nth-child(4),.grid .card:nth-child(4){animation-delay:.18s}.tiles .card:nth-child(5),.grid .card:nth-child(5){animation-delay:.24s}
+.tiles .card:nth-child(n+6),.grid .card:nth-child(n+6){animation-delay:.3s}
+
+/* ===== LOGO 3D ===== */
+.logo3d{position:relative;width:min(240px,100%);aspect-ratio:1;margin:0 auto 20px;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;-webkit-tap-highlight-color:transparent;border-radius:50%}
+.logo3d:active{cursor:grabbing}
+.logo3d:focus-visible{outline-offset:-6px}
+.logo3d canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.logo3d .shadow{position:absolute;left:24%;right:24%;bottom:8%;height:6%;background:radial-gradient(closest-side,rgba(10,47,90,.38),transparent);pointer-events:none;animation:floaty 4.5s ease-in-out infinite}
+.logo3d .hint{position:absolute;left:0;right:0;bottom:-20px;text-align:center;font-size:.72rem;color:var(--muted);pointer-events:none;transition:opacity .5s;animation:blink 2.6s ease-in-out infinite}
+.logo3d .hint.gone{opacity:0;animation:none}
+.logo3d.big{width:min(78vw,380px)}
+@keyframes floaty{50%{transform:scaleX(.85);opacity:.7}}
+@keyframes blink{50%{opacity:.45}}
+.wordmark{font-family:"Arial Black","Segoe UI Black","Segoe UI",system-ui,sans-serif;font-weight:900;font-size:2.1rem;letter-spacing:.06em;text-align:center;line-height:1;margin-top:2px;
+  background:linear-gradient(180deg,#0a4f9e,#0a2f5a);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+:root[data-theme="dark"] .wordmark{background:linear-gradient(180deg,#8fd0ff,#3d9be0);-webkit-background-clip:text;background-clip:text}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .wordmark{background:linear-gradient(180deg,#8fd0ff,#3d9be0);-webkit-background-clip:text;background-clip:text}}
+.wordmark.sm{font-size:1.35rem}
+
+/* Accueil : grande carte de bienvenue avec le logo 3D */
+.hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:14px;align-items:center;overflow:hidden;padding:18px 22px}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(380px 260px at 88% 45%,rgba(45,143,224,.22),transparent 70%),radial-gradient(300px 200px at 0% 0%,rgba(45,143,224,.10),transparent 70%);pointer-events:none}
+.hero>*{position:relative}
+.hero h2{font-size:1.5rem!important;margin-bottom:8px}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.stat{background:rgba(45,143,224,.12);border:1px solid rgba(45,143,224,.35);border-radius:12px;padding:6px 12px;font-size:.82rem;color:var(--muted)}
+.stat b{display:block;font-size:1.35rem;line-height:1.1;color:var(--accent)}
+@media(max-width:640px){.hero{grid-template-columns:1fr;padding:14px}.hero .logocol{order:-1}.hero .logo3d{width:min(200px,70%)}.hero h2{font-size:1.25rem!important;text-align:center}.hero .row,.hero .stats{justify-content:center}.hero .meta{text-align:center}}
+
+/* Ecran de connexion */
+.authcard{position:relative;overflow:hidden;padding-top:18px}
+.authcard::before{content:"";position:absolute;inset:0;background:radial-gradient(320px 240px at 50% 0%,rgba(45,143,224,.22),transparent 70%);pointer-events:none}
+.authcard>*{position:relative}
+.authcard h2{font-size:1.1rem;text-align:center;color:var(--muted);font-weight:600}
+.pwwrap{position:relative}
+.pwwrap input{padding-right:42px}
+.pweye{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;padding:6px 8px;opacity:.55;box-shadow:none!important}
+.capswarn{color:var(--warn-line);margin-top:4px}
+
+/* Agrandissement du logo (clic sur le logo du bandeau) */
+.logoov{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(6,18,34,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadein .2s}
+.logoov.out{opacity:0;transition:opacity .18s}
+.logoov-card{position:relative;background:var(--card);border-radius:24px;padding:22px 26px 24px;box-shadow:0 30px 80px rgba(0,0,0,.5);text-align:center;max-width:94vw;animation:pop .35s var(--ease)}
+.logoov-card::before{content:"";position:absolute;inset:0;border-radius:24px;background:radial-gradient(300px 220px at 50% 28%,rgba(45,143,224,.2),transparent 70%);pointer-events:none}
+.logoov-card>*{position:relative}
+.logoov-x{position:absolute!important;right:10px;top:10px;border-radius:50%;width:34px;height:34px;padding:0;display:grid;place-items:center}
+@keyframes fadein{from{opacity:0}}
+@keyframes pop{from{opacity:0;transform:scale(.88) translateY(14px)}}
+
+/* Pastille hors ligne, bouton Installer, bandeau de mise à jour, confettis */
+.netpill{background:#c0392b;color:#fff;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+header .row{gap:6px;flex-wrap:nowrap}
+#bInstall{font-size:.72rem;padding:4px 10px;line-height:1.2;white-space:nowrap}
+.updbar{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;display:flex;gap:12px;align-items:center;background:var(--brand);color:#fff;padding:8px 10px 8px 18px;border-radius:999px;box-shadow:var(--shadow-hi);animation:pop .35s var(--ease);font-size:.9rem;max-width:94vw}
+.confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:100}
+@media (max-width:480px){#bInstall{display:none!important}}
+@media print{.logo3d,.logoov,.updbar,.confetti,.netpill,#bInstall{display:none!important}.hero{display:block}}
+
+/* Animations coupées si l'appareil demande de les réduire */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
 </style>
 </head>
 <body>
@@ -415,10 +545,12 @@ html.photo[data-theme="dark"] body::before{background-image:linear-gradient(rgba
     <div class="top">
       <button class="menu-btn" onclick="toggleNav()" aria-label="Menu"><svg viewBox="0 0 24 24" width="1.6em" height="1.6em" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="display:block"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <h1 class="brand">
-      <a href="https://www.sibelco.com/en/country/france" target="_blank" rel="noopener" title="Sibelco France" style="display:inline-flex"><img src="icon-512.png" alt="Sibelco" class="logo"></a>
+      <a href="https://www.sibelco.com/en/country/france" target="_blank" rel="noopener" title="Logo 3D · Sibelco France" style="display:inline-flex" onclick="return openLogoViewer(event)"><img src="icon-512.png" alt="Sibelco" class="logo"></a>
       <span><span data-i18n="app_title"></span> <small data-i18n="app_sub"></small></span>
       </h1>
       <div class="row">
+        <span id="net" class="netpill hidden" role="status"></span>
+        <button id="bInstall" class="primary hidden" type="button"></button>
         <div class="lang" role="group" aria-label="Langue / Language">
           <button id="bFr" onclick="setLang('fr')">FR</button>
           <button id="bEn" onclick="setLang('en')">EN</button>
@@ -455,7 +587,7 @@ html.photo[data-theme="dark"] body::before{background-image:linear-gradient(rgba
  Le "toast" ci-dessous est la petite bulle de message qui apparaît en bas ("Tutoriel enregistré"...).
 -->
 <main class="wrap" id="app"></main>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!--
  ===================== 3. PROGRAMME (JavaScript) =====================
@@ -1222,9 +1354,11 @@ function renderHome(){
   state.section='home'; state.view='home'; $('filters').classList.add('hidden'); buildNav();
   const ob=tutos.find(t=>t.mandatory), c=settings.cls;
   $('app').innerHTML=`
-   <div class="panel"><h2 style="margin-top:0">${esc(T('welcome'))}${settings.name?', '+esc(settings.name):''}</h2>
+   <div class="panel hero"><div class="herotxt"><h2 style="margin-top:0">${esc(T('welcome'))}${settings.name?', '+esc(settings.name):''}</h2>
      <div class="row"><span>${esc(T('your_class'))}</span><span class="cls cls${c}">${esc(clsL(c))}</span></div>
-     <p class="meta">${esc(clsD(c))}</p></div>
+     <p class="meta">${esc(clsD(c))}</p>
+     <div class="stats"><div class="stat"><b data-count="${tutos.filter(t=>!isLocked(t)).length}">0</b>${L('tutos accessibles','tutorials available')}</div><div class="stat"><b data-count="${fiches.length}">0</b>${L('fiches','sheets')}</div><div class="stat"><b data-count="${GAMES.length}">0</b>${L('jeux','games')}</div></div></div>
+     <div class="logocol"><div class="logo3d"></div><div class="wordmark sm">SIBELCO</div></div></div>
    ${!settings.chosen?`<div class="panel"><b>${esc(T('ask_level'))}</b><div class="row" style="margin-top:8px">${CLS.slice(0,4).map((x,i)=>`<button onclick="chooseCls(${i})">${esc(clsL(i))}</button>`).join('')}</div></div>`:''}
    ${(c<1&&ob)?`<div class="box danger"><b>${esc(T('oblig_title'))}</b><br>${esc(T('oblig_txt'))}<div style="margin-top:8px"><button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button></div></div>`:''}
    ${settings.trained?`<div class="box" style="border-left-color:var(--ok)">${esc(T('trained_on'))} ${esc(new Date(settings.trained).toLocaleDateString(lang))}</div>`:''}
@@ -1255,7 +1389,7 @@ async function hash(pw,salt){
 }
 function authShell(inner){
   document.body.classList.add('nolog'); toggleNav(false);
-  $('app').innerHTML=`<div class="panel" style="max-width:380px;margin:40px auto"><div style="text-align:center"><a href="https://www.sibelco.com/en/country/france" target="_blank" rel="noopener" title="Sibelco France"><img src="icon-192.png" alt="Sibelco" style="height:90px"></a><h2 style="margin:8px 0 16px">${esc(T('app_title'))}</h2></div>${inner}<div id="aerr" class="box danger hidden" style="margin-top:12px"></div></div>`;
+  $('app').innerHTML=`<div class="panel authcard" style="max-width:400px;margin:24px auto"><div style="text-align:center"><div class="logo3d"></div><div class="wordmark">SIBELCO</div><h2 style="margin:10px 0 14px">${esc(T('app_title'))}</h2></div>${inner}<div id="aerr" class="box danger hidden" style="margin-top:12px"></div></div>`;
 }
 const aerr=m=>{ const e=$('aerr'); e.textContent=m; e.classList.remove('hidden'); };
 function renderLogin(){
@@ -2261,6 +2395,294 @@ function ordEnd(){
  3) Enregistrement du service worker sw.js : c'est lui qui permet d'ouvrir l'appli hors connexion
     et de l'installer comme une application.
 */
+/*
+ ============================================================================
+ ===================== 4. SIBELCO 2.0 : LOGO 3D ET CONFORT =====================
+ Tout ce bloc est NOUVEAU. Il ne modifie pas la logique existante (tutos, fiches, jeux, comptes) :
+   - Logo3D()          : globe Sibelco en 3D (dessiné au canvas, SANS bibliothèque -> marche hors connexion)
+   - openLogoViewer()  : agrandit le logo 3D quand on clique sur le logo du bandeau
+   - confetti()        : pluie de confettis (record battu dans un jeu, formation validée)
+   - pastille Hors ligne, bouton Installer, bandeau "nouvelle version disponible"
+   - petits confort : afficher/masquer le mot de passe, alerte Verr. Maj, raccourci "/" pour chercher,
+     effet d'onde sur les boutons, compteurs animés sur l'accueil.
+ ============================================================================
+*/
+
+/* ---------- LOGO 3D ----------
+ Principe : une sphère faite de ~1300 petits triangles (icosphère), un anneau en croissant autour,
+ le tout éclairé et dessiné face par face. Interactions :
+   - GLISSER (souris ou doigt) : fait tourner le globe, avec de l'inertie
+   - CLIQUER / TAPOTER        : le globe "explose" en éclats qui reviennent, tourne vite, onde lumineuse
+   - SURVOL                   : le globe s'incline légèrement vers le pointeur
+   - CLAVIER                  : flèches = tourner, Entrée/Espace = éclat
+ Pour changer les couleurs : voir LOGO_COL (bleu foncé -> bleu clair) et RING_COL.            */
+const LOGO_COL = { dark:[5,48,126], light:[118,204,250] };
+const RING_COL = { dark:[8,42,104], light:[38,122,212] };
+const LOGO_GEO = (()=>{
+  const nrm = v => { const l=Math.hypot(v[0],v[1],v[2])||1; return [v[0]/l,v[1]/l,v[2]/l]; };
+  const t=(1+Math.sqrt(5))/2;
+  const V=[[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]].map(nrm);
+  let F=[[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],[1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],[3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],[4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]];
+  const cache={};
+  const mid=(a,b)=>{ const k=a<b?a+'_'+b:b+'_'+a; if(cache[k]!==undefined) return cache[k];
+    V.push(nrm([(V[a][0]+V[b][0])/2,(V[a][1]+V[b][1])/2,(V[a][2]+V[b][2])/2])); return cache[k]=V.length-1; };
+  for(let s=0;s<3;s++){ const N=[]; for(const [a,b,c] of F){ const ab=mid(a,b),bc=mid(b,c),ca=mid(c,a); N.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca]); } F=N; }
+  const faces=F.map((f,i)=>({ i:f, n:nrm([V[f[0]][0]+V[f[1]][0]+V[f[2]][0],V[f[0]][1]+V[f[1]][1]+V[f[2]][1],V[f[0]][2]+V[f[1]][2]+V[f[2]][2]]),
+                              r:((Math.imul(i+1,2654435761)>>>0)%10007)/10007 }));
+  return { V, faces };
+})();
+
+function Logo3D(host,opt){
+  opt=opt||{};
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cv=document.createElement('canvas'), ctx=cv.getContext('2d');
+  host.appendChild(cv);
+  const sh=document.createElement('div'); sh.className='shadow'; host.appendChild(sh);
+  if(opt.hint){ const h=document.createElement('div'); h.className='hint'; h.textContent=opt.hint; host.appendChild(h); host._hint=h; }
+  host.setAttribute('role','img'); host.setAttribute('aria-label','Logo Sibelco 3D'); host.tabIndex=0;
+
+  const { V, faces } = LOGO_GEO, nV=V.length;
+  const PX=new Float32Array(nV), PY=new Float32Array(nV), PZ=new Float32Array(nV);
+  let W=0, DPR=Math.min(2,window.devicePixelRatio||1);
+  // état de rotation / animation
+  let yaw=-0.5, pitch=0.32, vy=reduce?0:0.007, vp=0, hx=0, hy=0, hxT=0, hyT=0;
+  let spring=0, springV=0, glow=0, pulse=0, ringSpin=0; const ripples=[];
+  let drag=false, lx=0, ly=0, moved=0, t0=0, lastT=performance.now(), running=true, ptrId=null;
+  const IDLE = reduce?0:0.007;
+
+  function fit(){ const w=Math.max(90,Math.round(host.clientWidth)); if(w!==W){ W=w; cv.width=cv.height=Math.round(W*DPR); cv.style.width=cv.style.height=W+'px'; } }
+  function burst(dir){
+    if(host._hint){ host._hint.classList.add('gone'); }
+    springV=reduce?0:0.3; glow=1; pulse=1; ripples.push({t:0});
+    if(!reduce) vy=(dir||1)*(0.38+Math.random()*0.12);
+  }
+  host.addEventListener('pointerdown',e=>{
+    drag=true; ptrId=e.pointerId; lx=e.clientX; ly=e.clientY; moved=0; t0=performance.now();
+    try{ host.setPointerCapture(e.pointerId); }catch(x){}
+    vp=0; if(host._hint) host._hint.classList.add('gone');
+  });
+  host.addEventListener('pointermove',e=>{
+    const r=host.getBoundingClientRect();
+    if(drag&&e.pointerId===ptrId){
+      const dx=e.clientX-lx, dy=e.clientY-ly; lx=e.clientX; ly=e.clientY; moved+=Math.abs(dx)+Math.abs(dy);
+      yaw+=dx*0.011; pitch=Math.max(-1.25,Math.min(1.25,pitch+dy*0.009));
+      vy=dx*0.011*0.9+vy*0.1; vp=dy*0.009*0.5;
+    }else if(e.pointerType==='mouse'){
+      hxT=((e.clientX-r.left)/r.width-0.5)*2; hyT=((e.clientY-r.top)/r.height-0.5)*2;
+    }
+  });
+  const up=e=>{
+    if(!drag||(e.pointerId!==undefined&&e.pointerId!==ptrId)) return; drag=false;
+    if(moved<6 && performance.now()-t0<450) burst(1);
+  };
+  host.addEventListener('pointerup',up); host.addEventListener('pointercancel',()=>{drag=false;});
+  host.addEventListener('pointerleave',()=>{ hxT=0; hyT=0; });
+  host.addEventListener('keydown',e=>{
+    if(e.key==='ArrowLeft'){ vy-=0.05; e.preventDefault(); } else if(e.key==='ArrowRight'){ vy+=0.05; e.preventDefault(); }
+    else if(e.key==='ArrowUp'){ pitch=Math.max(-1.25,pitch-0.15); e.preventDefault(); } else if(e.key==='ArrowDown'){ pitch=Math.min(1.25,pitch+0.15); e.preventDefault(); }
+    else if(e.key==='Enter'||e.key===' '){ burst(1); e.preventDefault(); }
+  });
+
+  const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+  const rgb=(c,k)=>`rgb(${Math.max(0,Math.min(255,c[0]*k|0))},${Math.max(0,Math.min(255,c[1]*k|0))},${Math.max(0,Math.min(255,c[2]*k|0))})`;
+  const LX=-0.45, LY=0.62, LZ=0.64, HL=Math.hypot(LX,LY,LZ+1);           // lumière + demi-vecteur (reflet)
+  const lx0=LX/Math.hypot(LX,LY,LZ), ly0=LY/Math.hypot(LX,LY,LZ), lz0=LZ/Math.hypot(LX,LY,LZ);
+  const hx0=LX/HL, hy0=LY/HL, hz0=(LZ+1)/HL;
+  const DCAM=3.6;
+
+  function frame(now){
+    if(!host.isConnected){ running=false; return; }
+    requestAnimationFrame(frame);
+    if(document.hidden) { lastT=now; return; }
+    const dt=Math.min(3,(now-lastT)/16.667); lastT=now;
+    fit(); const S=W*DPR, cx=S/2, cy=S/2, R0=S*0.29*(1+pulse*0.05);
+
+    // --- mouvement ---
+    if(!drag){
+      yaw+=vy*dt; pitch+=vp*dt;
+      vy+=(IDLE-vy)*0.022*dt; vp*=Math.pow(0.92,dt);
+      const rest=0.32+hy*0.28; pitch+=(rest-pitch)*0.03*dt;
+    }
+    hx+=(hxT-hx)*0.08*dt; hy+=(hyT-hy)*0.08*dt;
+    springV+=(-0.05*spring-0.22*springV)*dt; spring+=springV*dt;
+    glow*=Math.pow(0.95,dt); pulse*=Math.pow(0.92,dt); ringSpin+=(reduce?0:0.004)*dt;
+    const Y=yaw+hx*0.4, P=pitch;
+    const cY=Math.cos(Y), sY=Math.sin(Y), cP=Math.cos(P), sP=Math.sin(P);
+    const rot=(x,y,z)=>{ const x1=x*cY+z*sY, z1=-x*sY+z*cY; return [x1, y*cP-z1*sP, y*sP+z1*cP]; };
+    const prj=(x,y,z)=>{ const q=DCAM/(DCAM-z); return [cx+x*q*R0, cy-y*q*R0]; };
+
+    ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,S,S);
+
+    // halo lumineux sous le globe (s'intensifie au clic)
+    const g=ctx.createRadialGradient(cx,cy,R0*0.4,cx,cy,Math.min(S*0.5,R0*(1.9+glow*0.5)));
+    g.addColorStop(0,`rgba(70,170,255,${0.18+glow*0.35})`); g.addColorStop(1,'rgba(70,170,255,0)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,S,S);
+
+    // --- anneau en croissant : partie ARRIERE (z<0) dessinée avant le globe ---
+    const ringQuads=[];
+    { const N=56, arc=4.9, Rr=1.45, Wm=0.34, tz=-0.5;
+      const cz=Math.cos(tz), sz=Math.sin(tz);
+      const pt=(a,r)=>{ const x=Math.cos(a)*r, y=0, z=Math.sin(a)*r;     // anneau à plat, puis incliné sur le côté
+        return rot(x*cz-y*sz, x*sz+y*cz, z); };
+      let prevO=null, prevI=null, prevU=0;
+      for(let k=0;k<=N;k++){
+        const u=k/N, a=ringSpin+u*arc+0.2, w=Wm*Math.pow(Math.sin(Math.PI*u),0.75);
+        const o=pt(a,Rr+w*0.5), i=pt(a,Rr-w*0.5);
+        if(prevO){ const z=(prevO[2]+prevI[2]+o[2]+i[2])/4; ringQuads.push({z,u:(u+prevU)/2,q:[prevO,o,i,prevI]}); }
+        prevO=o; prevI=i; prevU=u;
+      }
+    }
+    const drawRing=front=>{
+      for(const r of ringQuads){ if((r.z>=0)!==front) continue;
+        const k=0.55+0.55*Math.max(0,Math.min(1,(r.z+1.2)/2.4)), c=mix(RING_COL.dark,RING_COL.light,Math.pow(Math.sin(Math.PI*r.u),0.8)*0.75*k);
+        ctx.fillStyle=rgb(c,0.9+0.25*k); ctx.beginPath();
+        r.q.forEach((p,j)=>{ const s=prj(p[0],p[1],p[2]); j?ctx.lineTo(s[0],s[1]):ctx.moveTo(s[0],s[1]); }); ctx.closePath(); ctx.fill();
+      }
+    };
+    drawRing(false);
+
+    // --- globe : rotation de tous les sommets puis dessin des faces tournées vers nous ---
+    for(let i=0;i<nV;i++){ const v=V[i], r=rot(v[0],v[1],v[2]); PX[i]=r[0]; PY[i]=r[1]; PZ[i]=r[2]; }
+    const exp=Math.max(-0.04,spring);
+    for(const f of faces){
+      const n=rot(f.n[0],f.n[1],f.n[2]);
+      if(n[2]<=-0.02 && exp<0.05) continue;
+      const a=f.i[0], b=f.i[1], c=f.i[2];
+      const mx=(PX[a]+PX[b]+PX[c])/3, my=(PY[a]+PY[b]+PY[c])/3, mz=(PZ[a]+PZ[b]+PZ[c])/3;
+      const lam=Math.max(0,n[0]*lx0+n[1]*ly0+n[2]*lz0);
+      const face=Math.max(0,Math.min(1,n[2]*1.5+0.1));
+      const s=(0.54+0.44*Math.min(1,0.4*face+0.6*lam+0.1))*(0.86+0.14*f.r);           // taille du triangle (effet "pixels")
+      const off=exp*(0.5+f.r*1.1);                                                         // éclatement au clic
+      const spec=Math.pow(Math.max(0,n[0]*hx0+n[1]*hy0+n[2]*hz0),28);
+      let col=mix(LOGO_COL.dark,LOGO_COL.light,Math.max(0,Math.min(1,0.06+lam*0.9+(f.r-0.5)*0.26)));
+      col=[col[0]+spec*140,col[1]+spec*110,col[2]+spec*70];
+      ctx.fillStyle=rgb(col,0.72+0.4*face);
+      ctx.beginPath();
+      const ids=[a,b,c];
+      for(let j=0;j<3;j++){ const id=ids[j];
+        const x=mx+(PX[id]-mx)*s+n[0]*off, y=my+(PY[id]-my)*s+n[1]*off, z=mz+(PZ[id]-mz)*s+n[2]*off;
+        const p=prj(x,y,z); j?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]); }
+      ctx.closePath(); ctx.fill();
+    }
+    drawRing(true);
+
+    // --- ondes lumineuses du clic ---
+    for(let i=ripples.length-1;i>=0;i--){ const r=ripples[i]; r.t+=dt;
+      if(r.t>40){ ripples.splice(i,1); continue; }
+      ctx.strokeStyle=`rgba(60,160,240,${Math.pow(1-r.t/40,1.5)*0.7})`; ctx.lineWidth=Math.max(1,2.2*DPR*(1-r.t/60));
+      ctx.beginPath(); ctx.arc(cx,cy,R0*(1.05+r.t*0.02),0,Math.PI*2); ctx.stroke();
+    }
+  }
+  requestAnimationFrame(frame);
+  return { burst, stop(){ running=false; } };
+}
+
+/* Monte un globe dans chaque bloc .logo3d de la page qui n'en a pas encore */
+function mountLogos(){
+  document.querySelectorAll('.logo3d:not([data-ok])').forEach(h=>{
+    h.dataset.ok='1';
+    try{ h._l3=Logo3D(h,{hint:h.classList.contains('nohint')?'':L('Cliquez ou faites glisser','Click or drag')}); }catch(e){ h.innerHTML='<img src="icon-512.png" alt="Sibelco" style="width:100%">'; }
+  });
+  document.querySelectorAll('[data-count]:not([data-done])').forEach(el=>{
+    el.dataset.done='1'; const to=+el.dataset.count||0; if(!to){ el.textContent='0'; return; }
+    const t0=performance.now(); (function tick(n){ const k=Math.min(1,(n-t0)/900), e=1-Math.pow(1-k,3); el.textContent=Math.round(to*e); if(k<1&&el.isConnected) requestAnimationFrame(tick); })(t0);
+  });
+}
+new MutationObserver(mountLogos).observe($('app'),{childList:true});
+
+/* Agrandir le logo : clic sur le logo du bandeau (Ctrl/Maj+clic ouvre quand même le site Sibelco) */
+function openLogoViewer(e){
+  if(e&&(e.ctrlKey||e.metaKey||e.shiftKey||e.button===1)) return true;
+  if(e&&e.preventDefault) e.preventDefault();
+  if($('logoov')) return false;
+  const o=document.createElement('div'); o.id='logoov'; o.className='logoov noprint';
+  o.innerHTML=`<div class="logoov-card" role="dialog" aria-modal="true" aria-label="Logo Sibelco 3D">
+    <button class="logoov-x" aria-label="${L('Fermer','Close')}">✕</button>
+    <div class="logo3d big"></div><div class="wordmark">SIBELCO</div>
+    <p class="meta" style="text-align:center;margin:6px 0 12px">${L('Faites tourner le logo avec la souris ou le doigt','Spin the logo with your mouse or finger')}</p>
+    <a class="btn primary" href="https://www.sibelco.com/en/country/france" target="_blank" rel="noopener">sibelco.com ↗</a></div>`;
+  const close=()=>{ o.classList.add('out'); setTimeout(()=>o.remove(),180); document.removeEventListener('keydown',esc); };
+  const esc=ev=>{ if(ev.key==='Escape') close(); };
+  o.addEventListener('click',ev=>{ if(ev.target===o||ev.target.closest('.logoov-x')) close(); });
+  document.addEventListener('keydown',esc); document.body.appendChild(o); mountLogos();
+  return false;
+}
+
+/* ---------- CONFETTIS ---------- */
+function confetti(){
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv=document.createElement('canvas'); cv.className='confetti noprint'; document.body.appendChild(cv);
+  const D=Math.min(2,window.devicePixelRatio||1), w=cv.width=innerWidth*D, h=cv.height=innerHeight*D, x=cv.getContext('2d');
+  const cols=['#0a5aa8','#2d8fe0','#5aaeea','#9fd8fb','#ffffff','#e8943a'];
+  const P=Array.from({length:110},()=>({x:w/2+(Math.random()-.5)*w*.25,y:h*0.35,vx:(Math.random()-.5)*14*D,vy:(-Math.random()*13-4)*D,s:(4+Math.random()*6)*D,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[Math.random()*cols.length|0]}));
+  const t0=performance.now();
+  (function f(n){ const k=(n-t0)/2400; x.clearRect(0,0,w,h);
+    P.forEach(p=>{ p.vy+=0.38*D; p.x+=p.vx; p.y+=p.vy; p.vx*=.992; p.r+=p.vr; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.globalAlpha=Math.max(0,1-k*k); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/3,p.s,p.s*.6); x.restore(); });
+    if(k<1) requestAnimationFrame(f); else cv.remove(); })(t0);
+}
+// Déclenchement : record battu dans un jeu, formation validée (on "enveloppe" les fonctions existantes)
+(function(){
+  const _gRecord=gRecord;
+  gRecord=function(g){ const id=settings.id||'x', before=((gScores()[id]||{}).best)||0; _gRecord(g); if(g&&g.score>before&&g.score>0) setTimeout(confetti,250); };
+  const _g2=g2Record;
+  g2Record=function(a,b){ const nb=_g2(a,b); if(nb&&b>0) setTimeout(confetti,250); return nb; };
+  const _vt=validateTraining;
+  validateTraining=function(){ _vt(); confetti(); };
+})();
+
+/* ---------- HORS LIGNE / INSTALLATION / MISE A JOUR ---------- */
+let deferredInstall=null;
+function netUpdate(){ const n=$('net'); if(!n) return; n.textContent='● '+L('Hors ligne','Offline'); n.classList.toggle('hidden',navigator.onLine!==false); }
+function instUpdate(){ const b=$('bInstall'); if(!b) return; b.textContent='⤓ '+L('Installer','Install'); b.classList.toggle('hidden',!deferredInstall); }
+window.addEventListener('online',()=>{ netUpdate(); toast(L('Connexion rétablie','Back online')); });
+window.addEventListener('offline',()=>{ netUpdate(); toast(L('Mode hors ligne : l’appli reste utilisable','Offline mode: the app still works')); });
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; instUpdate(); });
+window.addEventListener('appinstalled',()=>{ deferredInstall=null; instUpdate(); toast(L('Application installée','App installed')); });
+$('bInstall').addEventListener('click',async()=>{ if(!deferredInstall) return; deferredInstall.prompt(); try{ await deferredInstall.userChoice; }catch(e){} deferredInstall=null; instUpdate(); });
+(function(){ const _as=applyStatic; applyStatic=function(){ _as(); netUpdate(); instUpdate(); }; })();
+if('serviceWorker' in navigator){
+  let hadCtl=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(!hadCtl){ hadCtl=true; return; }
+    if($('updbar')) return;
+    const b=document.createElement('div'); b.id='updbar'; b.className='updbar noprint';
+    b.innerHTML=`<span>${L('Nouvelle version disponible','A new version is available')}</span><button class="primary small">${L('Mettre à jour','Update')}</button>`;
+    b.querySelector('button').onclick=()=>location.reload(); document.body.appendChild(b);
+  });
+}
+
+/* ---------- CONFORT ---------- */
+// Connexion : bouton "œil" pour voir le mot de passe + avertissement Verr. Maj
+(function(){
+  const _auth=authShell;
+  authShell=function(inner){
+    _auth(inner);
+    document.querySelectorAll('#app input[type=password]').forEach(inp=>{
+      const w=document.createElement('div'); w.className='pwwrap'; inp.parentNode.insertBefore(w,inp); w.appendChild(inp);
+      const b=document.createElement('button'); b.type='button'; b.className='pweye'; b.setAttribute('aria-label',L('Afficher le mot de passe','Show password')); b.textContent='👁';
+      b.onclick=()=>{ const s=inp.type==='password'; inp.type=s?'text':'password'; b.style.opacity=s?1:.55; };
+      w.appendChild(b);
+      const c=document.createElement('div'); c.className='meta capswarn hidden'; c.textContent='⇪ '+L('Verrouillage majuscules activé','Caps Lock is on'); w.after(c);
+      inp.addEventListener('keydown',ev=>{ if(ev.getModifierState) c.classList.toggle('hidden',!ev.getModifierState('CapsLock')); });
+    });
+    const f=$('li')||$('si'); if(f&&!/Mobi|Android/i.test(navigator.userAgent)) f.focus();
+  };
+})();
+// Raccourci "/" : aller dans la recherche des tutos
+document.addEventListener('keydown',e=>{
+  if(e.key!=='/'||e.ctrlKey||e.metaKey||e.altKey) return;
+  if(/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||'')) return;
+  const f=$('filters'); if(!f||f.classList.contains('hidden')) return; e.preventDefault(); $('q').focus();
+});
+// Effet d'onde au toucher des boutons
+document.addEventListener('pointerdown',e=>{
+  const b=e.target.closest&&e.target.closest('button:not(:disabled)'); if(!b||b.closest('.logo3d')) return;
+  const r=b.getBoundingClientRect(), s=document.createElement('span'), d=Math.max(r.width,r.height)*2;
+  s.className='ripple'; s.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
+  b.appendChild(s); setTimeout(()=>s.remove(),600);
+},{passive:true});
+mountLogos(); netUpdate(); instUpdate();
+
 (function(){var i=new Image();i.onload=function(){document.documentElement.classList.add('photo');};i.src='fond-verre.jpg';})();
 boot();
 if('serviceWorker' in navigator){
