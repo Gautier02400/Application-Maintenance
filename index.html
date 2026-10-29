@@ -43,6 +43,59 @@
       CSS -> bloc "SIBELCO 2.0" à la fin de la balise style ; JS -> section 4 à la fin du script.
 ============================================================================
 -->
+<!--
+ EXPLICATION SUPPLÉMENTAIRE : FICHE D'IDENTITE DU PROJET ET VOCABULAIRE
+ PROJET        : Tutos Maintenance – trieurs optiques verre (Sibelco Reims)
+ AUTEUR        : [A COMPLETER : votre nom]      DATE DE CREATION : [A COMPLETER]
+ HISTORIQUE    : notez ici chaque version (ex. v17 = ajout des machines 3D, date, ce qui a changé).
+                 Conservez aussi vos anciennes copies de ce fichier : elles datent et prouvent votre travail.
+ IA / OUTILS   : si un assistant IA vous a aidé, écrivez-le ici honnêtement (ex. "code rédigé avec l'aide de Claude,
+                 conçu, testé et adapté par [votre nom]"). C'est plus solide qu'une affirmation que vous ne pourriez pas défendre.
+ MARQUES       : le logo SIBELCO et les noms Redwave, Binder+Co, Steinert appartiennent à leurs propriétaires ;
+                 ce fichier ne prouve que l'auteur du CODE (animations, interface), pas des marques.
+ 
+ VOCABULAIRE (pour comprendre le code) :
+   DOM         = la page web vue comme un arbre d'éléments que le JavaScript peut modifier.
+   canvas      = une zone de dessin pixel par pixel ; le logo 3D, les machines 3D et le jeu y sont dessinés.
+   localStorage= petit coffre du navigateur (texte uniquement, quelques Mo) : tutos, comptes, scores.
+   IndexedDB   = coffre plus gros du navigateur : PDF, PowerPoint, copie de secours.
+   fonction    = un bloc de code nommé qu'on appelle (ex. save()). "async/await" = fonction qui attend un résultat.
+   requestAnimationFrame = demande au navigateur de rappeler une fonction avant chaque image (~60 fois/s) : base de toute animation.
+   dt          = durée écoulée depuis l'image précédente ; multiplier un mouvement par dt le rend identique sur PC lent ou rapide.
+   `...${x}...`= texte "modèle" : ${x} est remplacé par la valeur de x. Sert à fabriquer le HTML de chaque page.
+   esc()       = protège un texte avant de l'insérer dans le HTML (évite d'injecter du code par erreur).
+ LECTURE CONSEILLEE : suivre l'ordre du démarrage -> fin du fichier : safeBoot() -> boot() -> enter() -> renderHome().
+-->
+<!--
+ ============================================================================
+ GUIDE SIMPLE : OU MODIFIER QUOI ?   (Ctrl+F puis tapez le mot de la colonne de droite)
+ ============================================================================
+  Ce que vous voulez changer                          Mot à chercher dans ce fichier
+  ---------------------------------------------------  ------------------------------
+  Les textes de l'appli (menus, boutons) FR / EN       const I18N
+  Les tutoriels d'exemple                              const SEED
+  Les questions du quiz / vrai-faux / relier / ordre   const QUIZ  const VF  const LNK  const ORD
+  Les pièces du jeu "Trieur"                           const GITEMS
+  Les 5 classes d'utilisateurs                         const CLS
+  Vitesse, taille, nombre de triangles du globe 3D     const LOGO_CFG
+  Couleurs du globe et de l'anneau                     const LOGO_COL   const RING_COL
+  Les textes de la page Machines 3D                    -> DANS L'APPLI : bouton "Modifier les textes" (classes 3 et 4)
+     (au-dessus, sous la machine, à droite)             textes d'origine : M3_TXT_DEFAULT  et  M3_PARTS
+  Marques et modèles de trieurs                        const M3_BRANDS   const M3_MODELS
+  Couleurs des technologies VIS / UV / NIR / inductif  const M3_TECH
+  Les grains de verre qui circulent                    const M3_GRAINS
+  Les couleurs de toute l'appli                        :root (dans le style, en haut)
+  Hors connexion (cache)                               sw.js : changer le numéro de version
+
+ Repères : chaque réglage modifiable est précédé de la ligne "✏️ MODIFIABLE" dans le code.
+
+ REGLES POUR MODIFIER SANS RIEN CASSER :
+   1. Faites une COPIE du fichier avant (index-copie.html).
+   2. Ne changez que le texte entre guillemets '...' ou les chiffres ; gardez les virgules, les guillemets et les crochets.
+   3. Enregistrez, rechargez la page (Ctrl+F5), testez. Si ça ne marche plus, revenez à la copie.
+   4. Après toute modification, changez le numéro de version dans sw.js (v18 -> v19...).
+ ============================================================================
+-->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tutos Maintenance – Tri optique verre</title>
 <!--
@@ -65,6 +118,16 @@ window.__bip=null;
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__bip=e; if(window.instUpdate) try{ instUpdate(); }catch(x){} });
 </script>
 <style>
+/* EXPLICATION SUPPLÉMENTAIRE : COMMENT LIRE LE CSS (apparence)
+ Le CSS décrit l'apparence ; il ne contient aucune logique.
+ 1) Les couleurs sont des VARIABLES (--danger-bg, --accent, --card, --line, --text...) définies dans :root.
+ 2) Le MODE SOMBRE redéfinit ces mêmes variables, soit à la demande (data-theme="dark" posé par applyTheme()),
+    soit automatiquement (@media prefers-color-scheme: dark) : on ne réécrit donc pas chaque style.
+ 3) Les @media (max-width: ...) adaptent la mise en page au téléphone ; @media print prépare l'impression ;
+    @media (prefers-reduced-motion) coupe les animations pour les personnes sensibles au mouvement.
+ 4) Les classes .cover.c-xxx sont des fonds dégradés (une couleur par rubrique) ; .logo3d, .m3grid... = cadres des animations 3D.
+ POUR CHANGER L'ASPECT DE TOUTE L'APPLI : modifiez d'abord les variables de :root (clair ET sombre).
+*/
 /*
  ===================== 1. APPARENCE (CSS) =====================
  Toute la feuille de style est dans la balise style. Les couleurs sont stockées dans des "variables"
@@ -591,6 +654,11 @@ header .row{gap:6px;flex-wrap:nowrap}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
 }
+/* Textes modifiables de la page Machines 3D (mode modification) */
+.m3 [contenteditable="true"][data-k]{outline:2px dashed var(--accent);outline-offset:3px;border-radius:4px;cursor:text;min-height:1.3em}
+.m3 [contenteditable="true"][data-k]:focus{outline-style:solid;background:rgba(10,90,168,.08)}
+.m3 [contenteditable="true"][data-k]:empty:before{content:attr(data-ph);opacity:.55}
+.m3 .m3hint[contenteditable="true"]{pointer-events:auto}
 </style>
 </head>
 <body>
@@ -668,6 +736,14 @@ header .row{gap:6px;flex-wrap:nowrap}
  Clés de stockage localStorage. Le "v1" permet de changer de version plus tard sans mélanger les anciennes données.
    KEY      = liste des tutoriels        LANG_KEY = langue choisie (fr / en)
 */
+/* EXPLICATION SUPPLÉMENTAIRE : COMMENT FONCTIONNE LE SCRIPT (vue d'ensemble)
+ Principe : l'appli ne recharge JAMAIS la page. Une "route" = une fonction render...() qui REMPLACE le contenu de #app :
+    renderHome (accueil) | renderList (tutos) | openTuto (lecture) | renderEditor (édition) | renderSettings | renderGame...
+ Navigation : go('section') -> renderSection() -> la bonne fonction render. Le menu latéral est reconstruit par buildNav().
+ Données    : des tableaux/objets globaux (tutos, users, fiches, settings) relus au démarrage et réécrits par save()/saveUsers()...
+ Cycle      : action de l'utilisateur (onclick="...") -> modification des données -> save() -> re-render de la page.
+ Les onclick="nomFonction()" écrits dans le HTML généré appellent directement les fonctions de ce script (elles sont globales).
+*/
 const KEY = 'sibelco_tutos_v1';
 const LANG_KEY = 'sibelco_lang';
 
@@ -680,6 +756,7 @@ const LANG_KEY = 'sibelco_lang';
  ou data-i18n="ma_cle" sur un élément HTML fixe.
 */
 /* ---------- TRADUCTIONS DE L'INTERFACE ---------- */
+// ✏️ MODIFIABLE : textes de l'interface en français (fr) et en anglais (en) : changez le texte, pas le nom de la clé
 const I18N = {
  fr:{
   app_title:'Tutos Maintenance', app_sub:'Trieurs optiques – verre · Sibelco Reims',
@@ -811,6 +888,7 @@ const TOBL={id:'tobl',mandatory:true,title:'FORMATION OBLIGATOIRE – Les bases 
 /*
  SEED = les tutoriels fournis au premier lancement (copiés dans le localStorage). Ensuite chacun les modifie à sa guise.
 */
+// ✏️ MODIFIABLE : tutoriels d'exemple : titre, machine, étapes... (une entrée = un tuto)
 const SEED = [
  {id:'t1',title:'Consignation avant intervention (LOTO)',machine:'Tous trieurs',category:'Sécurité',level:'Obligatoire',duration:15,
   tools:['Cadenas personnel','Étiquettes de consignation','Fiche de consignation du site'],
@@ -931,6 +1009,12 @@ function view(t){
            cat (filtre catégorie), draft (tutoriel en cours d'édition), done (étapes cochées)
 */
 /* ---------- ÉTAT ---------- */
+/* EXPLICATION SUPPLÉMENTAIRE : L'ETAT DE L'APPLICATION
+ tutos = la liste de tous les tutoriels (chargée depuis le navigateur ; sinon copie de SEED = exemples).
+ state = où l'on est : view (home/list/view/edit), section, id du tuto ouvert, catégorie filtrée, draft (brouillon en cours d'édition),
+         done (étapes cochées par tuto : volontairement NON sauvegardé, la progression repart de zéro à chaque lecture).
+ La ligne unshift(TOBL) garantit que le tuto "obligatoire" TOBL existe toujours, même si l'utilisateur a importé une liste sans lui.
+*/
 let tutos = load(); if(!tutos.some(t=>t.id==='tobl')) tutos.unshift(JSON.parse(JSON.stringify(TOBL)));
 let state = {view:'home', section:'home', id:null, cat:'', draft:null, done:{}};
 
@@ -1122,6 +1206,10 @@ function openTuto(id){
   updProgress(id, false);
   window.scrollTo(0,0);
 }
+/* EXPLICATION SUPPLÉMENTAIRE : CASES A COCHER D'UN TUTO
+ Quand on coche l'étape i : on le note dans state.done, on barre l'étape (classe CSS "done") et on recalcule la barre de progression.
+ updProgress() affiche la barre et le pourcentage ; à 100 %, un message s'affiche et, si le tuto est obligatoire (mandatory),
+ validateTraining() enregistre la formation comme validée pour l'utilisateur. */
 function toggleStep(id,i,v){
   state.done[id][i]=v;
   const el=$('st'+i); if(el) el.classList.toggle('done',v);
@@ -1224,6 +1312,10 @@ function rmPhoto(i){ state.draft.steps[i].img=''; renderStepsEditor(); }
     (le navigateur limite le localStorage à environ 5 Mo).
  Le fond blanc (fillRect) évite que les PNG transparents deviennent noirs en JPEG.
 */
+/* EXPLICATION SUPPLÉMENTAIRE : REDUCTION DES PHOTOS
+ Une photo de téléphone pèse plusieurs Mo : elle saturerait le localStorage. readImg() la lit (FileReader), la redimensionne
+ dans un canvas (côté max = max, qualité q) puis la renvoie en texte base64 via cb(). Résultat : quelques dizaines de Ko par photo.
+*/
 function readImg(f,max,q,cb){
   const r=new FileReader();
   r.onload=()=>{
@@ -1325,6 +1417,7 @@ function importJSON(ev){
 */
 /* ---------- CLASSES / PARAMÈTRES / MENU ---------- */
 const SKEY='sibelco_settings_v1', FKEY='sibelco_fiches_v1';
+// ✏️ MODIFIABLE : les 5 classes d'utilisateurs et leur description
 const CLS=[
  {fr:'Classe 0 – Découverte',en:'Class 0 – Beginner',dfr:'Ne connaît pas les trieurs optiques : formation obligatoire avant les autres tutos.',den:'New to optical sorters: mandatory training before the other tutorials.'},
  {fr:'Classe 1 – Opérateur',en:'Class 1 – Operator',dfr:'Connaît les trieurs : accès aux tutos Facile / Moyen.',den:'Knows the sorters: access to Easy / Medium tutorials.'},
@@ -1446,6 +1539,13 @@ const UKEY='sibelco_users_v1', SESS='sibelco_session';
 let users=(()=>{try{const r=JSON.parse(localStorage.getItem(UKEY)); if(Array.isArray(r)) return r;}catch(e){} return [];})();
 function saveUsers(){ try{localStorage.setItem(UKEY,JSON.stringify(users));}catch(e){toast(T('storage_full'));} }
 const validId=v=>/^[a-z0-9._-]{2,30}$/.test(v);
+/* EXPLICATION SUPPLÉMENTAIRE : MOTS DE PASSE : COMMENT ILS SONT PROTEGES (ET LIMITES)
+ Le mot de passe n'est jamais stocké en clair : on stocke seulement son EMPREINTE SHA-256 calculée avec un "sel" (texte aléatoire propre à
+ chaque compte), donc deux personnes ayant le même mot de passe n'ont pas la même empreinte. Si le navigateur n'a pas crypto.subtle,
+ un calcul de secours plus faible est utilisé (préfixe "w").
+ ATTENTION : tout reste sur l'appareil. C'est un contrôle d'accès de confort, PAS une vraie sécurité serveur : quelqu'un qui maîtrise
+ le navigateur peut lire/modifier les données locales. Ne pas y mettre d'informations confidentielles.
+*/
 async function hash(pw,salt){
   const d=new TextEncoder().encode(salt+':'+pw);
   if(window.crypto&&crypto.subtle){ const b=await crypto.subtle.digest('SHA-256',d); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
@@ -1474,6 +1574,10 @@ async function doSetup(){
   const salt=uid(); const u={id,name,cls:3,salt,pw:await hash(pw,salt),chosen:true,trained:Date.now(),theme:'auto'};
   users.push(u); saveUsers(); try{localStorage.setItem(SESS,id);}catch(e){} enter(u);
 }
+/* EXPLICATION SUPPLÉMENTAIRE : CONNEXION
+ On retrouve le compte par son identifiant, on recalcule l'empreinte du mot de passe saisi avec le sel du compte et on la compare.
+ Si c'est bon : l'identifiant est mémorisé (clé SESS) pour rester connecté au prochain lancement, puis enter(u) ouvre l'accueil.
+*/
 async function doLogin(){
   const id=$('li').value.trim().toLowerCase(), u=users.find(x=>x.id===id);
   if(!u||(await hash($('lp').value,u.salt))!==u.pw){ aerr(L('Identifiant ou mot de passe incorrect','Wrong login or password')); return; }
@@ -1494,6 +1598,9 @@ function logout(){
  Le compte "aa" ne peut ni être supprimé ni rétrogradé depuis l'appli (voir setUserCls et delUser).
  /!\ SECURITE : changez le mot de passe AAAA dans Paramètres une fois connecté.
 */
+/* EXPLICATION SUPPLÉMENTAIRE : COMPTE ADMINISTRATEUR DE DEPART
+ Au premier lancement, seedAdmin() crée un compte "aa" de classe 4 (administrateur) avec un mot de passe par défaut visible dans le code.
+ Chacun peut lire ce code : changez ce mot de passe dès la première connexion (Paramètres) ou modifiez cette fonction. */
 async function seedAdmin(){
   let first=true; try{ first=!localStorage.getItem('sibelco_seed_aa_v2'); }catch(e){}
   let a=users.find(u=>u.id==='aa'), dirty=false;
@@ -1511,6 +1618,11 @@ async function seedAdmin(){
 /*
  boot() = DEMARRAGE : crée l'admin de départ, traduit l'interface, puis
    - si une session est mémorisée -> on entre directement (enter) ; sinon écran de connexion (ou création du 1er compte).
+*/
+/* EXPLICATION SUPPLÉMENTAIRE : DEMARRAGE DE L'APPLICATION
+ seedAdmin() crée l'administrateur de départ si besoin ; applyStatic() traduit les textes fixes ; puis trois cas :
+   - une session mémorisée existe -> enter(u) (accueil direct) ; - aucun compte -> renderSetup() (création du 1er compte) ;
+   - sinon -> renderLogin(). boot() est lancé par safeBoot() tout en bas du fichier.
 */
 async function boot(){
   await seedAdmin();
@@ -1573,6 +1685,10 @@ async function changePw(){
  Les PDF et PowerPoint sont trop gros pour le localStorage. On les range dans IndexedDB (base "sibelco_files",
  magasin "f"), avec l'identifiant de la fiche comme clé. idbPut = enregistrer, idbGet = lire, idbDel = effacer.
  Dans la fiche elle-même on ne garde que { name, size, kind } (nom, taille, 'pdf' ou 'ppt').
+*/
+/* EXPLICATION SUPPLÉMENTAIRE : INDEXEDDB : STOCKAGE DES GROS FICHIERS
+ Base "sibelco_files", magasin "f" : on y met les PDF et PowerPoint (Blob) sous une clé. idbOp(mode, clé, valeur) encapsule
+ les transactions (put = écrire, get = lire, del = supprimer) et renvoie une promesse ; idbPut/idbGet/idbDel sont les raccourcis.
 */
 function idb(){ return new Promise((ok,ko)=>{ const r=indexedDB.open('sibelco_files',1); r.onupgradeneeded=()=>r.result.createObjectStore('f'); r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); }); }
 async function idbOp(m,k,v){
@@ -1831,6 +1947,7 @@ const GBINS=[
  {fr:'Brun',en:'Brown',col:'#8a5a2b'},
  {fr:'Refus',en:'Reject',col:'#c0392b'}
 ];
+// ✏️ MODIFIABLE : pièces qui tombent dans le jeu Trieur (bin = bac de destination)
 const GITEMS=[
  {bin:0,shape:'bottle',col:'#2e9e4f',fr:'Verre vert',en:'Green glass'},
  {bin:1,shape:'bottle',col:'#bfe6f2',fr:'Verre blanc',en:'Clear glass'},
@@ -1913,6 +2030,11 @@ function gHud(g){
    gSpawn()  fait apparaître une pièce   gUpdate(g,dt)  fait avancer les pièces (dt = temps écoulé)
    gSort(bin)  vérifie le choix du joueur   gFail  perd une vie   gOver  fin de partie + enregistrement du score
 */
+/* EXPLICATION SUPPLÉMENTAIRE : BOUCLE D'UN JEU CANVAS (Trieur Sibelco)
+ gameInit() prépare le canvas (résolution adaptée aux écrans Retina via dpr) et l'objet g = tout l'état du jeu (score, vies, pièces...).
+ loop() tourne à chaque image : gUpdate(g,dt) fait avancer le jeu, gRender(g) le dessine. Elle s'arrête seule quand on quitte la page
+ (G!==g ou canvas détaché). Touches 1-4 = bacs de tri ; gSort() vérifie si la pièce a été mise dans le bon bac.
+*/
 function gameInit(){
   if(G&&G.raf) cancelAnimationFrame(G.raf);
   const cv=$('gcv'), dpr=Math.min(2,window.devicePixelRatio||1);
@@ -1935,6 +2057,10 @@ function gameStart(){
   $('gplay').classList.add('hidden'); gMsg(''); gHud(g);
 }
 function gLevel(g){ return 1+Math.floor(g.sorted/8); }
+/* EXPLICATION SUPPLÉMENTAIRE : DIFFICULTE PROGRESSIVE
+ Plus on trie de pièces (g.sorted), plus la vitesse de chute augmente (plafonnée), plus les pièces apparaissent vite (gUpdate),
+ et à partir de 6 pièces certaines dérivent latéralement (vx). gLevel() = niveau affiché (+1 toutes les 8 pièces).
+*/
 function gSpeed(g){ return 90+Math.min(150,g.sorted*3.5); }
 function gSpawn(g){
   const glass=Math.random()<Math.max(.35,.5-g.sorted*.004), pool=GITEMS.filter(i=>glass?i.bin<3:i.bin===3);
@@ -2148,6 +2274,7 @@ function gFrame(titleFr,titleEn,inner){
  POUR AJOUTER UNE QUESTION : copier une entrée existante, changer les textes et le numéro de bonne réponse.
  Chaque partie tire 10 questions au hasard ; le score dépend de la rapidité de réponse (chronomètre).
 */
+// ✏️ MODIFIABLE : questions du quiz : q = question, o = 4 réponses, a = numéro de la bonne (0 à 3), e = explication
 const QUIZ=[
  {q:['Avant de nettoyer les vitres de la zone optique, que faut-il faire en premier ?','Before cleaning the optical-area windows, what must you do first?'],
   o:[['Souffler à l’air comprimé','Blow with compressed air'],['Consigner la machine','Lock out the machine'],['Retirer les protections machine en marche','Remove guards while running'],['Appeler le fournisseur','Call the supplier']],a:1,
@@ -2214,6 +2341,7 @@ const QUIZ=[
 /*
  VF : même idée mais a = true (affirmation vraie) ou false (fausse).
 */
+// ✏️ MODIFIABLE : affirmations vrai/faux : a = true si vraie, e = explication
 const VF=[
  {q:['On peut intervenir sur la zone optique sans consigner si c’est rapide.','You may work in the optical area without lockout if it is quick.'],a:false,e:['Aucune intervention sans consignation, même courte.','No intervention without lockout, however short.']},
  {q:['L’air comprimé peut rester sous pression même machine arrêtée.','Compressed air can stay pressurised even when the machine is stopped.'],a:true,e:['C’est de l’énergie stockée : purgez et contrôlez le manomètre.','It is stored energy: bleed it and check the gauge.']},
@@ -2237,6 +2365,10 @@ const VF=[
  quizAnswer(i) corrige (i = -1 si le temps est écoulé), quizNext() passe à la suivante, quizEnd() affiche le résultat.
 */
 let Q=null;   // état de la partie de quiz / vrai-faux en cours
+/* EXPLICATION SUPPLÉMENTAIRE : MOTEUR COMMUN QUIZ / VRAI-FAUX
+ Même code pour les deux jeux : on tire 10 questions au hasard (shuffle) dans la banque QUIZ ou VF. En quiz les 4 réponses sont mélangées ;
+ en vrai/faux il y a 2 boutons fixes. Q = état de la partie (score, série, chrono). Les scores sont enregistrés par g2Record().
+*/
 function quizStart(kind){
   const bank=kind==='vf'?VF:QUIZ;
   const qs=shuffle(bank.slice()).slice(0,10).map(q=>kind==='vf'
@@ -2294,6 +2426,7 @@ function quizEnd(){                        // écran de résultat + enregistreme
  POUR CHANGER / AJOUTER / RETIRER UNE PAIRE : modifier, copier ou supprimer une ligne (gardez l'expression COURTE : environ 50 caractères).
  Pour changer le nombre de paires par partie : modifier LNK_N.
 */
+// ✏️ MODIFIABLE : paires à relier (objet <-> rôle)
 const LNK=[
  ['📷',['Caméra','Camera'],['Voit la couleur et les défauts du verre','Sees the glass colour and defects']],
  ['💡',['Éclairage','Lighting'],['Éclaire le verre pour une image nette','Lights the glass for a sharp image']],
@@ -2380,6 +2513,7 @@ window.addEventListener('resize',()=>{ if(LK&&$('lksvg')) lnkLines(); });
  ORD : t = titre de la procédure [fr,en] ; s = liste des étapes dans le BON ordre [[fr,en],...].
  Le jeu les mélange et le joueur doit les toucher dans l'ordre correct. POUR AJOUTER UNE PROCEDURE : copier une entrée.
 */
+// ✏️ MODIFIABLE : procédures à remettre dans l'ordre
 const ORD=[
  {t:['Consignation (LOTO)','Lockout / tagout'],s:[
   ['Prévenir le poste de conduite et arrêter l’alimentation en verre','Warn the control room and stop the glass feed'],
@@ -2494,6 +2628,7 @@ function ordEnd(){
 
  >>> POUR MODIFIER : changez uniquement les chiffres de LOGO_CFG ci-dessous (le reste n'a pas besoin d'être touché). <<<
 ===================================================================================== */
+// ✏️ MODIFIABLE : réglages du globe 3D : changez seulement les chiffres (le commentaire à droite dit quoi mettre)
 const LOGO_CFG = {
   size    : 0.25,   // taille du globe dans son cadre (0.20 = petit, 0.35 = très grand ; au-delà l'anneau est coupé)
   idle    : 0.007,  // vitesse de rotation quand on ne touche pas (0 = immobile, 0.02 = rapide)
@@ -2516,8 +2651,10 @@ const LOGO_CFG = {
    - CLAVIER                  : flèches = tourner, Entrée/Espace = éclat
  Pour changer les couleurs : voir LOGO_COL (bleu foncé -> bleu clair) et RING_COL.            */
 /* Couleurs du globe (rouge,vert,bleu de 0 à 255). Pour un autre bleu, changez ces 6 chiffres. */
+// ✏️ MODIFIABLE : couleurs du globe [rouge, vert, bleu] de 0 à 255
 const LOGO_COL = { dark:[5,48,126], light:[118,204,250] };
 /* Couleurs de l'anneau (même principe) */
+// ✏️ MODIFIABLE : couleurs de l'anneau [rouge, vert, bleu] de 0 à 255
 const RING_COL = { dark:[8,42,104], light:[38,122,212] };
 const LOGO_GEO = (()=>{
   const nrm = v => { const l=Math.hypot(v[0],v[1],v[2])||1; return [v[0]/l,v[1]/l,v[2]/l]; };
@@ -2597,6 +2734,11 @@ function Logo3D(host,opt){
 
   // frame() = UNE IMAGE d'animation, appelée ~60 fois/s par le navigateur (requestAnimationFrame).
   // Elle s'arrête toute seule quand le logo disparaît de la page (host.isConnected).
+  /* EXPLICATION SUPPLÉMENTAIRE : LE GLOBE : CE QUI SE PASSE A CHAQUE IMAGE
+   Ordre exact dans frame() : (1) mise à jour du mouvement (inertie, ressort, lueur) -> (2) halo -> (3) moitié ARRIERE de l'anneau ->
+   (4) rotation de tous les sommets -> (5) dessin des triangles du globe -> (6) moitié AVANT de l'anneau -> (7) ondes du clic.
+   Dessiner dans cet ordre (peintre) donne la bonne profondeur sans moteur 3D : ce qui est derrière est peint d'abord.
+  */
   function frame(now){
     if(!host.isConnected){ running=false; return; }
     requestAnimationFrame(frame);
@@ -2615,7 +2757,15 @@ function Logo3D(host,opt){
     glow*=Math.pow(0.95,dt); pulse*=Math.pow(0.92,dt); ringSpin+=(reduce?0:0.004)*dt;
     const Y=yaw+hx*0.4, P=pitch;
     const cY=Math.cos(Y), sY=Math.sin(Y), cP=Math.cos(P), sP=Math.sin(P);
+    /* EXPLICATION SUPPLÉMENTAIRE : ROTATION D'UN POINT
+     Deux rotations classiques enchaînées : autour de l'axe vertical (angle Y = yaw) puis autour de l'axe horizontal (angle P = pitch),
+     avec cos/sin. Entrée : un point (x,y,z) ; sortie : le même point tourné. Appliquée à tous les sommets à chaque image.
+    */
     const rot=(x,y,z)=>{ const x1=x*cY+z*sY, z1=-x*sY+z*cY; return [x1, y*cP-z1*sP, y*sP+z1*cP]; };
+    /* EXPLICATION SUPPLÉMENTAIRE : PERSPECTIVE
+     q = DCAM/(DCAM - z) : plus un point est proche de la caméra (z grand), plus q est grand, donc plus il s'éloigne du centre et paraît gros.
+     On obtient les coordonnées 2D (écran) : x*q*R0 et y*q*R0 autour du centre du canvas (cx,cy). C'est la "vraie" 3D de ce logo.
+    */
     const prj=(x,y,z)=>{ const q=DCAM/(DCAM-z); return [cx+x*q*R0, cy-y*q*R0]; };
 
     ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,S,S);
@@ -2699,6 +2849,11 @@ function mountLogos(){
 new MutationObserver(mountLogos).observe($('app'),{childList:true});
 
 /* Agrandir le logo : clic sur le logo du bandeau (Ctrl/Maj+clic ouvre quand même le site Sibelco) */
+/* EXPLICATION SUPPLÉMENTAIRE : FENETRE "LOGO AGRANDI"
+ Au clic simple sur le logo du bandeau : on bloque le lien (preventDefault) et on crée une fenêtre plein écran (#logoov)
+ contenant un .logo3d.big que mountLogos() transforme en globe. Elle se ferme par ✕, clic à côté ou touche Échap.
+ Avec Ctrl / Cmd / Maj ou clic du milieu, la fonction rend la main : le lien Sibelco France s'ouvre normalement.
+ Le bouton "sibelco.com" dans la fenêtre ouvre le même site dans un nouvel onglet. */
 function openLogoViewer(e){
   if(e&&(e.ctrlKey||e.metaKey||e.shiftKey||e.button===1)) return true;
   if(e&&e.preventDefault) e.preventDefault();
@@ -2717,6 +2872,10 @@ function openLogoViewer(e){
 }
 
 /* ---------- CONFETTIS ---------- */
+/* EXPLICATION SUPPLÉMENTAIRE : CONFETTIS
+ Crée un canvas plein écran, y dessine 110 petits rectangles colorés (couleurs bleues Sibelco + blanc + orange) qui partent vers le haut
+ puis retombent (gravité vy += 0.38), et le supprime après 2,4 s. Rien n'est dessiné si l'appareil demande de réduire les animations.
+ Appelé quand un record est battu dans un jeu ou quand une formation obligatoire est validée. */
 function confetti(){
   if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const cv=document.createElement('canvas'); cv.className='confetti noprint'; document.body.appendChild(cv);
@@ -2812,6 +2971,10 @@ $('bInstall').addEventListener('click',async()=>{
   instDialog('install');
 });
 (function(){ const _as=applyStatic; applyStatic=function(){ _as(); netUpdate(); instUpdate(); }; })();
+/* EXPLICATION SUPPLÉMENTAIRE : ENREGISTREMENT DU SERVICE WORKER
+ Une fois la page entièrement chargée, on enregistre sw.js : à partir de là l'appli est mise en cache et fonctionne hors connexion.
+ Le catch vide est volontaire : sans service worker (navigateur ancien, http), l'appli marche quand même, seulement en ligne.
+*/
 if('serviceWorker' in navigator){
   let hadCtl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange',()=>{
@@ -2878,6 +3041,7 @@ document.addEventListener('pointerdown',e=>{
 */
 
 /* Les 3 marques : id, nom affiché, couleur de la pastille */
+// ✏️ MODIFIABLE : les marques de trieurs : id, nom affiché, couleur de la pastille
 const M3_BRANDS=[
   {id:'redwave', name:'Redwave',               col:'#d7261e'},
   {id:'binder',  name:'Binder+Co · Clarity',   col:'#1f7ac8'},
@@ -2891,9 +3055,11 @@ const M3_BRANDS=[
  -> un menu « Modèle » apparaît et les technologies absentes du modèle choisi sont grisées.
  Codes : vis (visible), uv (ultraviolet), nir (proche infrarouge), ind (capteurs inductifs).
 */
+// ✏️ MODIFIABLE : les modèles réels de chaque marque (voir l'exemple dans le commentaire au-dessus)
 const M3_MODELS={ redwave:[], binder:[], steinert:[] };
 
 /* Les 4 technologies : couleur du faisceau / de la pastille */
+// ✏️ MODIFIABLE : couleur de chaque technologie
 const M3_TECH={ vis:'#f2b705', uv:'#9b5cff', nir:'#ff6a3d', ind:'#0fb5a0' };
 
 /*
@@ -2901,6 +3067,7 @@ const M3_TECH={ vis:'#f2b705', uv:'#9b5cff', nir:'#ff6a3d', ind:'#0fb5a0' };
    fr/en = titre ; sfr/sen = sous-titre ; pfr/pen = les paragraphes ; tech = true pour les 4 technologies ;
    dfr/den = « ce que ça détecte » (pastilles). Textes des technologies : d'après l'affiche Sibelco.
 */
+// ✏️ MODIFIABLE : les 8 repères de la machine : textes d'origine FR/EN (modifiables aussi dans l'appli)
 const M3_PARTS=[
  {id:'feed',n:1,fr:'Alimentation',en:'Feeding',
   sfr:'Étalement du calcin en nappe fine',sen:'Spreading the cullet into a thin layer',
@@ -2941,6 +3108,7 @@ const M3_PARTS=[
 ];
 
 /* Les « grains » qui circulent : couleur, et la technologie qui repère les indésirables (det) */
+// ✏️ MODIFIABLE : les grains de verre et d'indésirables qui circulent (couleur c, fréquence w)
 const M3_GRAINS=[
  {c:'#cfe9f3',w:5},{c:'#47b062',w:3},{c:'#a1713b',w:3},                         // verre : blanc, vert, brun
  {c:'#6f7378',det:'vis',w:1.2},                                                   // pierre / CSP -> VIS
@@ -3004,6 +3172,12 @@ const m3={
 
 /* ---------- construction d'une machine (liste de faces + points utiles) ---------- */
 const M3_SCENES={};
+/* EXPLICATION SUPPLÉMENTAIRE : CONSTRUIRE UNE MACHINE 3D
+ Une machine = une liste de FACES (polygones) étiquetées : tag = repère auquel elles appartiennent (feed, chute, vis...),
+ g = "ext" (carter visible) ou "int" (intérieur, visible seulement en Vue interne). Les formes viennent des outils m3.box / m3.extrude,
+ puis T() déplace/met à l'échelle l'intérieur pour chaque marque (tableau tf). Le résultat est mis en cache (M3_SCENES) :
+ la machine n'est calculée qu'une fois par marque. S.pins = position 3D des 8 repères ; S.path = trajets du verre.
+*/
 function m3Build(brand){
   if(M3_SCENES[brand]) return M3_SCENES[brand];
   const F=[], add=a=>{ a.forEach(f=>F.push(f)); };
@@ -3106,6 +3280,42 @@ function m3Build(brand){
 /* ---------- l'état de la visionneuse (gardé quand on change de langue) ---------- */
 const M3S={brand:'redwave',sel:null,model:0,yaw:-.62,pitch:.32,dist:6.2,tx:0,ty:1.05,tz:0,tgt:null,auto:true,flow:true,xr:0,xrT:0,parts:[],bursts:[],t:0,spawn:0,idle:0,raf:0,guided:false};
 const m3tr=(fr,en)=>lang==='en'?en:fr;
+/* ✏️ TEXTES MODIFIABLES DIRECTEMENT DANS L'APPLI (page « Machines 3D »)
+ Les classes 3 et 4 voient un bouton « ✏️ Modifier les textes » en haut de la page. En mode modification, les textes entourés
+ en pointillés (titre et introduction AU-DESSUS, aide sur la machine, texte SOUS la machine, panneau de DROITE) deviennent écrivables.
+ Chaque texte est enregistré tout seul quand on clique à côté (dans le navigateur, par langue FR ou EN, et inclus dans la sauvegarde).
+ Si rien n'a été modifié, ce sont les textes d'origine de M3_TXT_DEFAULT (ci-dessous) et de M3_PARTS qui s'affichent.
+ Le texte « sous la machine » est vide par défaut : il n'apparaît que si quelqu'un l'écrit. */
+const M3_TXT_KEY='sibelco_m3_texts_v1';
+// ✏️ MODIFIABLE : textes d'origine [français, anglais] de chaque zone (utilisés tant que personne ne les a changés dans l'appli)
+const M3_TXT_DEFAULT={
+  title:['Les trieurs optiques en 3D','Optical sorters in 3D'],
+  intro:['Choisissez une marque, faites tourner la machine, puis touchez un repère numéroté (ou une technologie) pour comprendre chaque étape. Les technologies VIS, UV, NIR et inductive s’appliquent aux 3 marques ; leur présence dépend du modèle.','Pick a brand, rotate the machine, then tap a numbered marker (or a technology) to understand each step. VIS, UV, NIR and inductive technologies apply to all 3 brands; which ones are fitted depends on the model.'],
+  hint:['Glisser : tourner · Molette / pincer : zoom','Drag: rotate · Wheel / pinch: zoom'],
+  below:['',''],
+  startTitle:['Par où commencer ?','Where to start?'],
+  startIntro:['Le verre broyé est étalé en nappe fine, glisse devant les capteurs, puis un jet d’air éjecte chaque indésirable. Suivez le chemin dans l’ordre :','The crushed glass is spread into a thin layer, slides past the sensors, then an air jet ejects each contaminant. Follow the path in order:'],
+  startNote:['Les points colorés qui circulent sont des morceaux de verre (clair, vert, brun) et des indésirables : pierre, vitrocéramique, plastique, métal. Chacun est repéré par la technologie qui le voit.','The moving dots are glass pieces (clear, green, brown) and contaminants: stone, glass-ceramic, plastic, metal. Each one is spotted by the technology that can see it.']
+};
+let M3_ED={}; try{ M3_ED=JSON.parse(localStorage.getItem(M3_TXT_KEY))||{}; }catch(e){ M3_ED={}; }   // M3_ED = textes modifiés par les utilisateurs
+function m3SaveEd(){ try{ localStorage.setItem(M3_TXT_KEY,JSON.stringify(M3_ED)); toast(L('Texte enregistré','Text saved')); }catch(e){ toast(T('storage_full')); } }
+// m3Txt('title') : renvoie le texte modifié s'il existe, sinon le texte d'origine, dans la langue en cours
+function m3Txt(key){ const o=M3_ED[lang+'.'+key]; if(o!==undefined) return o; const d=M3_TXT_DEFAULT[key]; return lang==='en'?d[1]:d[0]; }
+// m3PartTxt(repère,'t'|'s'|'p') : titre, sous-titre ou paragraphes d'un repère numéroté (texte modifié sinon M3_PARTS)
+function m3PartTxt(p,f){ const o=M3_ED[lang+'.part.'+p.id+'.'+f]; if(o!==undefined) return o; return f==='t'?m3tr(p.fr,p.en):f==='s'?m3tr(p.sfr,p.sen):m3tr(p.pfr,p.pen); }
+const m3CanEdit=()=>!!(settings&&settings.cls>=3);        // seuls les classes 3 et 4 peuvent modifier
+// m3Ed(clé) : ajoute à un élément HTML les attributs qui le rendent écrivable (uniquement en mode modification)
+const m3Ed=(key,ph)=>(M3S.edit&&m3CanEdit())?` contenteditable="true" spellcheck="true" data-k="${key}" data-ph="${esc(ph||'')}" onblur="m3Blur(this)"`:'';
+function m3Blur(el){            // quand on quitte un texte : on enregistre ce qui a été écrit
+  const v=el.tagName==='UL'?[...el.querySelectorAll('li')].map(li=>li.innerText.trim()).filter(Boolean):el.innerText.trim();
+  M3_ED[lang+'.'+el.dataset.k]=v; m3SaveEd();
+}
+function m3EditToggle(){ M3S.edit=!M3S.edit; renderMachines3D(); }
+function m3EditReset(){
+  if(!confirm(L('Rétablir les textes d’origine de cette page (langue en cours) ?','Restore this page’s original texts (current language)?'))) return;
+  Object.keys(M3_ED).forEach(k=>{ if(k.indexOf(lang+'.')===0) delete M3_ED[k]; }); m3SaveEd(); renderMachines3D();
+}
+
 const m3Part=id=>M3_PARTS.find(p=>p.id===id);
 const m3Avail=id=>{ const ms=M3_MODELS[M3S.brand]||[]; if(!ms.length||!M3_TECH[id]) return true; const m=ms[M3S.model]||ms[0]; return !m.tech||m.tech.indexOf(id)>=0; };
 
@@ -3117,15 +3327,20 @@ function m3Card(){
     <div class="meta"><span>${esc(L('VIS · UV · NIR · inductif','VIS · UV · NIR · inductive'))}</span><span>${esc(L('Interactif','Interactive'))}</span></div></div>`;
 }
 
+/* EXPLICATION SUPPLÉMENTAIRE : PAGE "MACHINES 3D"
+ Fabrique le HTML (onglets de marque, canvas #m3cv, panneau d'explication, boutons) puis appelle m3Start() qui lance l'animation.
+ Les textes des 8 repères viennent de M3_PARTS ; le choix de marque/modèle est gardé dans M3S (état de la visionneuse).
+*/
 function renderMachines3D(){
   state.section='presentation'; state.view='machines'; $('filters').classList.add('hidden'); buildNav();
   const ms=M3_MODELS[M3S.brand]||[];
-  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="m3Stop();renderFiches('presentation')">${esc(T('back'))}</button></div>
-   <div class="panel m3"><h2 style="margin-top:0">${esc(L('Les trieurs optiques en 3D','Optical sorters in 3D'))}</h2>
-    <p class="meta" style="margin:0 0 10px;display:block">${esc(L('Choisissez une marque, faites tourner la machine, puis touchez un repère numéroté (ou une technologie) pour comprendre chaque étape. Les technologies VIS, UV, NIR et inductive s’appliquent aux 3 marques ; leur présence dépend du modèle.','Pick a brand, rotate the machine, then tap a numbered marker (or a technology) to understand each step. VIS, UV, NIR and inductive technologies apply to all 3 brands; which ones are fitted depends on the model.'))}</p>
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="m3Stop();renderFiches('presentation')">${esc(T('back'))}</button>${m3CanEdit()?`<span class="row"><button onclick="m3EditToggle()" class="${M3S.edit?'primary':''}">${esc(M3S.edit?L('✔ Terminer la modification','✔ Finish editing'):L('✏️ Modifier les textes','✏️ Edit texts'))}</button>${M3S.edit?`<button onclick="m3EditReset()">${esc(L('Rétablir les textes d’origine','Restore original texts'))}</button>`:''}</span>`:''}</div>
+   ${M3S.edit&&m3CanEdit()?`<p class="meta noprint" style="display:block;margin:0 0 8px">${esc(L('Mode modification : cliquez sur un texte entouré en pointillés, écrivez, puis cliquez à côté : c’est enregistré tout seul. Pour modifier l’explication d’un repère (à droite), cliquez d’abord sur ce repère.','Edit mode: click a dotted text, type, then click elsewhere: it is saved automatically. To edit a marker’s explanation (right side), click that marker first.'))}</p>`:''}
+   <div class="panel m3"><h2 style="margin-top:0"${m3Ed('title','Titre de la page')}>${esc(m3Txt('title'))}</h2>
+    <p class="meta" style="margin:0 0 10px;display:block"${m3Ed('intro','Texte d’introduction (au-dessus de la machine)')}>${esc(m3Txt('intro'))}</p>
     <div class="m3tabs" role="tablist">${M3_BRANDS.map(b=>`<button role="tab" class="chip ${b.id===M3S.brand?'on':''}" aria-selected="${b.id===M3S.brand}" onclick="m3Brand('${b.id}')"><i class="m3dot" style="background:${b.col}"></i>${esc(b.name)}</button>`).join('')}${ms.length?`<select class="m3model" aria-label="${esc(L('Modèle','Model'))}" onchange="M3S.model=+this.value;m3UI()">${ms.map((m,i)=>`<option value="${i}" ${i===M3S.model?'selected':''}>${esc(m.name)}</option>`).join('')}</select>`:''}</div>
     <div class="m3grid"><div class="m3left">
-      <div class="m3cvbox"><canvas id="m3cv" aria-label="${esc(L('Machine en 3D, faites glisser pour tourner','3D machine, drag to rotate'))}"></canvas><div class="m3hint" id="m3hint">${esc(L('Glisser : tourner · Molette / pincer : zoom','Drag: rotate · Wheel / pinch: zoom'))}</div></div>
+      <div class="m3cvbox"><canvas id="m3cv" aria-label="${esc(L('Machine en 3D, faites glisser pour tourner','3D machine, drag to rotate'))}"></canvas><div class="m3hint" id="m3hint"${m3Ed('hint','Aide sur la machine')}>${esc(m3Txt('hint'))}</div></div>
       <div class="m3ctl noprint">
         <button id="m3bx" onclick="m3Toggle('x')">${esc(L('Vue interne','Inside view'))}</button>
         <button id="m3bf" onclick="m3Toggle('f')">${esc(L('Flux de verre','Glass flow'))}</button>
@@ -3134,7 +3349,7 @@ function renderMachines3D(){
       </div>
       <div class="m3chips noprint" id="m3chips"></div>
     </div><div class="m3side" id="m3info"></div></div></div>
-   <p class="disclaimer">${esc(L('Représentation schématique inspirée de l’affiche Sibelco « Technologies de tri optique pour le tri du verre » : la disposition exacte varie selon le modèle.','Schematic view inspired by the Sibelco poster “Optical sorting technologies for glass sorting”: the exact layout varies by model.'))}</p>`;
+   ${(m3Txt('below')||(M3S.edit&&m3CanEdit()))?`<p class="disclaimer"${m3Ed('below','Texte sous la machine (facultatif)')}>${esc(m3Txt('below'))}</p>`:''}`;
   window.scrollTo(0,0); m3UI(); m3Start(); if(M3S.sel) m3Focus();
 }
 function m3Stop(){ M3S.raf=0; }
@@ -3164,26 +3379,32 @@ function m3UI(){
   [bx,$('m3bf'),$('m3ba')].forEach(b=>b.setAttribute('aria-pressed',b.classList.contains('on')));
   $('m3chips').innerHTML=M3_PARTS.map(p=>{
     const col=M3_TECH[p.id]||'var(--accent)', off=!m3Avail(p.id);
-    return `<button class="chip m3chip ${M3S.sel===p.id?'on':''} ${off?'off':''}" style="--c:${col}" onclick="m3Select('${p.id}')" aria-pressed="${M3S.sel===p.id}"><b>${p.n}</b> ${esc(m3tr(p.fr,p.en))}</button>`;
+    return `<button class="chip m3chip ${M3S.sel===p.id?'on':''} ${off?'off':''}" style="--c:${col}" onclick="m3Select('${p.id}')" aria-pressed="${M3S.sel===p.id}"><b>${p.n}</b> ${esc(m3PartTxt(p,'t'))}</button>`;
   }).join('');
   const box=$('m3info'), p=M3S.sel&&m3Part(M3S.sel);
   if(!p){
-    box.innerHTML=`<h3 style="margin:0 0 6px">${esc(L('Par où commencer ?','Where to start?'))}</h3>
-     <p style="margin:0 0 8px">${esc(L('Le verre broyé est étalé en nappe fine, glisse devant les capteurs, puis un jet d’air éjecte chaque indésirable. Suivez le chemin dans l’ordre :','The crushed glass is spread into a thin layer, slides past the sensors, then an air jet ejects each contaminant. Follow the path in order:'))}</p>
-     <ol class="m3flow">${M3_PARTS.map(x=>`<li><a href="#" onclick="m3Select('${x.id}');return false" style="--c:${M3_TECH[x.id]||'var(--accent)'}"><b>${x.n}</b> ${esc(m3tr(x.fr,x.en))}</a></li>`).join('')}</ol>
+    box.innerHTML=`<h3 style="margin:0 0 6px"${m3Ed('startTitle')}>${esc(m3Txt('startTitle'))}</h3>
+     <p style="margin:0 0 8px"${m3Ed('startIntro')}>${esc(m3Txt('startIntro'))}</p>
+     <ol class="m3flow">${M3_PARTS.map(x=>`<li><a href="#" onclick="m3Select('${x.id}');return false" style="--c:${M3_TECH[x.id]||'var(--accent)'}"><b>${x.n}</b> ${esc(m3PartTxt(x,'t'))}</a></li>`).join('')}</ol>
      <div class="row" style="margin-top:12px"><button class="primary" onclick="m3Step(1)">${esc(L('Lancer la visite guidée','Start the guided tour'))}</button></div>
-     <p class="meta" style="margin-top:12px;display:block">${esc(L('Les points colorés qui circulent sont des morceaux de verre (clair, vert, brun) et des indésirables : pierre, vitrocéramique, plastique, métal. Chacun est repéré par la technologie qui le voit.','The moving dots are glass pieces (clear, green, brown) and contaminants: stone, glass-ceramic, plastic, metal. Each one is spotted by the technology that can see it.'))}</p>`;
+     <p class="meta" style="margin-top:12px;display:block"${m3Ed('startNote')}>${esc(m3Txt('startNote'))}</p>`;
     return;
   }
   const tc=M3_TECH[p.id], off=!m3Avail(p.id);
-  box.innerHTML=`<div class="m3hd" style="--c:${tc||'var(--accent)'}"><span class="m3num">${p.n}</span><div><h3 style="margin:0">${esc(m3tr(p.fr,p.en))}</h3><div class="meta" style="margin:2px 0 0">${esc(m3tr(p.sfr,p.sen))}</div></div></div>
-   <ul class="m3pts">${m3tr(p.pfr,p.pen).map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+  box.innerHTML=`<div class="m3hd" style="--c:${tc||'var(--accent)'}"><span class="m3num">${p.n}</span><div><h3 style="margin:0"${m3Ed('part.'+p.id+'.t')}>${esc(m3PartTxt(p,'t'))}</h3><div class="meta" style="margin:2px 0 0"${m3Ed('part.'+p.id+'.s')}>${esc(m3PartTxt(p,'s'))}</div></div></div>
+   <ul class="m3pts"${m3Ed('part.'+p.id+'.p')}>${m3PartTxt(p,'p').map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
    ${p.dfr?`<div class="m3det"><b>${esc(L('Détecte','Detects'))}</b>${m3tr(p.dfr,p.den).map(t=>`<span class="tag" style="border-color:${tc};color:${tc}">${esc(t)}</span>`).join('')}</div>`:''}
    ${tc?`<div class="m3avail ${off?'no':''}">${off?esc(L('Cette technologie n’est pas présente sur le modèle choisi.','This technology is not fitted on the selected model.')):esc(L('Présente sur Redwave, Binder+Co et Steinert, selon le modèle.','Available on Redwave, Binder+Co and Steinert, depending on the model.'))}</div>`:''}
    <div class="row noprint" style="margin-top:14px;justify-content:space-between"><button onclick="m3Step(-1)">◀ ${esc(L('Précédent','Previous'))}</button><button onclick="m3Select('${p.id}')">${esc(L('Fermer','Close'))}</button><button class="primary" onclick="m3Step(1)">${esc(L('Suivant','Next'))} ▶</button></div>`;
 }
 
 /* ---------- le moteur de rendu ---------- */
+/* EXPLICATION SUPPLÉMENTAIRE : MOTEUR D'AFFICHAGE 3D DES MACHINES (même principe que le logo, en plus complet)
+ Contient tout ce qui anime le canvas : camera() (position de la caméra autour de la machine selon yaw/pitch/dist),
+ proj() (perspective : point 3D -> pixel), draw() (peint les faces triées du fond vers l'avant + grains + repères), update() (inertie,
+ caméra qui glisse vers le repère choisi, apparition des grains), puis les écouteurs souris/doigt/molette/clavier et loop().
+ Pas de bibliothèque : tout est du calcul vectoriel simple (produits scalaires et vectoriels) + ctx.fill() sur des polygones.
+*/
 function m3Start(){
   const cv=$('m3cv'); if(!cv) return;
   const id=++M3S.raf; const ctx=cv.getContext('2d'); let W=0,H=0,dpr=1,last=0,cam=null,pinHit=[],theme={t:0};
@@ -3202,6 +3423,10 @@ function m3Start(){
     const w=Math.max(200,Math.round(r.width)), h=Math.round(w*(w<560?.82:.62));
     if(w!==W||h!==H||nd!==dpr){ W=w;H=h;dpr=nd; cv.style.height=h+'px'; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
   }
+  /* EXPLICATION SUPPLÉMENTAIRE : LA CAMERA
+   La caméra orbite autour d'une cible (tx,ty,tz) à la distance dist. f = direction du regard, r = droite, u = haut (produit vectoriel).
+   Ces 3 axes servent à exprimer n'importe quel point 3D dans le repère de la caméra (voir proj).
+  */
   function camera(){
     const t=[M3S.tx,M3S.ty,M3S.tz], cp=Math.cos(M3S.pitch), sp=Math.sin(M3S.pitch), d=M3S.dist;
     const pos=[t[0]+d*cp*Math.sin(M3S.yaw), t[1]+d*sp, t[2]+d*cp*Math.cos(M3S.yaw)];
@@ -3210,6 +3435,10 @@ function m3Start(){
     const u=[r[1]*f[2]-r[2]*f[1], r[2]*f[0]-r[0]*f[2], r[0]*f[1]-r[1]*f[0]];                // haut = droite x avant
     return {pos,f,r,u,fl:H*1.2,cx:W/2,cy:H*.54};
   }
+  /* EXPLICATION SUPPLÉMENTAIRE : PROJECTION 3D -> ECRAN
+   On mesure le point dans le repère de la caméra : z = profondeur, x/y = écart latéral/vertical. k = focale/z (perspective).
+   Si z<0,3 le point est derrière/trop près de la caméra : on renvoie null (non dessiné). Sinon pixel = centre + (x,y)*k.
+  */
   function proj(p){
     const dx=p[0]-cam.pos[0],dy=p[1]-cam.pos[1],dz=p[2]-cam.pos[2];
     const z=dx*cam.f[0]+dy*cam.f[1]+dz*cam.f[2]; if(z<.3) return null;
@@ -3224,6 +3453,11 @@ function m3Start(){
     let g=pick(); if(g.det&&!m3Avail(g.det)) g=M3_GRAINS[0];
     M3S.parts.push({g,z:(Math.random()*2-1)*S.zmax/S.tf.zs*.92,age:0,rot:Math.random()*6,sz:.075+Math.random()*.04,mark:0,det:false});
   }
+  /* EXPLICATION SUPPLÉMENTAIRE : CHRONOLOGIE DU VERRE
+   Un grain vit en 4 phases (durées en secondes) : a = plateau vibrant, b = goulotte, c = chute devant les capteurs, d = sortie.
+   ppos() donne sa position selon son âge. Les contaminants sont "repérés" pendant la chute par leur technologie, puis soufflés
+   par une buse (burst) et partent vers la sortie "refus" au lieu de la sortie "bon verre".
+  */
   const D={a:.55,b:1.0,c:.55,d:.6}; // durées : plateau, goulotte, chute, sortie (s)
   function ppos(S,p){
     const a=p.age; let xy,ph;
@@ -3247,6 +3481,10 @@ function m3Start(){
   }
   function shadeCol(f,L){ const k=.6+.55*Math.max(0,f.n[0]*L[0]+f.n[1]*L[1]+f.n[2]*L[2]); return [f.c[0]*k,f.c[1]*k,f.c[2]*k]; }
 
+  /* EXPLICATION SUPPLÉMENTAIRE : DESSIN D'UNE IMAGE DE LA MACHINE
+   Fond dégradé -> sol -> toutes les faces (carter seulement si pas en Vue interne ; carter rendu transparent selon xr) triées par
+   profondeur (algorithme du peintre) et ombrées par shadeCol() -> grains -> repères numérotés cliquables (pinHit).
+  */
   function draw(S,dt){
     ctx.clearRect(0,0,W,H);
     const g=ctx.createLinearGradient(0,0,0,H); const b=theme.bg;
@@ -3319,7 +3557,7 @@ function m3Start(){
       if(isSel){ const k=(tm*1.4)%1; ctx.beginPath(); ctx.arc(q[0],q[1],R+k*12,0,6.3); ctx.strokeStyle=col; ctx.globalAlpha=(1-k)*.7; ctx.lineWidth=2; ctx.stroke(); ctx.globalAlpha=1; }
       ctx.beginPath(); ctx.arc(q[0],q[1],R,0,6.3); ctx.fillStyle=col; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=theme.dark?'#10161c':'#ffffff'; ctx.stroke();
       ctx.fillStyle=(p.id==='vis')?'#2a2100':'#ffffff'; ctx.font=`700 ${Math.round(R*1.05)}px system-ui,sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(p.n,q[0],q[1]+.5);
-      if(isSel){ const label=m3tr(p.fr,p.en); ctx.font='600 12px system-ui,sans-serif'; const w2=ctx.measureText(label).width+14; let lx=q[0]+R+8; if(lx+w2>W-4) lx=q[0]-R-8-w2; const ly=q[1]-11;
+      if(isSel){ const label=m3PartTxt(p,'t'); ctx.font='600 12px system-ui,sans-serif'; const w2=ctx.measureText(label).width+14; let lx=q[0]+R+8; if(lx+w2>W-4) lx=q[0]-R-8-w2; const ly=q[1]-11;
         ctx.fillStyle=theme.dark?'rgba(16,22,28,.92)':'rgba(255,255,255,.95)'; ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(lx,ly,w2,22,11); else ctx.rect(lx,ly,w2,22); ctx.fill(); ctx.stroke();
         ctx.fillStyle=theme.txt; ctx.textAlign='left'; ctx.fillText(label,lx+7,ly+11.5); }
       ctx.globalAlpha=1;
@@ -3375,6 +3613,10 @@ function m3Start(){
   cv.tabIndex=0;
 
   readTheme(); let n=0;
+  /* EXPLICATION SUPPLÉMENTAIRE : BOUCLE D'ANIMATION DE LA VISIONNEUSE
+   Chaque image : dt = temps écoulé (plafonné à 0,05 s), relecture du thème clair/sombre toutes les 45 images, ajustement de la taille,
+   update() puis draw(). S'arrête toute seule si on quitte la page (M3S.raf changé ou canvas retiré).
+  */
   function loop(ts){
     if(M3S.raf!==id||!cv.isConnected) return;
     const dt=Math.min(.05,(ts-(last||ts))/1000); last=ts;
@@ -3399,7 +3641,7 @@ function m3Start(){
  dans la copie de secours ni dans le fichier .json (trop volumineux). Et chaque appareil a SES données : pour partager
  des tutos entre téléphones, utilisez la sauvegarde en fichier (ou un vrai serveur, non prévu ici).
  ============================================================================ */
-const BK_KEYS=[KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
+const BK_KEYS=[M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
 const LAST_EXPORT='sibelco_last_export';
 // petite base IndexedDB "sibelco_backup" : un seul enregistrement "snap" = copie de toutes les clés ci-dessus
 function bkDb(){ return new Promise((ok,ko)=>{ const r=indexedDB.open('sibelco_backup',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); }); }
@@ -3478,9 +3720,19 @@ const fmtD=t=>t?new Date(+t).toLocaleString(lang,{dateStyle:'short',timeStyle:'s
     })();
   };
 })();
+/* EXPLICATION SUPPLÉMENTAIRE : PREMIERS APPELS AU CHARGEMENT
+ mountLogos() : transforme les .logo3d déjà présents en globes ; netUpdate() : affiche la pastille Hors ligne si besoin ;
+ instUpdate() : affiche le bouton Installer si le navigateur le propose.
+*/
 mountLogos(); netUpdate(); instUpdate();
 
+/* EXPLICATION SUPPLÉMENTAIRE : PHOTO DE FOND FACULTATIVE
+ On essaie de charger fond-verre.jpg ; si elle existe, la classe "photo" est ajoutée à <html> et le CSS remplace le motif de verre par la photo.
+*/
 (function(){var i=new Image();i.onload=function(){document.documentElement.classList.add('photo');};i.src='fond-verre.jpg';})();
+/* EXPLICATION SUPPLÉMENTAIRE : LANCEMENT
+ safeBoot() (section 5) restaure d'abord les données depuis la copie de secours si elles ont disparu, puis appelle boot().
+*/
 safeBoot();
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
