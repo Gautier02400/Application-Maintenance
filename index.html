@@ -79,7 +79,7 @@
   Les 5 classes d'utilisateurs                         const CLS
   Vitesse, taille, nombre de triangles du globe 3D     const LOGO_CFG
   Couleurs du globe et de l'anneau                     const LOGO_COL   const RING_COL
-  Les textes de la page Machines 3D                    -> DANS L'APPLI : bouton "Modifier les textes" (classes 3 et 4)
+  Les textes de la page Machines 3D                    -> DANS L'APPLI : bouton "Modifier leS texteS" (classes 3 et 4)
      (au-dessus, sous la machine, à droite)             textes d'origine : M3_TXT_DEFAULT  et  M3_PARTS
   Marques et modèles de trieurs                        const M3_BRANDS   const M3_MODELS
   Couleurs des technologies VIS / UV / NIR / inductif  const M3_TECH
@@ -87,7 +87,7 @@
   Les couleurs de toute l'appli                        :root (dans le style, en haut)
   Hors connexion (cache)                               sw.js : changer le numéro de version
 
- Repères : chaque réglage modifiable est précédé de la ligne "✏️ MODIFIABLE" dans le code.
+ Repères : chaque réglage modifiable est précédé de la ligne " MODIFIABLE" dans le code.
 
  REGLES POUR MODIFIER SANS RIEN CASSER :
    1. Faites une COPIE du fichier avant (index-copie.html).
@@ -694,9 +694,9 @@ header .row{gap:6px;flex-wrap:nowrap}
 <div id="toolbar" class="noprint">
   <div class="wrap">
     <div class="actions" id="actions">
-      <button class="primary tbtn" onclick="newTuto()" data-i18n="new"></button>
+      <button class="primary tbtn" id="btnNew" onclick="newTuto()" data-i18n="new"></button>
       <button class="tbtn" onclick="exportJSON()" data-i18n="export"></button>
-      <button class="tbtn" onclick="document.getElementById('imp').click()" data-i18n="import"></button>
+      <button class="tbtn" id="btnImp" onclick="document.getElementById('imp').click()" data-i18n="import"></button>
       <input id="imp" type="file" accept="application/json" class="hidden" onchange="importJSON(event)">
     </div>
     <div class="filters" id="filters">
@@ -761,6 +761,7 @@ const I18N = {
  fr:{
   app_title:'Tutos Maintenance', app_sub:'Trieurs optiques – verre · Sibelco Reims',
   new:'+ Nouveau tutoriel', export:'Exporter', import:'Importer',
+  need_cls3:'Réservé aux classes 3 (Référent) et 4 (Administrateur).',
   search:'Rechercher (ex : buse, vitre, calibration…)',
   all_machines:'Toutes les machines', all_status:'Tous les statuts', all:'Toutes',
   none_found:'Aucun tutoriel trouvé.<br>Clique sur « + Nouveau tutoriel » pour en créer un.',
@@ -769,6 +770,7 @@ const I18N = {
   safety:'Sécurité', tools:'Matériel / outils', progress:'Progression',
   step_done:'Étape réalisée', no_steps:'Aucune étape.',
   prog:(d,n,p)=>`${d}/${n} étapes (${p}%)`, finished:'Tutoriel terminé !',
+  my_valid:'✔ Mes validés', done_on:'Réalisé le', redo:'Refaire ce tuto', validated_toast:'Tutoriel validé ! Il est classé dans « Mes validés ».',
   new_title:'Nouveau tutoriel', edit_title:'Modifier le tutoriel',
   cancel:'← Annuler', delete:'Supprimer', save:'Enregistrer',
   f_title:'Titre', ph_title:"Ex : Remplacement d'une buse d'éjection",
@@ -799,6 +801,7 @@ const I18N = {
  en:{
   app_title:'Maintenance Tutorials', app_sub:'Optical glass sorters · Sibelco Reims',
   new:'+ New tutorial', export:'Export', import:'Import',
+  need_cls3:'Reserved for class 3 (Referent) and class 4 (Administrator).',
   search:'Search (e.g. nozzle, window, calibration…)',
   all_machines:'All machines', all_status:'All statuses', all:'All',
   none_found:'No tutorial found.<br>Click “+ New tutorial” to create one.',
@@ -807,6 +810,7 @@ const I18N = {
   safety:'Safety', tools:'Tools / equipment', progress:'Progress',
   step_done:'Step completed', no_steps:'No steps.',
   prog:(d,n,p)=>`${d}/${n} steps (${p}%)`, finished:'Tutorial completed!',
+  my_valid:'✔ My validated', done_on:'Done on', redo:'Redo this tutorial', validated_toast:'Tutorial validated! It is now in “My validated”.',
   new_title:'New tutorial', edit_title:'Edit tutorial',
   cancel:'← Cancel', delete:'Delete', save:'Save',
   f_title:'Title', ph_title:'E.g. Replacing an ejection nozzle',
@@ -1083,9 +1087,11 @@ function renderList(){
   state.view='list'; state.section='tutos'; buildNav();
   $('filters').classList.remove('hidden');
   refreshMachineFilter();
-  const q=($('q').value||'').toLowerCase(), fm=$('fMachine').value, fs=$('fStatus').value;
+  const q=($('q').value||'').toLowerCase(), q0=q.trim(), fm=$('fMachine').value, fs=$('fStatus').value;
   const list = tutos.map(view).filter(t=>{
-    if(state.cat && t.category!==state.cat) return false;
+    if(state.cat==='__v'){ if(!isDone(t.id)) return false; }
+    else if(state.cat && t.category!==state.cat) return false;
+    if(state.cat!=='__v' && !q0 && isDone(t.id)) return false;   // un tuto validé quitte la liste normale (sauf recherche)
     if(fm && machineL(t.machine)!==fm) return false;
     if(fs && t.status!==fs) return false;
     if(q){
@@ -1097,7 +1103,7 @@ function renderList(){
   const chips = [-1,...CATS.keys()].map(i=>{
     const c = i<0?'':CATS[i];
     return `<button class="chip ${state.cat===c?'on':''}" onclick="setCat(${i})">${esc(i<0?T('all'):catL(c))}</button>`;
-  }).join('');
+  }).join('')+`<button class="chip ${state.cat==='__v'?'on':''}" onclick="state.cat='__v';renderList()">${esc(T('my_valid'))} (${tutos.filter(t=>isDone(t.id)).length})</button>`;
   $('app').innerHTML = `
     <div class="chips">${chips}</div>
     ${list.length?`<div class="grid">${list.map(cardHTML).join('')}</div>`:`<div class="empty">${T('none_found')}</div>`}
@@ -1150,6 +1156,7 @@ function cardHTML(t){
   return `<div class="card tcard ${isLocked(t)?'locked':''}" onclick="openTuto('${t.id}')">
     <div class="cover">${cv?`<img src="${cv}" alt="" loading="lazy">`:PH_SVG}</div>
     <div class="row" style="justify-content:space-between"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span></div>
+    ${isDone(t.id)?`<div><span class="tag valide">✔ ${esc(T('done_on'))} ${esc(fmtDate(doneDate(t.id)))}</span></div>`:''}
     <h3>${isLocked(t)?`<span class="tag">${esc(T('locked_tag'))}</span> `:''}${esc(t.title)}</h3>
     <div class="meta"><span>${esc(machineL(t.machine))}</span><span>${esc(t.duration)} ${T('min')}</span><span>${esc(levelL(t.level))}</span><span>${T('steps_n',(t.steps||[]).length)}</span></div>
   </div>`;
@@ -1170,7 +1177,7 @@ function openTuto(id){
   const t=view(raw);
   state.view='view'; state.id=id; state.section='tutos'; buildNav();
   if(isLocked(raw)) return renderLocked(raw,t);
-  if(!state.done[id]) state.done[id]=[];
+  if(!state.done[id]) state.done[id]= isDone(id) ? (t.steps||[]).map(()=>true) : [];
   $('filters').classList.add('hidden');
   const stepsHTML=(t.steps||[]).map((s,i)=>`
     <div class="step ${state.done[id][i]?'done':''}" id="st${i}">
@@ -1187,7 +1194,7 @@ function openTuto(id){
       <button onclick="renderList()">${esc(T('back'))}</button>
       <div class="row">
         <button onclick="window.print()">${esc(T('print'))}</button>
-        <button onclick="editTuto('${id}')">${esc(T('edit'))}</button>
+        ${canEditTutos()?`<button onclick="editTuto('${id}')">${esc(T('edit'))}</button>`:''}
       </div>
     </div>
     <div class="panel">
@@ -1199,6 +1206,7 @@ function openTuto(id){
       ${(t.tools&&t.tools.length)?`<div class="box" style="background:transparent;color:var(--text);border:1px solid var(--line);border-left:4px solid var(--accent)"><b>${esc(T('tools'))}</b><ul>${t.tools.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
     </div>
     <div class="panel">
+      ${isDone(id)?`<div class="row noprint" style="justify-content:space-between;margin-bottom:10px"><span class="tag valide">✔ ${esc(T('done_on'))} ${esc(fmtDate(doneDate(id)))}</span><button class="small" onclick="redoTuto('${id}')">↺ ${esc(T('redo'))}</button></div>`:''}
       <div class="row" style="justify-content:space-between"><b>${esc(T('progress'))}</b><span id="pct" class="meta"></span></div>
       <div class="progress"><div id="bar"></div></div>
       ${stepsHTML||`<div class="empty">${esc(T('no_steps'))}</div>`}
@@ -1221,7 +1229,7 @@ function updProgress(id, notify){
   const p=n?Math.round(d/n*100):0;
   $('bar').style.width=p+'%';
   $('pct').textContent=T('prog',d,n,p);
-  if(notify && n && d===n){ toast(T('finished')); if(t.mandatory) validateTraining(); }
+  if(notify && n && d===n){ markDone(id); toast(T('validated_toast')); if(t.mandatory) validateTraining(); }
 }
 
 /*
@@ -1232,8 +1240,8 @@ function updProgress(id, notify){
 function blankTuto(){
   return {id:uid(),title:'',cover:'',machine:'',category:CATS[1],level:'Facile',duration:30,tools:[],safety:[],steps:[{text:'',warn:'',img:''}],status:'brouillon',updated:Date.now()};
 }
-function newTuto(){ state.draft=blankTuto(); state.isNew=true; renderEditor(); }
-function editTuto(id){ state.draft=JSON.parse(JSON.stringify(view(tutos.find(t=>t.id===id)))); state.isNew=false; renderEditor(); }
+function newTuto(){ if(!canEditTutos()){ toast(T('need_cls3')); return; } state.draft=blankTuto(); state.isNew=true; renderEditor(); }
+function editTuto(id){ if(!canEditTutos()){ toast(T('need_cls3')); return; } state.draft=JSON.parse(JSON.stringify(view(tutos.find(t=>t.id===id)))); state.isNew=false; renderEditor(); }
 function renderEditor(){
   state.view='edit';
   $('filters').classList.add('hidden');
@@ -1355,6 +1363,7 @@ function rmCover(){ state.draft.cover=''; $('coverEd').innerHTML=coverEdHTML(); 
  le tutoriel dans la liste puis enregistre. delTuto() supprime après confirmation.
 */
 function saveDraft(){
+  if(!canEditTutos()){ toast(T('need_cls3')); return; }
   const d=state.draft;
   if(!d.title.trim()){ toast(T('need_title')); return; }
   if(!d.machine.trim()) d.machine='Non précisée';
@@ -1366,6 +1375,7 @@ function saveDraft(){
 }
 function cancelEdit(){ if(state.isNew) renderList(); else openTuto(state.draft.id); }
 function delTuto(){
+  if(!canEditTutos()){ toast(T('need_cls3')); return; }
   if(!confirm(T('confirm_del'))) return;
   tutos=tutos.filter(t=>t.id!==state.draft.id); save(); toast(T('deleted')); renderList();
 }
@@ -1385,6 +1395,7 @@ function exportJSON(){
   toast(T('export_started'));
 }
 function importJSON(ev){
+  if(!canEditTutos()){ ev.target.value=''; toast(T('need_cls3')); return; }
   const f=ev.target.files[0]; if(!f) return;
   const r=new FileReader();
   r.onload=()=>{
@@ -1452,6 +1463,16 @@ function saveSettings(){ saveUsers(); }
 function applyTheme(){ const r=document.documentElement; if(settings.theme==='light'||settings.theme==='dark') r.setAttribute('data-theme',settings.theme); else r.removeAttribute('data-theme'); }
 const needCls=t=>(t.mandatory||t.category==='Sécurité')?0:(t.level==='Avancé'?2:1);
 const isLocked=t=>settings.cls<needCls(t);
+// Création / modification / suppression / import de tutoriels : réservés aux classes 3 (Référent) et 4 (Administrateur)
+const canEditTutos=()=>!!(settings&&settings.cls>=3);
+// Tutos validés PAR L'UTILISATEUR (toutes les étapes cochées) : mémorisés dans son compte (settings.doneTutos = {idTuto: date})
+const doneDate=id=>(settings&&settings.doneTutos&&settings.doneTutos[id])||0;
+const isDone=id=>!!doneDate(id);
+const fmtDate=ts=>new Date(ts).toLocaleDateString(lang==='en'?'en-GB':'fr-FR');
+function markDone(id){ settings.doneTutos=settings.doneTutos||{}; settings.doneTutos[id]=Date.now(); saveSettings(); }
+function redoTuto(id){ state.done[id]=[]; openTuto(id); }
+// Fiches : "Présentation" et "Pièces consommables" réservées aux classes 3 et 4 (les fiches constructeur restent ouvertes)
+const canEditFiche=type=>type==='constructeur'||canEditTutos();
 function validateTraining(){ if(settings.cls<1) settings.cls=1; settings.chosen=true; settings.trained=Date.now(); saveSettings(); buildNav(); toast(T('trained_ok')); }
 
 /*
@@ -1465,6 +1486,8 @@ function buildNav(){
    NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
   document.querySelector('header').classList.toggle('big',state.section!=='tutos');
   $('actions').classList.toggle('hidden',state.section!=='tutos');
+  $('btnNew').classList.toggle('hidden',!canEditTutos());
+  $('btnImp').classList.toggle('hidden',!canEditTutos());
 }
 /*
  Menu : toggleNav() l'ouvre/ferme ; togglePin() mémorise le choix "menu épinglé" (uniquement sur écran large).
@@ -1866,7 +1889,7 @@ function saveFiches(){ try{localStorage.setItem(FKEY,JSON.stringify(fiches));}ca
 function renderFiches(type){
   state.section=type; state.view='fiches'; $('filters').classList.add('hidden'); buildNav();
   const l=fiches.filter(f=>f.type===type);
-  $('app').innerHTML=`<div class="row" style="margin:12px 0;justify-content:space-between"><h2 style="margin:0">${esc(T(type==='constructeur'?'nav_cons':type==='consommables'?'nav_cons2':'nav_pres'))}</h2><button class="primary" onclick="editFiche('','${type}')">${esc(T('add_fiche'))}</button></div>`+
+  $('app').innerHTML=`<div class="row" style="margin:12px 0;justify-content:space-between"><h2 style="margin:0">${esc(T(type==='constructeur'?'nav_cons':type==='consommables'?'nav_cons2':'nav_pres'))}</h2>${canEditFiche(type)?`<button class="primary" onclick="editFiche('','${type}')">${esc(T('add_fiche'))}</button>`:''}</div>`+
    ((l.length||type==='presentation')?`<div class="grid">${type==='presentation'?m3Card():''}${l.map(f=>`<div class="card tcard" onclick="openFiche('${f.id}')"><div class="cover c-${type}">${f.cover?`<img src="${f.cover}" alt="" loading="lazy">`:icoSVG(type)}</div><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${f.file?`<span>${fileKind(f.file)==='ppt'?'PowerPoint':'PDF'}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
@@ -1879,7 +1902,7 @@ function openFiche(id){
   const f=fiches.find(x=>x.id===id); if(!f) return;
   state.section=f.type; state.view='fiche'; state.fid=id; $('filters').classList.add('hidden'); buildNav();
   const ok=/^(https?:\/\/|\.?\/?[\w\-\/.]+\.(pdf|png|jpe?g|docx?|xlsx?|pptx?|ppsx?|html?))/i.test(f.url||'');
-  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="renderFiches('${f.type}')">${esc(T('back'))}</button><div class="row"><button onclick="window.print()">${esc(T('print'))}</button><button onclick="editFiche('${id}')">${esc(T('edit'))}</button></div></div>
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="renderFiches('${f.type}')">${esc(T('back'))}</button><div class="row"><button onclick="window.print()">${esc(T('print'))}</button>${canEditFiche(f.type)?`<button onclick="editFiche('${id}')">${esc(T('edit'))}</button>`:''}</div></div>
    <div class="panel">${f.cover?`<img class="tcover" src="${f.cover}" alt="">`:''}<h2 style="margin-top:0">${esc(f.title)}</h2><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span></div>
    <p>${esc(f.text).replace(/\n/g,'<br>')}</p><div id=\"pdfBox\"></div>${ok?`<a class="btn" href="${esc(f.url)}" target="_blank" rel="noopener">${esc(T('open_doc'))}</a>`:''}</div>`;
   if(f.file) (fileKind(f.file)==='ppt'?showPpt(f):showPdf(f));
@@ -1891,6 +1914,7 @@ function openFiche(id){
  fCoverEdHTML / addFCover / rmFCover : choix de l'image d'illustration de la fiche (même principe que readImg).
 */
 function editFiche(id,type){
+  { const ft=id?(fiches.find(f=>f.id===id)||{}).type:type; if(!canEditFiche(ft)){ toast(T('need_cls3')); return; } }
   state.fnew=!id; state.fdFile=null; state.fdRm=false; state.fd=id?JSON.parse(JSON.stringify(fiches.find(f=>f.id===id))):{id:uid(),type,title:'',cover:'',machine:'',text:'',url:''};
   renderFicheEditor();
 }
@@ -1921,12 +1945,12 @@ function renderFicheEditor(){
  delFiche() : supprime la fiche et son fichier.
 */
 async function saveFiche(){
-  const d=state.fd; if(!d.title.trim()){ toast(T('need_title')); return; }
+  const d=state.fd; if(!canEditFiche(d.type)){ toast(T('need_cls3')); return; } if(!d.title.trim()){ toast(T('need_title')); return; }
   const i=fiches.findIndex(f=>f.id===d.id); if(i>=0) fiches[i]=d; else fiches.unshift(d);
   try{ if(state.fdFile) await idbPut(d.id,state.fdFile); else if(state.fdRm) await idbDel(d.id); }catch(e){ toast(L('Stockage du PDF impossible','Cannot store the PDF')); return; }
   saveFiches(); toast(T('saved')); openFiche(d.id);
 }
-function delFiche(){ if(!confirm(T('confirm_del'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(T('deleted')); renderFiches(t); }
+function delFiche(){ if(!canEditFiche(state.fd.type)){ toast(T('need_cls3')); return; } if(!confirm(T('confirm_del'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(T('deleted')); renderFiches(t); }
 
 /*
  ===================== JEU 1 : TRIEUR SIBELCO (dessiné dans un <canvas>) =====================
@@ -3280,14 +3304,14 @@ function m3Build(brand){
 /* ---------- l'état de la visionneuse (gardé quand on change de langue) ---------- */
 const M3S={brand:'redwave',sel:null,model:0,yaw:-.62,pitch:.32,dist:6.2,tx:0,ty:1.05,tz:0,tgt:null,auto:true,flow:true,xr:0,xrT:0,parts:[],bursts:[],t:0,spawn:0,idle:0,raf:0,guided:false};
 const m3tr=(fr,en)=>lang==='en'?en:fr;
-/* ✏️ TEXTES MODIFIABLES DIRECTEMENT DANS L'APPLI (page « Machines 3D »)
- Les classes 3 et 4 voient un bouton « ✏️ Modifier les textes » en haut de la page. En mode modification, les textes entourés
+/*  TEXTES MODIFIABLES DIRECTEMENT DANS L'APPLI (page « Machines 3D »)
+ Les classes 3 et 4 voient un bouton «  Modifier les textes » en haut de la page. En mode modification, les textes entourés
  en pointillés (titre et introduction AU-DESSUS, aide sur la machine, texte SOUS la machine, panneau de DROITE) deviennent écrivables.
  Chaque texte est enregistré tout seul quand on clique à côté (dans le navigateur, par langue FR ou EN, et inclus dans la sauvegarde).
  Si rien n'a été modifié, ce sont les textes d'origine de M3_TXT_DEFAULT (ci-dessous) et de M3_PARTS qui s'affichent.
  Le texte « sous la machine » est vide par défaut : il n'apparaît que si quelqu'un l'écrit. */
 const M3_TXT_KEY='sibelco_m3_texts_v1';
-// ✏️ MODIFIABLE : textes d'origine [français, anglais] de chaque zone (utilisés tant que personne ne les a changés dans l'appli)
+//  MODIFIABLE : textes d'origine [français, anglais] de chaque zone (utilisés tant que personne ne les a changés dans l'appli)
 const M3_TXT_DEFAULT={
   title:['Les trieurs optiques en 3D','Optical sorters in 3D'],
   intro:['Choisissez une marque, faites tourner la machine, puis touchez un repère numéroté (ou une technologie) pour comprendre chaque étape. Les technologies VIS, UV, NIR et inductive s’appliquent aux 3 marques ; leur présence dépend du modèle.','Pick a brand, rotate the machine, then tap a numbered marker (or a technology) to understand each step. VIS, UV, NIR and inductive technologies apply to all 3 brands; which ones are fitted depends on the model.'],
@@ -3334,7 +3358,7 @@ function m3Card(){
 function renderMachines3D(){
   state.section='presentation'; state.view='machines'; $('filters').classList.add('hidden'); buildNav();
   const ms=M3_MODELS[M3S.brand]||[];
-  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="m3Stop();renderFiches('presentation')">${esc(T('back'))}</button>${m3CanEdit()?`<span class="row"><button onclick="m3EditToggle()" class="${M3S.edit?'primary':''}">${esc(M3S.edit?L('✔ Terminer la modification','✔ Finish editing'):L('✏️ Modifier les textes','✏️ Edit texts'))}</button>${M3S.edit?`<button onclick="m3EditReset()">${esc(L('Rétablir les textes d’origine','Restore original texts'))}</button>`:''}</span>`:''}</div>
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="m3Stop();renderFiches('presentation')">${esc(T('back'))}</button>${m3CanEdit()?`<span class="row"><button onclick="m3EditToggle()" class="${M3S.edit?'primary':''}">${esc(M3S.edit?L('✔ Terminer la modification','✔ Finish editing'):L(' Modifier les textes',' Edit texts'))}</button>${M3S.edit?`<button onclick="m3EditReset()">${esc(L('Rétablir les textes d’origine','Restore original texts'))}</button>`:''}</span>`:''}</div>
    ${M3S.edit&&m3CanEdit()?`<p class="meta noprint" style="display:block;margin:0 0 8px">${esc(L('Mode modification : cliquez sur un texte entouré en pointillés, écrivez, puis cliquez à côté : c’est enregistré tout seul. Pour modifier l’explication d’un repère (à droite), cliquez d’abord sur ce repère.','Edit mode: click a dotted text, type, then click elsewhere: it is saved automatically. To edit a marker’s explanation (right side), click that marker first.'))}</p>`:''}
    <div class="panel m3"><h2 style="margin-top:0"${m3Ed('title','Titre de la page')}>${esc(m3Txt('title'))}</h2>
     <p class="meta" style="margin:0 0 10px;display:block"${m3Ed('intro','Texte d’introduction (au-dessus de la machine)')}>${esc(m3Txt('intro'))}</p>
