@@ -59,6 +59,11 @@
 <meta name="apple-mobile-web-app-title" content="Tutos Maintenance">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
+<script>
+/* Capte tout de suite la proposition d'installation du navigateur (elle peut arriver avant la fin du chargement de la page) */
+window.__bip=null;
+window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__bip=e; if(window.instUpdate) try{ instUpdate(); }catch(x){} });
+</script>
 <style>
 /*
  ===================== 1. APPARENCE (CSS) =====================
@@ -345,6 +350,46 @@ header.big .menu-btn{font-size:1rem;padding:5px 8px}
 .pdfpages{display:flex;flex-direction:column;gap:10px;align-items:center}
 .pdfpg{width:100%;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 1px 5px rgba(0,0,0,.18)}
 .pdfpg canvas{width:100%;height:auto;display:block;border-radius:6px}
+/*
+ Machines en 3D (rubrique Présentation) : .m3cover = vignette de la carte ; .m3tabs = choix de la marque ;
+ .m3grid = canevas 3D à gauche + explications à droite (une seule colonne sur téléphone) ;
+ .m3chip = les 8 repères sous le canevas (--c = couleur de la technologie).
+*/
+.m3cover{position:relative}
+.m3cover svg{width:72%;height:auto;max-height:100%}
+.m3badge{position:absolute;top:8px;right:8px;background:#fff;color:#4a2a7a;font-weight:800;font-size:.72rem;padding:2px 9px;border-radius:999px;letter-spacing:.04em}
+.m3tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.m3tabs .chip{display:inline-flex;align-items:center;gap:7px;padding:7px 14px}
+.m3dot{width:11px;height:11px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.28)}
+.m3model{width:auto;padding:6px 10px}
+.m3grid{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:900px){.m3grid{grid-template-columns:1fr}}
+.m3cvbox{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.m3cvbox canvas{display:block;width:100%;touch-action:none;cursor:grab;outline-offset:-3px}
+.m3cvbox canvas:active{cursor:grabbing}
+.m3hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:.72rem;color:var(--muted);pointer-events:none;transition:opacity .5s}
+.m3hint.gone{opacity:0}
+.m3ctl{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.m3ctl button.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.m3chips{display:flex;gap:6px;flex-wrap:wrap}
+.m3chip{border-left:4px solid var(--c);display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 8px}
+.m3chip b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--c);color:#fff;font-size:.72rem}
+.m3chip.on{border-color:var(--c);box-shadow:0 0 0 2px var(--c) inset}
+.m3chip.off{opacity:.45}
+.m3side{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;min-height:240px}
+.m3hd{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.m3num{flex:0 0 34px;height:34px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:800}
+.m3pts{margin:0;padding-left:18px}
+.m3pts li{margin:6px 0}
+.m3det{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.m3det b{font-size:.8rem;color:var(--muted);margin-right:2px}
+.m3avail{margin-top:12px;font-size:.82rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+.m3avail.no{color:var(--warn-text);background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:8px;padding:8px 10px}
+.m3flow{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.m3flow a{display:flex;gap:8px;align-items:center;text-decoration:none;color:var(--text);padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card)}
+.m3flow a:hover{border-color:var(--c)}
+.m3flow b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--c);color:#fff;font-size:.74rem}
+@media print{.m3ctl,.m3chips,.m3hint{display:none!important}}
 /* Aperçu PowerPoint (fiches de présentation) : miniature + une carte de texte par diapositive */
 .pptthumb{max-width:420px;width:100%;border-radius:8px;border:1px solid var(--line);display:block;margin:8px 0}
 .pptslide{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:8px 12px;margin:8px 0;background:var(--bg)}
@@ -1356,10 +1401,11 @@ window.addEventListener('resize',()=>{ if($('side').classList.contains('open')){
  renderSection() : réaffiche la page courante (utile après un changement de langue).
  cnt(k) : nombre d'éléments affiché sur les tuiles de l'accueil.
 */
-function go(k){ if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else renderFiches(k); }
+function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else renderFiches(k); }
 function renderSection(){ const v=state.view;
   if(v==='home') renderHome(); else if(v==='settings') renderSettings(); else if(v==='fiches') renderFiches(state.section);
   else if(v==='jeux') renderGame();
+  else if(v==='machines') renderMachines3D();
   else if(v==='fiche') openFiche(state.fid); else if(v==='fedit') renderFicheEditor(); else renderList(); }
 function cnt(k){ if(k==='jeux') return GAMES.length; if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
 
@@ -1705,7 +1751,7 @@ function renderFiches(type){
   state.section=type; state.view='fiches'; $('filters').classList.add('hidden'); buildNav();
   const l=fiches.filter(f=>f.type===type);
   $('app').innerHTML=`<div class="row" style="margin:12px 0;justify-content:space-between"><h2 style="margin:0">${esc(T(type==='constructeur'?'nav_cons':type==='consommables'?'nav_cons2':'nav_pres'))}</h2><button class="primary" onclick="editFiche('','${type}')">${esc(T('add_fiche'))}</button></div>`+
-   (l.length?`<div class="grid">${l.map(f=>`<div class="card tcard" onclick="openFiche('${f.id}')"><div class="cover c-${type}">${f.cover?`<img src="${f.cover}" alt="" loading="lazy">`:icoSVG(type)}</div><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${f.file?`<span>${fileKind(f.file)==='ppt'?'PowerPoint':'PDF'}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
+   ((l.length||type==='presentation')?`<div class="grid">${type==='presentation'?m3Card():''}${l.map(f=>`<div class="card tcard" onclick="openFiche('${f.id}')"><div class="cover c-${type}">${f.cover?`<img src="${f.cover}" alt="" loading="lazy">`:icoSVG(type)}</div><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${f.file?`<span>${fileKind(f.file)==='ppt'?'PowerPoint':'PDF'}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
 /*
@@ -2449,14 +2495,14 @@ function ordEnd(){
  >>> POUR MODIFIER : changez uniquement les chiffres de LOGO_CFG ci-dessous (le reste n'a pas besoin d'être touché). <<<
 ===================================================================================== */
 const LOGO_CFG = {
-  size    : 0.29,   // taille du globe dans son cadre (0.20 = petit, 0.35 = très grand ; au-delà l'anneau est coupé)
+  size    : 0.25,   // taille du globe dans son cadre (0.20 = petit, 0.35 = très grand ; au-delà l'anneau est coupé)
   idle    : 0.007,  // vitesse de rotation quand on ne touche pas (0 = immobile, 0.02 = rapide)
   spin    : 0.38,   // force du tour sur lui-même au clic (0.2 = doux, 0.6 = toupie)
   explode : 0.30,   // force de l'éclatement au clic (0 = aucun, 0.5 = gros éclatement)
-  detail  : 3,      // nombre de triangles : 2 = 320 (facetté, rapide), 3 = 1280 (joli), 4 = 5120 (lent sur vieux téléphone)
+  detail  : 2,      // nombre de triangles : 2 = 320 (facetté, rapide), 3 = 1280 (joli), 4 = 5120 (lent sur vieux téléphone)
   tri     : 0.54,   // taille des triangles : 0.3 = beaucoup de blanc entre eux, 0.95 = globe presque plein
-  ringR   : 1.45,   // rayon de l'anneau (1 = colle au globe, 1.8 = très large)
-  ringW   : 0.34,   // épaisseur du croissant (0.15 = fin, 0.5 = épais)
+  ringR   : 1.25,   // rayon de l'anneau (1 = colle au globe, 1.8 = très large)
+  ringW   : 0.30,   // épaisseur du croissant (0.15 = fin, 0.5 = épais)
   ringArc : 4.9,    // longueur du croissant en radians (3.1 = demi-tour, 6.28 = anneau complet)
   ringTilt: -0.5    // inclinaison de l'anneau sur le côté (0 = horizontal)
 };
@@ -2693,7 +2739,7 @@ function confetti(){
 })();
 
 /* ---------- HORS LIGNE / INSTALLATION / MISE A JOUR ---------- */
-let deferredInstall=null;
+let deferredInstall=window.__bip||null;
 function netUpdate(){ const n=$('net'); if(!n) return; n.textContent='● '+L('Hors ligne','Offline'); n.classList.toggle('hidden',navigator.onLine!==false); }
 function isStandalone(){ return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true; }
 function instUpdate(){
@@ -2706,7 +2752,7 @@ function instUpdate(){
 }
 window.addEventListener('online',()=>{ netUpdate(); toast(L('Connexion rétablie','Back online')); });
 window.addEventListener('offline',()=>{ netUpdate(); toast(L('Mode hors ligne : l’appli reste utilisable','Offline mode: the app still works')); });
-window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; instUpdate(); });
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; window.__bip=e; instUpdate(); });
 window.addEventListener('appinstalled',()=>{ deferredInstall=null; instUpdate(); toast(L('Application installée','App installed')); });
 try{ matchMedia('(display-mode: standalone)').addEventListener('change',instUpdate); }catch(e){}
 
@@ -2758,7 +2804,11 @@ function instDialog(mode){
 }
 $('bInstall').addEventListener('click',async()=>{
   if(isStandalone()){ instDialog('uninstall'); return; }
-  if(deferredInstall){ deferredInstall.prompt(); try{ await deferredInstall.userChoice; }catch(e){} deferredInstall=null; instUpdate(); return; }
+  const ev=deferredInstall||window.__bip;
+  if(ev){
+    try{ await ev.prompt(); const r=await ev.userChoice; if(r&&r.outcome==='dismissed') toast(L('Installation annulée','Installation cancelled')); }catch(e){}
+    deferredInstall=null; window.__bip=null; instUpdate(); return;
+  }
   instDialog('install');
 });
 (function(){ const _as=applyStatic; applyStatic=function(){ _as(); netUpdate(); instUpdate(); }; })();
@@ -2807,6 +2857,533 @@ document.addEventListener('pointerdown',e=>{
   s.className='ripple'; s.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
   b.appendChild(s); setTimeout(()=>s.remove(),600);
 },{passive:true});
+
+/*
+ ============================================================================
+ ===================== MACHINES EN 3D (rubrique "Fiches présentation") =====================
+ Une visionneuse 3D des 3 marques de trieurs optiques (Redwave, Binder+Co « Clarity », Steinert), dessinée au canvas,
+ SANS bibliothèque (comme le logo 3D) -> elle marche hors connexion.
+   - on fait tourner la machine au doigt / à la souris, on zoome (molette ou pincement) ;
+   - « Vue interne » rend le carter transparent : goulotte, caméras, buses, sorties ;
+   - le verre circule en direct : les indésirables sont repérés par la technologie qui les voit, puis soufflés ;
+   - 8 repères numérotés (flux de la machine) : clic = explication. 4 d'entre eux sont les technologies VIS, UV, NIR, inductif.
+ Les technologies existent sur les 3 marques : seule leur présence dépend du MODELE (voir M3_MODELS plus bas).
+ Les machines sont des représentations SCHEMATIQUES inspirées de l'affiche Sibelco, pas des plans constructeur.
+
+ POUR ADAPTER :
+   - textes des explications  -> M3_PARTS (FR/EN) ;
+   - couleurs / formes d'une machine -> m3Build() (une branche par marque) ;
+   - modèles réels et technologies présentes sur chacun -> M3_MODELS (laisser [] tant qu'on ne les connaît pas).
+ ============================================================================
+*/
+
+/* Les 3 marques : id, nom affiché, couleur de la pastille */
+const M3_BRANDS=[
+  {id:'redwave', name:'Redwave',               col:'#d7261e'},
+  {id:'binder',  name:'Binder+Co · Clarity',   col:'#1f7ac8'},
+  {id:'steinert',name:'Steinert',              col:'#e8b800'}
+];
+
+/*
+ MODELES PAR MARQUE (facultatif). Tant que la liste est vide, la page indique « selon le modèle ».
+ Quand vous connaissez vos modèles, remplissez-la, par exemple :
+   redwave:[{name:'Nom du modèle', tech:['vis','uv','nir','ind']}, {name:'Autre modèle', tech:['vis','nir']}]
+ -> un menu « Modèle » apparaît et les technologies absentes du modèle choisi sont grisées.
+ Codes : vis (visible), uv (ultraviolet), nir (proche infrarouge), ind (capteurs inductifs).
+*/
+const M3_MODELS={ redwave:[], binder:[], steinert:[] };
+
+/* Les 4 technologies : couleur du faisceau / de la pastille */
+const M3_TECH={ vis:'#f2b705', uv:'#9b5cff', nir:'#ff6a3d', ind:'#0fb5a0' };
+
+/*
+ Les 8 repères, dans l'ordre du flux du verre.
+   fr/en = titre ; sfr/sen = sous-titre ; pfr/pen = les paragraphes ; tech = true pour les 4 technologies ;
+   dfr/den = « ce que ça détecte » (pastilles). Textes des technologies : d'après l'affiche Sibelco.
+*/
+const M3_PARTS=[
+ {id:'feed',n:1,fr:'Alimentation',en:'Feeding',
+  sfr:'Étalement du calcin en nappe fine',sen:'Spreading the cullet into a thin layer',
+  pfr:['Le verre broyé (calcin) arrive par convoyeur dans la trémie d’alimentation.','Un extracteur vibrant l’étale en une nappe fine, sur une seule couche, sur toute la largeur de la machine.','Plus les particules sont séparées les unes des autres, plus la détection est fiable : une particule cachée derrière une autre ne peut pas être analysée.'],
+  pen:['The crushed glass (cullet) arrives by conveyor in the feed hopper.','A vibrating feeder spreads it into a thin, single layer over the full width of the machine.','The more the particles are separated from each other, the more reliable the detection: a particle hidden behind another cannot be analysed.']},
+ {id:'chute',n:2,fr:'Goulotte d’accélération',en:'Acceleration chute',
+  sfr:'Une vitesse régulière devant les capteurs',sen:'A steady speed in front of the sensors',
+  pfr:['Le verre glisse sur une goulotte inclinée (selon le modèle : un tapis convoyeur) qui l’accélère et régularise sa vitesse.','En sortie, les particules forment un rideau régulier qui passe devant les capteurs à vitesse constante : c’est ce qui permet à la machine de calculer l’instant exact où il faut souffler.','Une goulotte encrassée ou usée peut modifier la trajectoire des particules : à surveiller en maintenance.'],
+  pen:['The glass slides down an inclined chute (depending on the model: a conveyor belt) that accelerates it and evens out its speed.','At the exit the particles form a regular curtain passing the sensors at constant speed: this is what lets the machine compute the exact moment to blow.','A dirty or worn chute can change the particles’ trajectory: keep an eye on it during maintenance.']},
+ {id:'vis',n:3,tech:true,fr:'Technologie VIS',en:'VIS technology',
+  sfr:'Tri du verre par blanc et couleurs',sen:'Sorting glass into clear and coloured',
+  pfr:['Des caméras haute résolution dans le domaine visible trient le verre par couleur ou détectent les impuretés.','Chaque particule est examinée à la lumière pour vérifier si la lumière la traverse ou non.','La lumière ne passe pas : c’est un corps étranger (CSP, matières organiques, métal) et la machine l’élimine.','La lumière passe : c’est du verre, trié selon blanc ou couleurs.'],
+  pen:['High-resolution cameras working in the visible range sort glass by colour or detect impurities.','Each particle is examined under light to check whether light passes through it or not.','Light does not pass: it is a foreign body (CSP, organic matter, metal) and the machine rejects it.','Light passes: it is glass, sorted as clear or coloured.'],
+  dfr:['Blanc','Couleurs','CSP : céramique, pierre, porcelaine','Matières organiques'],den:['Clear','Coloured','CSP: ceramic, stone, porcelain','Organic matter']},
+ {id:'uv',n:4,tech:true,fr:'Technologie UV',en:'UV technology',
+  sfr:'Détection des matériaux invisibles à l’œil nu',sen:'Detecting materials invisible to the naked eye',
+  pfr:['Elle complète la technologie VIS en fonctionnant dans le domaine ultraviolet.','Elle identifie des substances perturbatrices qui ne sont pas détectables dans le domaine visible.','Principe : on teste la réaction de différents matériaux à la lumière UV pour distinguer le verre creux ou plat des autres types de verre.','Exemple : différencier le verre au plomb et les vitrocéramiques.'],
+  pen:['It complements VIS by working in the ultraviolet range.','It identifies disturbing substances that cannot be detected in the visible range.','Principle: the reaction of different materials to UV light is tested, to tell hollow or flat glass from other types of glass.','Example: telling lead glass and glass-ceramics apart.'],
+  dfr:['Verre au plomb','Vitrocéramiques','Verre creux / plat'],den:['Lead glass','Glass-ceramics','Hollow / flat glass']},
+ {id:'nir',n:5,tech:true,fr:'Technologie NIR',en:'NIR technology',
+  sfr:'Séparation des plastiques et autres matériaux',sen:'Separating plastics and other materials',
+  pfr:['Le proche infrarouge (NIR) détecte les différences entre les matériaux dans une gamme de longueurs d’onde invisible à l’œil nu.','Ces capteurs identifient le modèle de réflexion caractéristique de chaque matériau.','Cela permet de distinguer les plastiques et autres matériaux des débris de verre recyclé, et de les séparer.'],
+  pen:['Near-infrared (NIR) detects differences between materials in a range of wavelengths invisible to the naked eye.','These sensors identify the characteristic reflection pattern of each material.','This makes it possible to tell plastics and other materials from recycled glass debris, and to separate them.'],
+  dfr:['Verre','Plastiques','Papier','Métaux','Autres'],den:['Glass','Plastics','Paper','Metals','Others']},
+ {id:'ind',n:6,tech:true,fr:'Capteurs inductifs',en:'Inductive sensors',
+  sfr:'Détection et élimination des métaux',sen:'Detecting and removing metals',
+  pfr:['Les capteurs inductifs détectent les pièces métalliques dans le flux de verre grâce aux variations du champ électromagnétique.','Lorsque les métaux s’approchent, la perturbation du champ magnétique est enregistrée et la position exacte des pièces métalliques est identifiée en même temps.','Détection fiable de tous types de métaux, pour un verre recyclé plus pur et conforme aux exigences du marché.','Les trieuses de verre CLARITY utilisent cette technologie pour trier efficacement tous types de matériaux métalliques.'],
+  pen:['Inductive sensors detect metal pieces in the glass stream through variations in the electromagnetic field.','When metals come close, the disturbance of the magnetic field is recorded and the exact position of the metal pieces is identified at the same time.','Reliable detection of all types of metal, for purer recycled glass that meets market requirements.','CLARITY glass sorters use this technology to efficiently sort all types of metallic materials.'],
+  dfr:['Bouchons couronne','Capsules aluminium','Vis / écrous','Agrafes','Fil métallique'],den:['Crown caps','Aluminium capsules','Screws / nuts','Staples','Metal wire']},
+ {id:'nozzle',n:7,fr:'Buses d’éjection',en:'Ejection nozzles',
+  sfr:'Un jet d’air sur la particule visée',sen:'An air jet on the targeted particle',
+  pfr:['Une rangée de buses d’air comprimé couvre toute la largeur du flux.','Dès qu’une particule indésirable est repérée, le système calcule sa position exacte et déclenche la ou les buses en face d’elle, pendant quelques millisecondes.','Le jet d’air dévie uniquement la particule visée vers la sortie « refus », sans perturber le verre voisin.','Une buse bouchée ou un manque de pression d’air laisse passer des indésirables : à contrôler en priorité en maintenance.'],
+  pen:['A row of compressed-air nozzles covers the full width of the stream.','As soon as an unwanted particle is spotted, the system computes its exact position and fires the nozzle(s) facing it for a few milliseconds.','The air jet deflects only the targeted particle to the “reject” outlet, without disturbing the neighbouring glass.','A blocked nozzle or low air pressure lets contaminants through: check it first during maintenance.']},
+ {id:'out',n:8,fr:'Sorties : bon verre / refus',en:'Outlets: good glass / reject',
+  sfr:'Deux flux séparés',sen:'Two separate streams',
+  pfr:['Un séparateur (diviseur) sépare les deux flux.','Bon verre : trié en blanc et couleurs, il part vers la suite du process.','Refus : CSP, métaux, plastiques et autres indésirables sont évacués.','Objectif de l’affiche Sibelco : jusqu’à 99,9 % de précision à la fin du process.'],
+  pen:['A splitter separates the two streams.','Good glass: sorted into clear and coloured, it goes on to the rest of the process.','Reject: CSP, metals, plastics and other contaminants are removed.','Target on the Sibelco poster: up to 99.9% precision at the end of the process.']}
+];
+
+/* Les « grains » qui circulent : couleur, et la technologie qui repère les indésirables (det) */
+const M3_GRAINS=[
+ {c:'#cfe9f3',w:5},{c:'#47b062',w:3},{c:'#a1713b',w:3},                         // verre : blanc, vert, brun
+ {c:'#6f7378',det:'vis',w:1.2},                                                   // pierre / CSP -> VIS
+ {c:'#dfe0f6',det:'uv',w:1.2},                                                    // vitrocéramique / plomb -> UV
+ {c:'#2f80d8',det:'nir',w:1.2},                                                   // plastique -> NIR
+ {c:'#bcc3ca',det:'ind',w:1.2}                                                    // métal -> inductif
+];
+
+/* ---------- petits outils de géométrie ---------- */
+const m3={
+ hx(h){ h=h.replace('#',''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; },
+ dist(a,b){ return Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]); },
+ lerp(a,b,t){ return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]; },
+ mean(ps){ const c=[0,0,0]; ps.forEach(p=>{c[0]+=p[0];c[1]+=p[1];c[2]+=p[2];}); return [c[0]/ps.length,c[1]/ps.length,c[2]/ps.length]; },
+ normal(p){ let x=0,y=0,z=0; for(let i=0;i<p.length;i++){ const a=p[i],b=p[(i+1)%p.length]; x+=(a[1]-b[1])*(a[2]+b[2]); y+=(a[2]-b[2])*(a[0]+b[0]); z+=(a[0]-b[0])*(a[1]+b[1]); } const l=Math.hypot(x,y,z)||1; return [x/l,y/l,z/l]; },
+ /* un quadrilatère trop grand est découpé en petites cases (sinon le tri « du fond vers l'avant » se trompe) */
+ splitQuad(q,max){
+   const nu=Math.max(1,Math.ceil(m3.dist(q[0],q[1])/max)), nv=Math.max(1,Math.ceil(m3.dist(q[0],q[3])/max)), out=[];
+   const P=(u,v)=>m3.lerp(m3.lerp(q[0],q[1],u),m3.lerp(q[3],q[2],u),v);
+   for(let i=0;i<nu;i++) for(let j=0;j<nv;j++) out.push([P(i/nu,j/nv),P((i+1)/nu,j/nv),P((i+1)/nu,(j+1)/nv),P(i/nu,(j+1)/nv)]);
+   return out;
+ },
+ splitTri(t,max,out,depth){
+   const e=[m3.dist(t[0],t[1]),m3.dist(t[1],t[2]),m3.dist(t[2],t[0])], k=e.indexOf(Math.max(...e));
+   if(e[k]<=max||(depth||0)>6){ out.push(t); return; }
+   const a=t[k], b=t[(k+1)%3], c=t[(k+2)%3], mid=m3.lerp(a,b,.5);
+   m3.splitTri([a,mid,c],max,out,(depth||0)+1); m3.splitTri([mid,b,c],max,out,(depth||0)+1);
+ },
+ /* transforme un ensemble de polygones en « solide » : normales tournées vers l'extérieur (pour cacher les faces de dos) */
+ solid(polys,col,tag,g,T,o){
+   o=o||{}; const C=m3.hx(col);
+   polys=polys.map(p=>p.map(q=>T?T(q):q));
+   const all=[]; polys.forEach(p=>p.forEach(q=>all.push(q))); const cen=m3.mean(all);
+   return polys.map(p=>{
+     const ctr=m3.mean(p); let n=m3.normal(p);
+     if(n[0]*(ctr[0]-cen[0])+n[1]*(ctr[1]-cen[1])+n[2]*(ctr[2]-cen[2])<0){ p=p.slice().reverse(); n=[-n[0],-n[1],-n[2]]; }
+     let c=C; if(o.top&&n[1]>.9) c=m3.hx(o.top);
+     return {p,n,ctr,c,tag:tag||'',g:g||'ext',a:o.a||1,dec:!!o.dec};
+   });
+ },
+ box(x0,x1,y0,y1,z0,z1,col,tag,g,T,o){
+   const P=(x,y,z)=>[x,y,z];
+   const q=[ [P(x0,y0,z0),P(x1,y0,z0),P(x1,y1,z0),P(x0,y1,z0)], [P(x0,y0,z1),P(x1,y0,z1),P(x1,y1,z1),P(x0,y1,z1)],
+             [P(x0,y0,z0),P(x0,y0,z1),P(x0,y1,z1),P(x0,y1,z0)], [P(x1,y0,z0),P(x1,y0,z1),P(x1,y1,z1),P(x1,y1,z0)],
+             [P(x0,y0,z0),P(x1,y0,z0),P(x1,y0,z1),P(x0,y0,z1)], [P(x0,y1,z0),P(x1,y1,z0),P(x1,y1,z1),P(x0,y1,z1)] ];
+   let polys=[]; q.forEach(f=>{ m3.splitQuad(f,(o&&o.cell)||.7).forEach(c=>polys.push(c)); });
+   return m3.solid(polys,col,tag,g,T,o);
+ },
+ /* prisme : un contour 2D CONVEXE (prof) extrudé le long d'un axe ('z' : contour en x,y ; 'x' : contour en z,y ; 'y' : contour en x,z) */
+ extrude(prof,ax,a0,a1,col,tag,g,T,o){
+   const M=(u,v,a)=>ax==='z'?[u,v,a]:ax==='x'?[a,v,u]:[u,a,v], polys=[], n=prof.length, cell=(o&&o.cell)||.7;
+   for(let i=0;i<n;i++){ const j=(i+1)%n; m3.splitQuad([M(prof[i][0],prof[i][1],a0),M(prof[j][0],prof[j][1],a0),M(prof[j][0],prof[j][1],a1),M(prof[i][0],prof[i][1],a1)],cell).forEach(c=>polys.push(c)); }
+   [a0,a1].forEach(a=>{
+     const ring=prof.map(p=>M(p[0],p[1],a)), c=m3.mean(ring);
+     for(let i=0;i<n;i++) m3.splitTri([c,ring[i],ring[(i+1)%n]],cell*1.3,polys);
+   });
+   return m3.solid(polys,col,tag,g,T,o);
+ },
+ circle(cx,cy,r,n){ const o=[]; for(let i=0;i<n;i++){ const a=i/n*Math.PI*2; o.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r]); } return o; }
+};
+
+/* ---------- construction d'une machine (liste de faces + points utiles) ---------- */
+const M3_SCENES={};
+function m3Build(brand){
+  if(M3_SCENES[brand]) return M3_SCENES[brand];
+  const F=[], add=a=>{ a.forEach(f=>F.push(f)); };
+  /* réglage de l'intérieur (même principe sur les 3 marques) à l'échelle de chaque carter : s = échelle, zs = largeur, ox/oy = position */
+  const tf={redwave:{s:.88,zs:1,ox:0,oy:.35}, binder:{s:.85,zs:1.15,ox:0,oy:.25,rot:true}, steinert:{s:.92,zs:1,ox:-.35,oy:.3}}[brand];
+  const T=tf.rot?(p=>[tf.ox+tf.zs*p[2], tf.oy+tf.s*p[1], -tf.s*p[0]]):(p=>[tf.ox+tf.s*p[0], tf.oy+tf.s*p[1], tf.zs*p[2]]);
+  const W=.8, DK='#2c323a';
+  const chuteY=x=>1.62-.827*(x+.75);                      // hauteur de la goulotte (pente)
+
+  /* ===== INTERIEUR (identique en principe sur les 3 marques) ===== */
+  add(m3.box(-1.35,-.75,1.6,1.74,-W,W,'#9aa5b0','feed','int',T));                         // plateau vibrant
+  add(m3.box(-1.15,-.85,1.74,1.9,-.3,.3,'#5b6670','feed','int',T));                        // moteur vibrant
+  add(m3.box(-1.35,-.75,1.74,1.8,-W,-W+.05,'#7d8792','feed','int',T)); add(m3.box(-1.35,-.75,1.74,1.8,W-.05,W,'#7d8792','feed','int',T));
+  add(m3.extrude([[-.75,1.62],[0,1],[0,.94],[-.75,1.56]],'z',-W,W,'#b4bec8','chute','int',T));    // goulotte
+  /* capteurs inductifs : barre sous la goulotte */
+  const ci=[[-.5,chuteY(-.5)-.07],[-.1,chuteY(-.1)-.07],[-.1,chuteY(-.1)-.17],[-.5,chuteY(-.5)-.17]];
+  add(m3.extrude(ci,'z',-W+.04,W-.04,'#0b8f7e','ind','int',T));
+  for(let i=0;i<6;i++){ const z=-W+.2+i*(2*W-.4)/5; add(m3.extrude([[-.46,chuteY(-.46)-.175],[-.14,chuteY(-.14)-.175],[-.14,chuteY(-.14)-.2],[-.46,chuteY(-.46)-.2]],'z',z-.07,z+.07,'#5fe3cf','ind','int',T)); }
+  /* modules de détection côté +x : VIS (haut), UV (milieu), NIR (bas) */
+  [['vis',1.36,'#f2b705','#394a5d'],['uv',.96,'#9b5cff','#39325a'],['nir',.56,'#ff6a3d','#54403a']].forEach(([id,y0,hi,body])=>{
+    add(m3.box(.78,1.02,y0,y0+.14,-W,W,body,id,'int',T));
+    add(m3.box(.74,.78,y0+.02,y0+.12,-W+.03,W-.03,hi,id,'int',T));
+  });
+  add(m3.box(-.3,-.17,.55,.85,-W,W,'#e6ecf2','vis','int',T)); add(m3.box(-.17,-.14,.58,.82,-W+.04,W-.04,'#f2b705','vis','int',T));   // panneau lumineux de fond
+  /* buses : barre + 16 petits becs */
+  add(m3.box(.3,.42,.44,.6,-W,W,'#505a64','nozzle','int',T));
+  for(let i=0;i<16;i++){ const z=-W+.05+i*(2*W-.1)/15; add(m3.extrude(m3.circle(z,.52,.02,6),'x',.42,.49,'#d9dee3','nozzle','int',T,{cell:2})); }
+  /* trémies : bon verre (bleu) / refus (rouge) + séparateur */
+  add(m3.extrude([[.08,.3],[.74,.3],[.58,0],[.24,0]],'z',-W,W,'#7fb4e2','out','int',T,{top:'#274a68'}));
+  add(m3.extrude([[.84,.3],[1.46,.3],[1.32,0],[.96,0]],'z',-W,W,'#d9463d','out','int',T,{top:'#6b1f1b'}));
+  add(m3.extrude([[.72,.1],[.84,.1],[.78,.44]],'z',-W,W,'#9aa5b0','out','int',T));
+
+  /* ===== EXTERIEUR : une branche par marque ===== */
+  if(brand==='redwave'){
+    const R='#d7261e', R2='#ee4a3f';
+    add(m3.box(-1.8,1.7,0,.3,-1.05,1.05,'#6d7782','base','ext'));                                  // châssis
+    [[-1.6,-.95],[1.5,-.95],[-1.6,.95],[1.5,.95]].forEach(([x,z])=>add(m3.box(x-.1,x+.1,.3,.34,z-.1,z+.1,'#444c55','base','ext')));
+    add(m3.extrude([[-1.55,.3],[1.45,.3],[1.6,.55],[1.6,1.55],[1.0,2.15],[-1.0,2.2],[-1.55,1.7]],'z',-1,1,R,'hood','hood'));        // grand carter rouge
+    for(const sg of [1,-1]){                                                                                                  // portes d'accès (les 2 côtés)
+      for(let i=0;i<5;i++) add(m3.box(-1.25+i*.62,-1.21+i*.62,.5,1.75,sg>0?1:-1.03,sg>0?1.03:-1,'#9a1913','door','hood',null,{dec:true,cell:3}));
+      for(let i=0;i<4;i++) add(m3.box(-1.0+i*.62,-.82+i*.62,1.05,1.12,sg>0?1:-1.045,sg>0?1.045:-1,'#f3f4f6','door','hood',null,{dec:true,cell:3}));
+    }
+    add(m3.box(1.6,1.64,.6,1.5,-.9,.9,'#f0f2f4','door','hood',null,{dec:true,cell:3}));                                          // plaque
+    /* cadre gris + convoyeur d'alimentation côté entrée (x<0) */
+    [[-2.2,-.9],[-1.7,-.9],[-2.2,.9],[-1.7,.9]].forEach(([x,z])=>add(m3.box(x-.04,x+.04,0,1.85,z-.04,z+.04,'#c8cdd2','frame','ext')));
+    add(m3.box(-2.25,-1.65,1.82,1.9,-.95,-.85,'#c8cdd2','frame','ext')); add(m3.box(-2.25,-1.65,1.82,1.9,.85,.95,'#c8cdd2','frame','ext'));
+    add(m3.box(-2.25,-1.6,1.9,2.0,-.7,.7,'#7c858e','feed','ext'));
+    add(m3.box(-2.25,-1.6,1.0,1.04,-.9,.9,'#c8cdd2','frame','ext'));
+  }else if(brand==='binder'){
+    const BL='#1f7ac8', GR='#dde1e6', BL2='#176099';
+    add(m3.box(-2,2.3,0,.22,-1.75,1.75,'#c4c9cf','base','ext'));                                                                   // socle gris
+    add(m3.box(-2,2.3,.22,.27,-1.7,1.7,'#aab0b7','base','ext'));
+    const arch=[]; for(let i=0;i<=16;i++){ const a=i/16*Math.PI; arch.push([1.45*Math.cos(a),.22+1.9*Math.sin(a)]); }
+    const edges=[-1.55,-.95,-.45,.15,.75,1.55]; const cols=[GR,BL,GR,BL,GR];
+    for(let i=0;i<5;i++) add(m3.extrude(arch,'x',edges[i],edges[i+1],cols[i],'hood','hood'));                                       // dôme à bandes bleu / gris
+    add(m3.extrude([[-.9,.22],[.9,.22],[.9,1.25],[.55,1.5],[-.55,1.5],[-.9,1.25]],'x',1.55,2.05,BL2,'hood','hood'));               // nez bleu
+    add(m3.box(2.0,2.07,.45,1.15,-.6,.6,'#16222f','hood','hood'));                                                                  // vitre sombre
+    /* ENTREE DU VERRE SUR LE COTE (+z) : convoyeur incliné qui vient déposer le calcin sur l'extracteur vibrant */
+    add(m3.extrude([[1.0,1.38],[2.9,2.05],[2.9,2.15],[1.0,1.48]],'x',-.95,.95,'#3b4148','feed','ext'));                              // bande
+    for(const sx of [-.95,.9]) add(m3.extrude([[1.0,1.48],[2.9,2.15],[2.9,2.3],[1.0,1.63]],'x',sx,sx+.05,'#8b9299','feed','ext'));   // rebords
+    for(const [zz,hh] of [[1.9,1.62],[2.7,2.1]]) for(const sx of [-.8,.8]) add(m3.box(sx-.04,sx+.04,0,hh,zz-.04,zz+.04,'#8b9299','frame','ext'));
+    add(m3.box(-.95,.95,.0,.0+.05,2.45,3.1,'#aab0b7','base','ext'));
+  }else{
+    const Y='#e8b800', DKG='#5a616a', ST='#8b9299';
+    [[-1.65,-.85],[1.0,-.85],[-1.65,.85],[1.0,.85]].forEach(([x,z])=>add(m3.box(x-.09,x+.09,0,.25,z-.09,z+.09,ST,'base','ext')));
+    add(m3.box(-1.75,1.1,.2,.25,-.97,.97,ST,'base','ext'));
+    add(m3.box(-1.75,1.1,.25,1.0,-.97,.97,Y,'hood','hood'));                                                                        // caisson jaune
+    add(m3.extrude([[-1.75,1.0],[1.1,1.0],[1.1,1.75],[.45,2.2],[-1.2,2.25],[-1.75,1.85]],'z',-.97,.97,DKG,'hood','hood'));        // capot gris foncé
+    [-1.3,-.9].forEach(x=>add(m3.extrude(m3.circle(x,.55,.13,12),'y',2.1,2.5,'#b9c0c7','base','ext',null,{cell:2})));
+    /* extracteur vibrant sur son bâti, côté entrée (x<-1.75) */
+    [[-2.5,-.8],[-1.85,-.8],[-2.5,.8],[-1.85,.8]].forEach(([x,z])=>add(m3.box(x-.05,x+.05,0,1.95,z-.05,z+.05,ST,'frame','ext')));
+    add(m3.box(-2.55,-1.8,1.9,2.0,-.88,.88,ST,'frame','ext'));
+    add(m3.box(-2.45,-1.75,2.0,2.14,-.7,.7,'#4b5057','feed','ext')); add(m3.box(-2.45,-1.75,2.14,2.34,-.7,-.62,'#4b5057','feed','ext')); add(m3.box(-2.45,-1.75,2.14,2.34,.62,.7,'#4b5057','feed','ext'));
+    add(m3.box(-2.3,-1.9,1.7,1.9,-.4,.4,Y,'feed','ext'));
+  }
+
+  /* trajectoire du verre (coordonnées de l'intérieur, converties) : alimentation -> goulotte -> chute -> buses -> sortie */
+  const bz=(a,b,c,t)=>[(1-t)*(1-t)*a[0]+2*(1-t)*t*b[0]+t*t*c[0],(1-t)*(1-t)*a[1]+2*(1-t)*t*b[1]+t*t*c[1]];
+  const E=[0,1.0], P1=[.28,.78], N=[.52,.5];
+  const path={
+    feed:t=>[-1.3+.55*t, 1.8-.14*t],
+    chute:t=>{ const x=-.75+.75*t; return [x,chuteY(x)+.05]; },
+    fall:t=>bz(E,P1,N,t),
+    acc:t=>bz(N,[.56,.3],[.55,.02],t),
+    rej:t=>bz(N,[.98,.46],[1.2,.02],t),
+    det:{vis:.1,uv:.45,nir:.75}
+  };
+  /* repères numérotés (3D, au centre de la machine) */
+  const pins={feed:[-1.05,1.95,0],chute:[-.4,1.5,0],vis:[1.06,1.43,0],uv:[1.06,1.03,0],nir:[1.06,.63,0],ind:[-.3,chuteY(-.3)-.26,0],nozzle:[.36,.52,0],out:[.9,.02,0]};
+  const pinsW={}; Object.keys(pins).forEach(k=>pinsW[k]=T(pins[k]));
+  /* rideaux de lumière VIS / UV / NIR vers le flux */
+  const beams=['vis','uv','nir'].map(id=>{
+    const y0={vis:1.43,uv:1.03,nir:.63}[id], tt=path.det[id], tp=path.fall(tt);
+    return {id,p:[T([.74,y0,-W]),T([.74,y0,W]),T([tp[0],tp[1],W]),T([tp[0],tp[1],-W])]};
+  });
+  const S={hoodA:tf.rot?.07:.16,sideYaw:tf.rot?1.17:-.4,faces:F,T,tf,W,path,pins:pinsW,beams,coil:T([-.3,chuteY(-.3)-.12,0]),coilL:[-.3,chuteY(-.3)-.12,0],zmax:tf.zs*(W-.08)};
+  M3_SCENES[brand]=S; return S;
+}
+
+/* ---------- l'état de la visionneuse (gardé quand on change de langue) ---------- */
+const M3S={brand:'redwave',sel:null,model:0,yaw:-.62,pitch:.32,dist:6.2,tx:0,ty:1.05,tz:0,tgt:null,auto:true,flow:true,xr:0,xrT:0,parts:[],bursts:[],t:0,spawn:0,idle:0,raf:0,guided:false};
+const m3tr=(fr,en)=>lang==='en'?en:fr;
+const m3Part=id=>M3_PARTS.find(p=>p.id===id);
+const m3Avail=id=>{ const ms=M3_MODELS[M3S.brand]||[]; if(!ms.length||!M3_TECH[id]) return true; const m=ms[M3S.model]||ms[0]; return !m.tech||m.tech.indexOf(id)>=0; };
+
+/* La carte d'entrée affichée en tête de la rubrique Présentation */
+function m3Card(){
+  return `<div class="card tcard m3card" onclick="renderMachines3D()" tabindex="0" onkeydown="if(event.key==='Enter')renderMachines3D()"><div class="cover c-presentation m3cover">
+    <svg viewBox="0 0 120 80" aria-hidden="true"><path d="M14 52l46-22 46 22-46 22z" fill="rgba(255,255,255,.18)" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M14 52v8l46 22v-8M106 52v8L60 82v-8" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M40 42l20-10 20 10-20 10z" fill="#fff" opacity=".9"/><circle cx="92" cy="22" r="3" fill="#ffd54a"/><circle cx="102" cy="30" r="2.2" fill="#7fe0c8"/><circle cx="82" cy="16" r="2.2" fill="#a98bff"/></svg>
+    <span class="m3badge">3D</span></div><h3>${esc(L('Les trieurs en 3D : Redwave, Binder+Co, Steinert','Sorters in 3D: Redwave, Binder+Co, Steinert'))}</h3>
+    <div class="meta"><span>${esc(L('VIS · UV · NIR · inductif','VIS · UV · NIR · inductive'))}</span><span>${esc(L('Interactif','Interactive'))}</span></div></div>`;
+}
+
+function renderMachines3D(){
+  state.section='presentation'; state.view='machines'; $('filters').classList.add('hidden'); buildNav();
+  const ms=M3_MODELS[M3S.brand]||[];
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="m3Stop();renderFiches('presentation')">${esc(T('back'))}</button></div>
+   <div class="panel m3"><h2 style="margin-top:0">${esc(L('Les trieurs optiques en 3D','Optical sorters in 3D'))}</h2>
+    <p class="meta" style="margin:0 0 10px;display:block">${esc(L('Choisissez une marque, faites tourner la machine, puis touchez un repère numéroté (ou une technologie) pour comprendre chaque étape. Les technologies VIS, UV, NIR et inductive s’appliquent aux 3 marques ; leur présence dépend du modèle.','Pick a brand, rotate the machine, then tap a numbered marker (or a technology) to understand each step. VIS, UV, NIR and inductive technologies apply to all 3 brands; which ones are fitted depends on the model.'))}</p>
+    <div class="m3tabs" role="tablist">${M3_BRANDS.map(b=>`<button role="tab" class="chip ${b.id===M3S.brand?'on':''}" aria-selected="${b.id===M3S.brand}" onclick="m3Brand('${b.id}')"><i class="m3dot" style="background:${b.col}"></i>${esc(b.name)}</button>`).join('')}${ms.length?`<select class="m3model" aria-label="${esc(L('Modèle','Model'))}" onchange="M3S.model=+this.value;m3UI()">${ms.map((m,i)=>`<option value="${i}" ${i===M3S.model?'selected':''}>${esc(m.name)}</option>`).join('')}</select>`:''}</div>
+    <div class="m3grid"><div class="m3left">
+      <div class="m3cvbox"><canvas id="m3cv" aria-label="${esc(L('Machine en 3D, faites glisser pour tourner','3D machine, drag to rotate'))}"></canvas><div class="m3hint" id="m3hint">${esc(L('Glisser : tourner · Molette / pincer : zoom','Drag: rotate · Wheel / pinch: zoom'))}</div></div>
+      <div class="m3ctl noprint">
+        <button id="m3bx" onclick="m3Toggle('x')">${esc(L('Vue interne','Inside view'))}</button>
+        <button id="m3bf" onclick="m3Toggle('f')">${esc(L('Flux de verre','Glass flow'))}</button>
+        <button id="m3ba" onclick="m3Toggle('a')">${esc(L('Rotation auto','Auto-rotate'))}</button>
+        <button onclick="m3Reset()">${esc(L('Vue initiale','Reset view'))}</button>
+      </div>
+      <div class="m3chips noprint" id="m3chips"></div>
+    </div><div class="m3side" id="m3info"></div></div></div>
+   <p class="disclaimer">${esc(L('Représentation schématique inspirée de l’affiche Sibelco « Technologies de tri optique pour le tri du verre » : la disposition exacte varie selon le modèle.','Schematic view inspired by the Sibelco poster “Optical sorting technologies for glass sorting”: the exact layout varies by model.'))}</p>`;
+  window.scrollTo(0,0); m3UI(); m3Start(); if(M3S.sel) m3Focus();
+}
+function m3Stop(){ M3S.raf=0; }
+function m3Brand(id){ M3S.brand=id; M3S.model=0; M3S.parts=[]; M3S.bursts=[]; renderMachines3D(); }
+function m3Reset(){ M3S.sel=null; M3S.auto=true; M3S.tgt={yaw:-.62,pitch:.32,dist:6.2,t:[0,1.05,0]}; M3S.xrT=0; m3UI(); }
+/* la caméra se place d'elle-même : vue de profil zoomée sur la pièce choisie (ou vue d'ensemble si rien n'est choisi) */
+function m3Focus(){
+  const S=m3Build(M3S.brand), wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
+  if(M3S.sel){ const w=S.pins[M3S.sel]; M3S.tgt={yaw:M3S.yaw+wrap(S.sideYaw-M3S.yaw),pitch:.22,dist:3.9,t:[w[0],w[1],w[2]]}; }
+  else M3S.tgt={yaw:M3S.yaw,pitch:.32,dist:6.2,t:[0,1.05,0]};
+}
+function m3Toggle(k){ if(k==='x'){ M3S.xrT=M3S.xrT>.5?0:1; } else if(k==='f') M3S.flow=!M3S.flow; else M3S.auto=!M3S.auto; m3UI(); }
+function m3Select(id){
+  M3S.sel=(M3S.sel===id)?null:id;
+  if(M3S.sel) M3S.xrT=1;
+  m3Focus(); m3UI();
+}
+/* visite guidée : étape suivante / précédente */
+function m3Step(d){
+  const i=M3S.sel?M3_PARTS.findIndex(p=>p.id===M3S.sel):-1, n=M3_PARTS.length;
+  M3S.sel=M3_PARTS[((i<0?(d>0?-1:0):i)+d+n)%n].id; M3S.xrT=1; m3Focus(); m3UI();
+}
+/* met à jour boutons, pastilles et panneau d'explication */
+function m3UI(){
+  const bx=$('m3bx'); if(!bx) return;
+  bx.classList.toggle('on',M3S.xrT>.5); $('m3bf').classList.toggle('on',M3S.flow); $('m3ba').classList.toggle('on',M3S.auto);
+  [bx,$('m3bf'),$('m3ba')].forEach(b=>b.setAttribute('aria-pressed',b.classList.contains('on')));
+  $('m3chips').innerHTML=M3_PARTS.map(p=>{
+    const col=M3_TECH[p.id]||'var(--accent)', off=!m3Avail(p.id);
+    return `<button class="chip m3chip ${M3S.sel===p.id?'on':''} ${off?'off':''}" style="--c:${col}" onclick="m3Select('${p.id}')" aria-pressed="${M3S.sel===p.id}"><b>${p.n}</b> ${esc(m3tr(p.fr,p.en))}</button>`;
+  }).join('');
+  const box=$('m3info'), p=M3S.sel&&m3Part(M3S.sel);
+  if(!p){
+    box.innerHTML=`<h3 style="margin:0 0 6px">${esc(L('Par où commencer ?','Where to start?'))}</h3>
+     <p style="margin:0 0 8px">${esc(L('Le verre broyé est étalé en nappe fine, glisse devant les capteurs, puis un jet d’air éjecte chaque indésirable. Suivez le chemin dans l’ordre :','The crushed glass is spread into a thin layer, slides past the sensors, then an air jet ejects each contaminant. Follow the path in order:'))}</p>
+     <ol class="m3flow">${M3_PARTS.map(x=>`<li><a href="#" onclick="m3Select('${x.id}');return false" style="--c:${M3_TECH[x.id]||'var(--accent)'}"><b>${x.n}</b> ${esc(m3tr(x.fr,x.en))}</a></li>`).join('')}</ol>
+     <div class="row" style="margin-top:12px"><button class="primary" onclick="m3Step(1)">${esc(L('Lancer la visite guidée','Start the guided tour'))}</button></div>
+     <p class="meta" style="margin-top:12px;display:block">${esc(L('Les points colorés qui circulent sont des morceaux de verre (clair, vert, brun) et des indésirables : pierre, vitrocéramique, plastique, métal. Chacun est repéré par la technologie qui le voit.','The moving dots are glass pieces (clear, green, brown) and contaminants: stone, glass-ceramic, plastic, metal. Each one is spotted by the technology that can see it.'))}</p>`;
+    return;
+  }
+  const tc=M3_TECH[p.id], off=!m3Avail(p.id);
+  box.innerHTML=`<div class="m3hd" style="--c:${tc||'var(--accent)'}"><span class="m3num">${p.n}</span><div><h3 style="margin:0">${esc(m3tr(p.fr,p.en))}</h3><div class="meta" style="margin:2px 0 0">${esc(m3tr(p.sfr,p.sen))}</div></div></div>
+   <ul class="m3pts">${m3tr(p.pfr,p.pen).map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+   ${p.dfr?`<div class="m3det"><b>${esc(L('Détecte','Detects'))}</b>${m3tr(p.dfr,p.den).map(t=>`<span class="tag" style="border-color:${tc};color:${tc}">${esc(t)}</span>`).join('')}</div>`:''}
+   ${tc?`<div class="m3avail ${off?'no':''}">${off?esc(L('Cette technologie n’est pas présente sur le modèle choisi.','This technology is not fitted on the selected model.')):esc(L('Présente sur Redwave, Binder+Co et Steinert, selon le modèle.','Available on Redwave, Binder+Co and Steinert, depending on the model.'))}</div>`:''}
+   <div class="row noprint" style="margin-top:14px;justify-content:space-between"><button onclick="m3Step(-1)">◀ ${esc(L('Précédent','Previous'))}</button><button onclick="m3Select('${p.id}')">${esc(L('Fermer','Close'))}</button><button class="primary" onclick="m3Step(1)">${esc(L('Suivant','Next'))} ▶</button></div>`;
+}
+
+/* ---------- le moteur de rendu ---------- */
+function m3Start(){
+  const cv=$('m3cv'); if(!cv) return;
+  const id=++M3S.raf; const ctx=cv.getContext('2d'); let W=0,H=0,dpr=1,last=0,cam=null,pinHit=[],theme={t:0};
+  const ptr=new Map(); let drag=null, pinch=0;
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const mixc=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+  const rgb=(c,a)=>`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a==null?1:a})`;
+
+  function readTheme(){
+    const cs=getComputedStyle(document.documentElement), card=m3.hx(rgb2hex(cs.getPropertyValue('--card')||'#ffffff')), line=m3.hx(rgb2hex(cs.getPropertyValue('--line')||'#dbe1e7'));
+    theme={bg:card,line,dark:(card[0]+card[1]+card[2])<240,acc:cs.getPropertyValue('--accent').trim()||'#0a5aa8',txt:cs.getPropertyValue('--text').trim()||'#1b2733'};
+  }
+  function rgb2hex(s){ s=(s||'').trim(); if(s[0]==='#'){ if(s.length===4) s='#'+s[1]+s[1]+s[2]+s[2]+s[3]+s[3]; return s; } return '#ffffff'; }
+  function resize(){
+    const r=cv.getBoundingClientRect(); const nd=Math.min(2,window.devicePixelRatio||1);
+    const w=Math.max(200,Math.round(r.width)), h=Math.round(w*(w<560?.82:.62));
+    if(w!==W||h!==H||nd!==dpr){ W=w;H=h;dpr=nd; cv.style.height=h+'px'; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  }
+  function camera(){
+    const t=[M3S.tx,M3S.ty,M3S.tz], cp=Math.cos(M3S.pitch), sp=Math.sin(M3S.pitch), d=M3S.dist;
+    const pos=[t[0]+d*cp*Math.sin(M3S.yaw), t[1]+d*sp, t[2]+d*cp*Math.cos(M3S.yaw)];
+    let f=[t[0]-pos[0],t[1]-pos[1],t[2]-pos[2]]; const fl=Math.hypot(...f); f=f.map(v=>v/fl);
+    let r=[-f[2],0,f[0]]; const rl=Math.hypot(...r)||1; r=r.map(v=>v/rl);                       // droite = avant x haut
+    const u=[r[1]*f[2]-r[2]*f[1], r[2]*f[0]-r[0]*f[2], r[0]*f[1]-r[1]*f[0]];                // haut = droite x avant
+    return {pos,f,r,u,fl:H*1.2,cx:W/2,cy:H*.54};
+  }
+  function proj(p){
+    const dx=p[0]-cam.pos[0],dy=p[1]-cam.pos[1],dz=p[2]-cam.pos[2];
+    const z=dx*cam.f[0]+dy*cam.f[1]+dz*cam.f[2]; if(z<.3) return null;
+    const x=dx*cam.r[0]+dy*cam.r[1]+dz*cam.r[2], y=dx*cam.u[0]+dy*cam.u[1]+dz*cam.u[2], k=cam.fl/z;
+    return [cam.cx+x*k, cam.cy-y*k, z, k];
+  }
+  const bez=(a,b,c,t)=>[(1-t)*(1-t)*a[0]+2*(1-t)*t*b[0]+t*t*c[0],(1-t)*(1-t)*a[1]+2*(1-t)*t*b[1]+t*t*c[1]];
+
+  /* --- le verre qui circule --- */
+  function pick(){ let s=0; M3_GRAINS.forEach(g=>s+=g.w); let r=Math.random()*s; for(const g of M3_GRAINS){ r-=g.w; if(r<=0) return g; } return M3_GRAINS[0]; }
+  function spawn(S){
+    let g=pick(); if(g.det&&!m3Avail(g.det)) g=M3_GRAINS[0];
+    M3S.parts.push({g,z:(Math.random()*2-1)*S.zmax/S.tf.zs*.92,age:0,rot:Math.random()*6,sz:.075+Math.random()*.04,mark:0,det:false});
+  }
+  const D={a:.55,b:1.0,c:.55,d:.6}; // durées : plateau, goulotte, chute, sortie (s)
+  function ppos(S,p){
+    const a=p.age; let xy,ph;
+    if(a<D.a){ xy=S.path.feed(a/D.a); ph=0; }
+    else if(a<D.a+D.b){ const u=(a-D.a)/D.b; xy=S.path.chute(u*u*.55+u*.45); ph=1; }
+    else if(a<D.a+D.b+D.c){ const u=(a-D.a-D.b)/D.c; xy=S.path.fall(u); ph=2; p.u=u; }
+    else { const u=Math.min(1,(a-D.a-D.b-D.c)/D.d); xy=(p.g.det?S.path.rej:S.path.acc)(u); ph=3; p.u=u; }
+    return {w:S.T([xy[0],xy[1],p.z]),ph};
+  }
+
+  /* --- dessin --- */
+  function floor(S){
+    const R=4.2, y=0, c=theme.dark?[255,255,255]:[16,40,70];
+    const ring=[]; for(let i=0;i<48;i++){ const a=i/48*Math.PI*2; ring.push(proj([Math.cos(a)*R*1.05,y,Math.sin(a)*R*.75])); }
+    if(ring.every(Boolean)){ ctx.beginPath(); ring.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])); ctx.closePath(); ctx.fillStyle=rgb(c,theme.dark?.045:.05); ctx.fill(); }
+    ctx.lineWidth=1; ctx.strokeStyle=rgb(c,theme.dark?.08:.07);
+    for(let i=-4;i<=4;i++){ const a=proj([i*.9,0,-3.2]), b=proj([i*.9,0,3.2]), c2=proj([-4.2,0,i*.75]), d2=proj([4.2,0,i*.75]);
+      if(a&&b){ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();} if(c2&&d2){ctx.beginPath();ctx.moveTo(c2[0],c2[1]);ctx.lineTo(d2[0],d2[1]);ctx.stroke();} }
+    for(let k=0;k<4;k++){ const e=1.55+k*.1, pts=[[-e*1.35,0,-e*.9],[e*1.35,0,-e*.9],[e*1.35,0,e*.9],[-e*1.35,0,e*.9]].map(proj);
+      if(pts.every(Boolean)){ ctx.beginPath(); pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])); ctx.closePath(); ctx.fillStyle=rgb([0,0,0],.045); ctx.fill(); } }
+  }
+  function shadeCol(f,L){ const k=.6+.55*Math.max(0,f.n[0]*L[0]+f.n[1]*L[1]+f.n[2]*L[2]); return [f.c[0]*k,f.c[1]*k,f.c[2]*k]; }
+
+  function draw(S,dt){
+    ctx.clearRect(0,0,W,H);
+    const g=ctx.createLinearGradient(0,0,0,H); const b=theme.bg;
+    g.addColorStop(0,rgb(mixc(b,theme.dark?[40,60,80]:[200,220,240],theme.dark?.35:.38))); g.addColorStop(1,rgb(mixc(b,theme.dark?[10,14,18]:[255,255,255],.35)));
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    cam=camera(); floor(S);
+    const Lg=(()=>{ const v=[-.45*cam.r[0]+.8*cam.u[0]-.5*cam.f[0], -.45*cam.r[1]+.8*cam.u[1]-.5*cam.f[1], -.45*cam.r[2]+.8*cam.u[2]-.5*cam.f[2]]; const l=Math.hypot(...v); return v.map(x=>x/l); })();
+    const xr=M3S.xr, sel=M3S.sel, selTech=sel&&M3_TECH[sel]?sel:null, seeInt=xr>.03;
+    const inList=[], outList=[];
+    for(const f of S.faces){
+      if(f.g==='int'&&!seeInt) continue;
+      const dx=f.ctr[0]-cam.pos[0],dy=f.ctr[1]-cam.pos[1],dz=f.ctr[2]-cam.pos[2];
+      if(f.n[0]*dx+f.n[1]*dy+f.n[2]*dz>=0) continue;
+      (f.g==='int'?inList:outList).push({d:dx*dx+dy*dy+dz*dz-(f.dec?1e3:0),f});
+    }
+    /* particules et faisceaux de l'intérieur */
+    if(seeInt){
+      S.beams.forEach(bm=>{
+        const on=selTech?(selTech===bm.id?1:0):(sel?0:.22); if(!on||!m3Avail(bm.id)) return;
+        const c=m3.mean(bm.p); const dx=c[0]-cam.pos[0],dy=c[1]-cam.pos[1],dz=c[2]-cam.pos[2];
+        inList.push({d:dx*dx+dy*dy+dz*dz,beam:bm,on});
+      });
+      if(selTech==='ind'&&m3Avail('ind')){ const c=S.coil; const dx=c[0]-cam.pos[0],dy=c[1]-cam.pos[1],dz=c[2]-cam.pos[2]; inList.push({d:dx*dx+dy*dy+dz*dz-.5,coil:1}); }
+      M3S.parts.forEach(p=>{ const q=ppos(S,p); p._w=q.w; p._ph=q.ph; const dx=q.w[0]-cam.pos[0],dy=q.w[1]-cam.pos[1],dz=q.w[2]-cam.pos[2]; inList.push({d:dx*dx+dy*dy+dz*dz-.02,part:p}); });
+      M3S.bursts.forEach(bu=>{ const dx=bu.w[0]-cam.pos[0],dy=bu.w[1]-cam.pos[1],dz=bu.w[2]-cam.pos[2]; inList.push({d:dx*dx+dy*dy+dz*dz-.05,burst:bu}); });
+    }
+    inList.sort((a,b)=>b.d-a.d); outList.sort((a,b)=>b.d-a.d);
+    const bgc=theme.bg;
+    const drawFace=(f,alpha,dim)=>{
+      const pts=f.p.map(proj); if(pts.some(q=>!q)) return;
+      let c=shadeCol(f,Lg), hi=false;
+      if(sel&&f.g==='int'){ if(f.tag===sel||(sel==='out'&&f.tag==='out')) hi=true; else c=mixc(c,[bgc[0],bgc[1],bgc[2]],.62); }
+      if(sel&&f.g!=='int'&&f.tag===sel) hi=true;
+      if(hi) c=mixc(c,[255,255,255],.12);
+      ctx.beginPath(); pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])); ctx.closePath();
+      ctx.fillStyle=rgb(c,alpha); ctx.fill();
+      if(alpha<.95&&!hi) return;
+      ctx.lineWidth=hi?1.3:.8; ctx.lineJoin='round'; ctx.strokeStyle=hi?rgb(m3.hx(M3_TECH[sel]||'#ffffff'),Math.min(1,alpha+.3)):rgb(c,alpha);
+      ctx.stroke();
+    };
+    /* 1) intérieur */
+    inList.forEach(o=>{
+      if(o.f){ drawFace(o.f,Math.min(1,xr*1.6)); return; }
+      if(o.beam){ const q=o.beam.p.map(proj); if(q.some(v=>!v)) return; const col=m3.hx(M3_TECH[o.beam.id]), pul=.65+.35*Math.sin(M3S.t*7+(o.beam.id==='uv'?1:o.beam.id==='nir'?2:0));
+        ctx.beginPath(); q.forEach((v,i)=>i?ctx.lineTo(v[0],v[1]):ctx.moveTo(v[0],v[1])); ctx.closePath(); ctx.fillStyle=rgb(col,(.18+.22*pul)*o.on*xr); ctx.fill();
+        ctx.strokeStyle=rgb(col,.75*o.on*xr); ctx.lineWidth=1.4; ctx.stroke(); return; }
+      if(o.coil){ const col=m3.hx(M3_TECH.ind); for(let k=0;k<3;k++){ const ph=((M3S.t*.9+k/3)%1), rx=.12+ph*.55, rz=.4+ph*.35; const ring=[]; for(let i=0;i<=40;i++){ const a=i/40*Math.PI*2; ring.push(proj(S.T([S.coilL[0]+Math.cos(a)*rx, S.coilL[1]-.02, Math.sin(a)*rz]))); }
+        if(ring.every(Boolean)){ ctx.beginPath(); ring.forEach((v,i)=>i?ctx.lineTo(v[0],v[1]):ctx.moveTo(v[0],v[1])); ctx.strokeStyle=rgb(col,(1-ph)*.9*xr); ctx.lineWidth=2; ctx.stroke(); } } return; }
+      if(o.burst){ const bu=o.burst, a=proj(bu.w), e=proj(S.T([.5+.45*bu.k,.47,bu.lz])); if(a&&e){ ctx.strokeStyle=`rgba(255,255,255,${(1-bu.k)*.9*xr})`; ctx.lineWidth=Math.max(2,a[3]*.05); ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(e[0],e[1]); ctx.stroke();
+        ctx.strokeStyle=`rgba(120,200,255,${(1-bu.k)*.8*xr})`; ctx.lineWidth=1.2; ctx.stroke(); } return; }
+      if(o.part){ const p=o.part, q=proj(p._w); if(!q) return; const r=p.sz*q[3];
+        let al=Math.min(1,p.age/.15)*xr; if(p._ph===3&&p.u>.7) al*=Math.max(0,(1-p.u)/.3);
+        const emph=selTech&&p.g.det===selTech;
+        const rr=r*(emph?1.5:1);
+        if(p.mark>0){ const col=m3.hx(M3_TECH[p.det]||'#ffffff'); ctx.beginPath(); ctx.arc(q[0],q[1],rr*(1.6+p.mark*1.6),0,6.3); ctx.strokeStyle=rgb(col,Math.min(1,p.mark)*.9*al); ctx.lineWidth=2; ctx.stroke(); }
+        if(emph&&p.det!==false){ ctx.beginPath(); ctx.arc(q[0],q[1],rr*1.9,0,6.3); ctx.fillStyle=rgb(m3.hx(M3_TECH[selTech]),.25*al); ctx.fill(); }
+        const col=m3.hx(p.g.c); ctx.beginPath(); for(let i=0;i<6;i++){ const a=p.rot+i/6*6.283, rad=rr*(i%2?.8:1.1); ctx.lineTo(q[0]+Math.cos(a)*rad,q[1]+Math.sin(a)*rad); } ctx.closePath();
+        ctx.fillStyle=rgb(col,.95*al); ctx.fill(); ctx.strokeStyle=rgb([col[0]*.55,col[1]*.55,col[2]*.55],al); ctx.lineWidth=.8; ctx.stroke(); }
+    });
+    /* 2) extérieur (carter qui devient transparent) */
+    outList.forEach(o=>{ const f=o.f; const a=f.g==='hood'?(1-xr*(1-S.hoodA)):(f.tag==='base'?(1-xr*.55):1); drawFace(f,a); });
+    /* 3) repères numérotés par-dessus */
+    pinHit=[]; const tm=M3S.t;
+    M3_PARTS.forEach(p=>{
+      const w=S.pins[p.id]; const q=proj(w); if(!q) return;
+      const isSel=sel===p.id, col=M3_TECH[p.id]||theme.acc, off=!m3Avail(p.id), inside=xr<.4;
+      const R=(isSel?14:10.5)*Math.min(1.2,Math.max(.8,q[3]/62));
+      pinHit.push({id:p.id,x:q[0],y:q[1],r:R+5});
+      ctx.globalAlpha=off?.35:(inside&&!isSel?.78:1);
+      if(isSel){ const k=(tm*1.4)%1; ctx.beginPath(); ctx.arc(q[0],q[1],R+k*12,0,6.3); ctx.strokeStyle=col; ctx.globalAlpha=(1-k)*.7; ctx.lineWidth=2; ctx.stroke(); ctx.globalAlpha=1; }
+      ctx.beginPath(); ctx.arc(q[0],q[1],R,0,6.3); ctx.fillStyle=col; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=theme.dark?'#10161c':'#ffffff'; ctx.stroke();
+      ctx.fillStyle=(p.id==='vis')?'#2a2100':'#ffffff'; ctx.font=`700 ${Math.round(R*1.05)}px system-ui,sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(p.n,q[0],q[1]+.5);
+      if(isSel){ const label=m3tr(p.fr,p.en); ctx.font='600 12px system-ui,sans-serif'; const w2=ctx.measureText(label).width+14; let lx=q[0]+R+8; if(lx+w2>W-4) lx=q[0]-R-8-w2; const ly=q[1]-11;
+        ctx.fillStyle=theme.dark?'rgba(16,22,28,.92)':'rgba(255,255,255,.95)'; ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(lx,ly,w2,22,11); else ctx.rect(lx,ly,w2,22); ctx.fill(); ctx.stroke();
+        ctx.fillStyle=theme.txt; ctx.textAlign='left'; ctx.fillText(label,lx+7,ly+11.5); }
+      ctx.globalAlpha=1;
+    });
+  }
+
+  function update(S,dt){
+    M3S.t+=dt;
+    M3S.xr+=(M3S.xrT-M3S.xr)*Math.min(1,dt*6);
+    if(M3S.tgt){ const k=Math.min(1,dt*4.5), g=M3S.tgt; let dy=g.yaw-M3S.yaw; dy=Math.atan2(Math.sin(dy),Math.cos(dy));
+      M3S.yaw+=dy*k; M3S.pitch+=(g.pitch-M3S.pitch)*k; M3S.dist+=(g.dist-M3S.dist)*k; M3S.tx+=(g.t[0]-M3S.tx)*k; M3S.ty+=(g.t[1]-M3S.ty)*k; M3S.tz+=(g.t[2]-M3S.tz)*k;
+      if(Math.abs(dy)<.004&&Math.abs(g.dist-M3S.dist)<.01) M3S.tgt=null; }
+    else if(M3S.idle>0) M3S.idle-=dt; else if(M3S.auto&&!drag&&!M3S.sel) M3S.yaw+=dt*.18;
+    if(M3S.flow&&M3S.xr>.03){
+      M3S.spawn-=dt; if(M3S.spawn<=0&&M3S.parts.length<46){ spawn(S); M3S.spawn=.14+Math.random()*.14; }
+    }
+    {
+      const k=M3S.flow?1:0;
+      M3S.parts.forEach(p=>{
+        p.age+=dt*k;
+        /* repérage : la technologie qui voit ce grain l'entoure de sa couleur */
+        if(p.g.det&&!p.det){
+          const dd=p.g.det, tt=S.path.det[dd];
+          const hit=dd==='ind'?(p.age>D.a+D.b*.78):(p.age>D.a+D.b+D.c*(tt||0));
+          if(hit){ p.det=dd; p.mark=1; }
+        }
+        if(p.mark>0) p.mark=Math.max(.55,p.mark-dt*.6);
+        if(p.g.det&&p.det&&!p.fired&&p.age>D.a+D.b+D.c){ p.fired=true; M3S.bursts.push({lz:p.z,w:S.T([.5,.52,p.z]),k:0}); }
+      });
+      M3S.parts=M3S.parts.filter(p=>p.age<D.a+D.b+D.c+D.d+.05);
+      M3S.bursts.forEach(b=>b.k+=dt*5); M3S.bursts=M3S.bursts.filter(b=>b.k<1);
+    }
+  }
+
+  /* --- souris / doigt --- */
+  function pos(e){ const r=cv.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; }
+  cv.style.touchAction='none';
+  cv.addEventListener('pointerdown',e=>{ cv.setPointerCapture&&cv.setPointerCapture(e.pointerId); ptr.set(e.pointerId,pos(e)); drag={x:e.clientX,y:e.clientY,moved:0,start:pos(e)}; M3S.idle=4; M3S.tgt=null; const h=$('m3hint'); if(h) h.classList.add('gone'); });
+  cv.addEventListener('pointermove',e=>{
+    if(!ptr.has(e.pointerId)) return; const prev=ptr.get(e.pointerId), cur=pos(e); ptr.set(e.pointerId,cur);
+    if(ptr.size===2){ const [a,b]=[...ptr.values()]; const dd=Math.hypot(a[0]-b[0],a[1]-b[1]); if(pinch) M3S.dist=clamp(M3S.dist*(pinch/dd),2.4,10); pinch=dd; if(drag) drag.moved=99; return; }
+    if(!drag) return; drag.moved+=Math.abs(cur[0]-prev[0])+Math.abs(cur[1]-prev[1]);
+    M3S.yaw-=(cur[0]-prev[0])*.009; M3S.pitch=clamp(M3S.pitch+(cur[1]-prev[1])*.007,-.05,1.35); M3S.idle=4;
+  });
+  const up=e=>{
+    if(!ptr.has(e.pointerId)) return; const was=ptr.size; ptr.delete(e.pointerId); if(ptr.size<2) pinch=0;
+    if(drag&&drag.moved<7&&was===1){ const s=drag.start; let best=null,bd=1e9; pinHit.forEach(h=>{ const d=Math.hypot(h.x-s[0],h.y-s[1]); if(d<h.r&&d<bd){bd=d;best=h;} }); if(best) m3Select(best.id); }
+    if(!ptr.size) drag=null;
+  };
+  cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+  cv.addEventListener('wheel',e=>{ e.preventDefault(); M3S.dist=clamp(M3S.dist*(1+Math.sign(e.deltaY)*.08),2.4,10); M3S.idle=4; M3S.tgt=null; },{passive:false});
+  cv.addEventListener('keydown',e=>{ if(e.key==='ArrowLeft') M3S.yaw-=.1; else if(e.key==='ArrowRight') M3S.yaw+=.1; else if(e.key==='+') M3S.dist=clamp(M3S.dist-.4,2.4,10); else if(e.key==='-') M3S.dist=clamp(M3S.dist+.4,2.4,10); });
+  cv.tabIndex=0;
+
+  readTheme(); let n=0;
+  function loop(ts){
+    if(M3S.raf!==id||!cv.isConnected) return;
+    const dt=Math.min(.05,(ts-(last||ts))/1000); last=ts;
+    if(n++%45===0) readTheme();
+    resize(); const S=m3Build(M3S.brand); update(S,dt); draw(S,dt);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
 
 /* ============================================================================
  ===================== 5. PROTECTION DES DONNEES (tutos, fiches, comptes) =====================
