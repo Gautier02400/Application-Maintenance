@@ -232,6 +232,25 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 .step label.chk{display:flex;gap:8px;align-items:center;margin:8px 0 0;color:var(--muted);cursor:pointer}
 .step input[type=checkbox]{width:20px;height:20px;padding:0}
 .edit-step{border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0;background:var(--bg)}
+/* --- Tuto guidé : pastilles d'étapes, média, question, impression --- */
+.printonly{display:none}
+@media print{.printonly{display:block}}
+.gnav{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.gdot{width:36px;height:36px;border-radius:50%;padding:0;display:grid;place-items:center;font-weight:700;border:2px solid var(--line);background:var(--card);color:var(--muted)}
+.gdot.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.gdot.cur{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.gdot:disabled{opacity:.4;cursor:not-allowed}
+.gstep{padding:6px 0}
+.gtxt{font-size:1.05rem;line-height:1.55;margin:10px 0}
+.gmedia{max-width:100%;border-radius:8px;border:1px solid var(--line);margin-top:8px;display:block}
+.gq{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:10px 12px;margin:12px 0;background:var(--bg)}
+.gq label.opt{display:flex;gap:8px;align-items:center;margin:6px 0;color:var(--text);cursor:pointer;font-size:.95rem}
+.gq label.opt input{width:18px;height:18px;padding:0}
+.gq label.opt.good{color:var(--ok);font-weight:600}
+.gq label.opt.ko{color:var(--danger-text)}
+.gq .bad{color:var(--danger-text);margin-top:8px;font-weight:600}
+label.tpbtn{display:inline-block;margin:0;padding:4px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--text);font-size:.8rem;background:var(--card)}
+.tpedit{margin-top:6px;gap:6px}
 .hidden{display:none!important}
 .empty{text-align:center;color:var(--muted);padding:40px 10px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -245,6 +264,12 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 /*
  --- IMPRESSION / PDF : on cache le menu, le bandeau et les boutons pour n'imprimer que le contenu ---
 */
+/* Logo Sibelco en haut à droite de TOUT ce qui s'imprime (1re page) : image .printlogo posée en tête de page, invisible à l'écran.
+   Pour le changer de taille : modifiez "height:16mm". Le fichier est icon-512.png (le même que le logo du bandeau). */
+.printlogo{display:none}
+@media print{
+  .printlogo{display:block;height:16mm;width:auto;margin:0 0 5mm auto}
+}
 @media print{
   header,.noprint,.toast{display:none!important}
   body{background:#fff;color:#000}
@@ -688,6 +713,7 @@ header .row{gap:6px;flex-wrap:nowrap}
 </style>
 </head>
 <body>
+<img class="printlogo" src="icon-512.png" alt="Sibelco">
 
 <!--
  ===================== 2. STRUCTURE FIXE DE LA PAGE =====================
@@ -782,7 +808,7 @@ const LANG_KEY = 'sibelco_lang';
  ou data-i18n="ma_cle" sur un élément HTML fixe.
 */
 /* ---------- TRADUCTIONS DE L'INTERFACE ---------- */
-// ✏️ MODIFIABLE : textes de l'interface en français (fr) et en anglais (en) : changez le texte, pas le nom de la clé
+//  MODIFIABLE : textes de l'interface en français (fr) et en anglais (en) : changez le texte, pas le nom de la clé
 const I18N = {
  fr:{
   app_title:'Tutos Maintenance', app_sub:'Trieurs optiques – verre · Sibelco Reims',
@@ -813,7 +839,7 @@ const I18N = {
   storage_full:'Stockage plein ou indisponible : pensez à exporter en JSON',
   footer:'Projet réalisé par Lecertisseur Gautier, Coordinateur Tri Optiques · Sibelco Reims',
   unspecified:'Non précisée', locked_tag:'Verrouillé',
-  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_cons2:'Pièces consommables', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', nav_flow:'Flowsheet', items:'élément(s)',
+  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_cons2:'Pièces consommables', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', nav_flow:'Flowsheet',nav_Point:'...', items:'élément(s)',
   welcome:'Bienvenue', your_class:'Votre classe :', ask_level:'Quel est votre niveau sur les trieurs optiques ?',
   confirm_cls:'Je confirme avoir le niveau de cette classe (déclaratif, à valider avec le référent).',
   oblig_title:'Formation obligatoire', oblig_txt:"Vous ne connaissez pas encore les trieurs optiques : terminez d'abord la formation pour débloquer les autres tutoriels.", oblig_go:'Commencer la formation',
@@ -853,7 +879,7 @@ const I18N = {
   storage_full:'Storage full or unavailable: please export to JSON',
   footer:'Project by Lecertisseur Gautier, Optical Sorting Coordinator · Sibelco Reims',
   unspecified:'Not specified', locked_tag:'Locked',
-  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_cons2:'Consumable parts', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', nav_flow:'Flowsheet', items:'item(s)',
+  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_cons2:'Consumable parts', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', nav_flow:'Flowsheet',nav_Point:'...', items:'item(s)',
   welcome:'Welcome', your_class:'Your class:', ask_level:'What is your level on optical sorters?',
   confirm_cls:'I confirm I have the level of this class (self-declared, to be validated with the referent).',
   oblig_title:'Mandatory training', oblig_txt:'You do not know optical sorters yet: complete the training first to unlock the other tutorials.', oblig_go:'Start training',
@@ -899,7 +925,10 @@ const machineL = m => lang==='en'?(MACHINE_TR[m]||m):m;
    tools     liste du matériel (texte)       safety    liste des consignes de sécurité
    status    'brouillon' | 'avalider' | 'valide'
    cover     image de couverture (texte base64) - facultatif
-   steps     liste d'étapes : { text:'instruction', warn:'avertissement', img:'photo en base64' }
+   steps     liste d'étapes : { text:'instruction', warn:'avertissement', img:'photo en base64',
+                                video:{key,name} (fichier gardé dans IndexedDB) , vurl:'lien YouTube ou .mp4',
+                                q:'question de validation', opts:['réponse 1','réponse 2'...], ok:0 (n° de la bonne réponse, 0 = la 1re) }
+   reward    récompense à la 1re réussite : { mode:'none' | 'pct' | 'class', pct:25 (% vers la classe suivante), cls:1 (classe donnée) }
    updated   date de dernière modification (0 = jamais modifié = exemple d'origine)
  TOBL = la formation obligatoire : la terminer (toutes les étapes cochées) débloque la classe 1.
 */
@@ -1027,7 +1056,7 @@ function view(t){
   if(lang==='en' && t.updated===0 && SEED_EN[t.id]){
     const e=SEED_EN[t.id];
     return Object.assign({},t,{title:e.title,machine:e.machine,tools:e.tools,safety:e.safety,
-      steps:e.steps.map((s,i)=>({text:s[0],warn:s[1],img:(t.steps[i]&&t.steps[i].img)||''}))});
+      steps:e.steps.map((s,i)=>Object.assign({},t.steps[i]||{},{text:s[0],warn:s[1],img:(t.steps[i]&&t.steps[i].img)||''}))});
   }
   return t;
 }
@@ -1184,6 +1213,7 @@ function cardHTML(t){
     <div class="cover">${cv?`<img src="${cv}" alt="" loading="lazy">`:PH_SVG}</div>
     <div class="row" style="justify-content:space-between"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span></div>
     ${isDone(t.id)?`<div><span class="tag valide">✔ ${esc(T('done_on'))} ${esc(fmtDate(doneDate(t.id)))}</span></div>`:''}
+    ${rewardTxt(t)?`<div><span class="tag">${esc(rewardTxt(t))}</span></div>`:''}
     <h3>${isLocked(t)?`<span class="tag">${esc(T('locked_tag'))}</span> `:''}${esc(t.title)}</h3>
     <div class="meta"><span>${esc(machineL(t.machine))}</span><span>${esc(t.duration)} ${T('min')}</span><span>${esc(levelL(t.level))}</span><span>${T('steps_n',(t.steps||[]).length)}</span></div>
   </div>`;
@@ -1199,23 +1229,30 @@ function setCat(i){ state.cat = i<0?'':CATS[i]; renderList(); }
  Quand toutes les étapes de la formation obligatoire sont cochées => validateTraining() débloque la classe 1.
 */
 /* ---------- LECTURE ---------- */
-function openTuto(id){
+/*
+ ===================== TUTO GUIDÉ (étape par étape) =====================
+ On ne voit qu'UNE étape à la fois (texte + avertissement + photo + vidéo).
+   - Si l'étape a une question : il faut choisir la bonne réponse pour la valider.
+   - Sinon : bouton "J'ai réalisé cette étape".
+ L'étape 2 ne peut PAS être validée avant la 1 (idem pour les suivantes) : les pastilles numérotées des étapes
+ pas encore accessibles sont grisées, et gValidate() refuse aussi si on essaie de forcer.
+ À la dernière étape validée : finishTuto() enregistre le tuto comme réalisé et applique la récompense (voir giveReward).
+ state.done[id] = étapes validées (non sauvegardé, repart de zéro à chaque lecture) ; state.cur[id] = étape affichée.
+*/
+const firstTodo=(id,n)=>{ const d=state.done[id]||[]; let i=0; while(i<n&&d[i]) i++; return i; };
+function ytId(u){ const m=/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/.exec(u||''); return m?m[1]:''; }
+function openTuto(id,at){
   const raw=tutos.find(x=>x.id===id); if(!raw) return;
-  const t=view(raw);
+  const t=view(raw), S=t.steps||[], n=S.length;
   state.view='view'; state.id=id; state.section='tutos'; buildNav();
   if(isLocked(raw)) return renderLocked(raw,t);
-  if(!state.done[id]) state.done[id]= isDone(id) ? (t.steps||[]).map(()=>true) : [];
+  if(!state.done[id]) state.done[id]= isDone(id) ? S.map(()=>true) : [];
+  state.cur=state.cur||{}; state.msg=state.msg||{}; state.msg[id]='';
+  const ft=firstTodo(id,n);
+  state.cur[id]=Math.max(0,Math.min(at===undefined?(ft>=n?0:ft):at, ft, n-1));
   $('filters').classList.add('hidden');
-  const stepsHTML=(t.steps||[]).map((s,i)=>`
-    <div class="step ${state.done[id][i]?'done':''}" id="st${i}">
-      <div class="num">${i+1}</div>
-      <div class="body">
-        <div class="txt">${esc(s.text).replace(/\n/g,'<br>')}</div>
-        ${s.warn?`<div class="box danger">${esc(s.warn)}</div>`:''}
-        ${s.img?`<img src="${s.img}" alt="${esc(T('step'))} ${i+1}">`:''}
-        <label class="chk noprint"><input type="checkbox" ${state.done[id][i]?'checked':''} onchange="toggleStep('${id}',${i},this.checked)"> ${esc(T('step_done'))}</label>
-      </div>
-    </div>`).join('');
+  const rw=rewardTxt(t);
+  const printList=S.map((s,i)=>`<div class="step"><div class="num">${i+1}</div><div class="body"><div class="txt">${esc(s.text).replace(/\n/g,'<br>')}</div>${s.warn?`<div class="box danger">${esc(s.warn)}</div>`:''}${s.img?`<img src="${s.img}" alt="">`:''}</div></div>`).join('');
   $('app').innerHTML = `
     <div class="row noprint" style="margin:12px 0;justify-content:space-between">
       <button onclick="renderList()">${esc(T('back'))}</button>
@@ -1226,37 +1263,96 @@ function openTuto(id){
     </div>
     <div class="panel">
       ${t.cover?`<img class="tcover" src="${t.cover}" alt="">`:''}
-      <div class="row"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span></div>
+      <div class="row"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span>${rw?`<span class="tag" style="color:var(--accent);border-color:var(--accent)">${esc(rw)}</span>`:''}</div>
       <h2 style="margin:8px 0">${esc(t.title)}</h2>
       <div class="meta"><span>${esc(machineL(t.machine))}</span><span>${esc(t.duration)} ${T('min')}</span><span>${esc(levelL(t.level))}</span></div>
       ${(t.safety&&t.safety.length)?`<div class="box danger"><b>${esc(T('safety'))}</b><ul>${t.safety.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
       ${(t.tools&&t.tools.length)?`<div class="box" style="background:transparent;color:var(--text);border:1px solid var(--line);border-left:4px solid var(--accent)"><b>${esc(T('tools'))}</b><ul>${t.tools.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
     </div>
-    <div class="panel">
-      ${isDone(id)?`<div class="row noprint" style="justify-content:space-between;margin-bottom:10px"><span class="tag valide">✔ ${esc(T('done_on'))} ${esc(fmtDate(doneDate(id)))}</span><button class="small" onclick="redoTuto('${id}')">↺ ${esc(T('redo'))}</button></div>`:''}
+    <div class="panel noprint">
+      ${isDone(id)?`<div class="row" style="justify-content:space-between;margin-bottom:10px"><span class="tag valide">✔ ${esc(T('done_on'))} ${esc(fmtDate(doneDate(id)))}</span><button class="small" onclick="redoTuto('${id}')">↺ ${esc(T('redo'))}</button></div>`:''}
       <div class="row" style="justify-content:space-between"><b>${esc(T('progress'))}</b><span id="pct" class="meta"></span></div>
       <div class="progress"><div id="bar"></div></div>
-      ${stepsHTML||`<div class="empty">${esc(T('no_steps'))}</div>`}
-    </div>`;
-  updProgress(id, false);
+      <div id="gbox"></div>
+    </div>
+    <div class="panel printonly">${printList}</div>`;
+  renderGStep(id);
   window.scrollTo(0,0);
 }
-/* EXPLICATION SUPPLÉMENTAIRE : CASES A COCHER D'UN TUTO
- Quand on coche l'étape i : on le note dans state.done, on barre l'étape (classe CSS "done") et on recalcule la barre de progression.
- updProgress() affiche la barre et le pourcentage ; à 100 %, un message s'affiche et, si le tuto est obligatoire (mandatory),
- validateTraining() enregistre la formation comme validée pour l'utilisateur. */
-function toggleStep(id,i,v){
-  state.done[id][i]=v;
-  const el=$('st'+i); if(el) el.classList.toggle('done',v);
-  updProgress(id, true);
+/* média d'une étape : photo, vidéo (fichier gardé dans IndexedDB) ou lien (YouTube / .mp4) */
+function mediaHTML(s){
+  let h='';
+  if(s.img) h+=`<img class="gmedia" src="${s.img}" alt="">`;
+  if(s.video&&s.video.key) h+=`<video class="gmedia" id="gvid" controls playsinline preload="metadata"></video><div class="meta hidden" id="gvidko">${L('Vidéo indisponible sur cet appareil (les vidéos ne sont pas incluses dans l’export .json).','Video not available on this device (videos are not included in the .json export).')}</div>`;
+  const u=(s.vurl||'').trim(), y=ytId(u);
+  if(y) h+=`<iframe class="gmedia" style="width:100%;aspect-ratio:16/9;border:0" src="https://www.youtube.com/embed/${y}" allowfullscreen loading="lazy"></iframe>`;
+  else if(/^https?:\/\//i.test(u)) h+=`<video class="gmedia" src="${esc(u)}" controls playsinline preload="metadata"></video>`;
+  return h;
 }
-function updProgress(id, notify){
-  const t=tutos.find(x=>x.id===id), n=(t.steps||[]).length;
-  const d=(state.done[id]||[]).filter(Boolean).length;
-  const p=n?Math.round(d/n*100):0;
-  $('bar').style.width=p+'%';
-  $('pct').textContent=T('prog',d,n,p);
-  if(notify && n && d===n){ markDone(id); toast(T('validated_toast')); if(t.mandatory) validateTraining(); }
+let gUrl=null;
+function renderGStep(id){
+  const box=$('gbox'); if(!box) return;
+  const raw=tutos.find(x=>x.id===id), t=view(raw), S=t.steps||[], n=S.length, d=state.done[id]||[];
+  const ft=firstTodo(id,n), i=state.cur[id]||0, fin=n>0&&ft>=n;
+  const dn=d.filter(Boolean).length, p=n?Math.round(dn/n*100):0;
+  $('bar').style.width=p+'%'; $('pct').textContent=T('prog',dn,n,p);
+  if(!n){ box.innerHTML=`<div class="empty">${esc(T('no_steps'))}</div>`; return; }
+  const s=S[i], ok=!!d[i], good=+s.ok||0, hasQ=!!(s.q&&(s.opts||[]).length>1);
+  const dots=S.map((_,k)=>`<button class="gdot ${d[k]?'done':''} ${k===i?'cur':''}" ${k>ft?'disabled':''} onclick="gGo('${id}',${k})" aria-label="${esc(T('step'))} ${k+1}">${d[k]&&k!==i?'✓':k+1}</button>`).join('');
+  const q=hasQ?`<div class="gq"><b>${esc(s.q)}</b>${s.opts.map((o,k)=>`<label class="opt ${ok&&k===good?'good':''}"><input type="radio" name="gq" value="${k}" ${ok?'disabled':''} ${ok&&k===good?'checked':''}> ${esc(o)}</label>`).join('')}<div id="gbad" class="bad hidden">${L('Ce n’est pas la bonne réponse : relisez l’étape puis réessayez.','Not the right answer: re-read the step and try again.')}</div></div>`:'';
+  const next= ok ? (i<n-1?`<button class="primary" onclick="gGo('${id}',${i+1})">${L('Étape suivante','Next step')} →</button>`:'')
+                 : `<button class="primary" onclick="gValidate('${id}',${i})">${hasQ?L('Valider ma réponse','Check my answer'):L('J’ai réalisé cette étape','I did this step')} ✔</button>`;
+  box.innerHTML=`<div class="gnav">${dots}</div>
+   <div class="gstep">
+     <div class="row"><div class="num">${i+1}</div><b>${esc(T('step'))} ${i+1} / ${n}</b>${ok?`<span class="tag valide">✔ ${esc(T('step_done'))}</span>`:''}</div>
+     <div class="gtxt">${esc(s.text).replace(/\n/g,'<br>')}</div>
+     ${s.warn?`<div class="box danger">${esc(s.warn)}</div>`:''}
+     ${mediaHTML(s)}
+     ${q}
+     <div class="row" style="justify-content:space-between;margin-top:12px"><button onclick="gGo('${id}',${i-1})" ${i===0?'disabled':''}>← ${L('Précédent','Previous')}</button>${next}</div>
+   </div>
+   ${fin?`<div class="box" style="border-left-color:var(--ok)"><b>✔ ${esc(T('finished'))}</b>${state.msg[id]?`<br>${esc(state.msg[id])}`:''}</div>`:''}`;
+  if(s.video&&s.video.key) idbGet(s.video.key).then(blob=>{
+    const v=$('gvid'); if(!v) return;
+    if(blob){ if(gUrl) URL.revokeObjectURL(gUrl); gUrl=URL.createObjectURL(blob); v.src=gUrl; }
+    else { v.classList.add('hidden'); const k=$('gvidko'); if(k) k.classList.remove('hidden'); }
+  }).catch(()=>{});
+}
+/* aller à une étape : seulement jusqu'à la première étape pas encore validée */
+function gGo(id,k){
+  const n=((tutos.find(x=>x.id===id)||{}).steps||[]).length, ft=firstTodo(id,n);
+  if(k<0||k>Math.min(ft,n-1)) return;
+  state.cur[id]=k; renderGStep(id);
+  const b=$('gbox'); if(b&&b.scrollIntoView) b.scrollIntoView({block:'start',behavior:'smooth'});
+}
+/* valider l'étape i : refusé si l'étape précédente n'est pas validée ; si question : il faut la bonne réponse */
+function gValidate(id,i){
+  const t=view(tutos.find(x=>x.id===id)), S=t.steps||[], n=S.length;
+  if(!state.done[id]) state.done[id]=[];
+  const d=state.done[id];
+  if(firstTodo(id,n)<i){ toast(L('Validez d’abord l’étape précédente','Validate the previous step first')); return; }
+  const s=S[i];
+  if(s.q&&(s.opts||[]).length>1){
+    const r=document.querySelector('input[name=gq]:checked');
+    if(!r){ toast(L('Choisissez une réponse','Pick an answer')); return; }
+    if(+r.value!==(+s.ok||0)){
+      const bad=$('gbad'); if(bad) bad.classList.remove('hidden');
+      document.querySelectorAll('.gq label.opt').forEach(l=>l.classList.remove('ko')); r.closest('label').classList.add('ko');
+      return;
+    }
+  }
+  d[i]=true;
+  if(firstTodo(id,n)>=n) finishTuto(id); else state.cur[id]=i+1;
+  renderGStep(id);
+}
+/* tuto terminé : enregistré comme réalisé ; la récompense n'est donnée qu'à la 1re réussite (voir giveReward) */
+function finishTuto(id){
+  const t=tutos.find(x=>x.id===id), first=!isDone(id);
+  markDone(id);
+  const msg=giveReward(t,first);
+  if(t.mandatory&&(first||!settings.trained)){ settings.chosen=true; settings.trained=Date.now(); saveSettings(); }
+  state.msg[id]=msg; buildNav();
+  toast(msg||T('validated_toast'));
 }
 
 /*
@@ -1265,10 +1361,13 @@ function updProgress(id, notify){
 */
 /* ---------- ÉDITION ---------- */
 function blankTuto(){
-  return {id:uid(),title:'',cover:'',machine:'',category:CATS[1],level:'Facile',duration:30,tools:[],safety:[],steps:[{text:'',warn:'',img:''}],status:'brouillon',updated:Date.now()};
+  return {id:uid(),title:'',cover:'',machine:'',category:CATS[1],level:'Facile',duration:30,tools:[],safety:[],steps:[newStep()],reward:normReward(null),status:'brouillon',updated:Date.now()};
 }
-function newTuto(){ if(!canEditTutos()){ toast(T('need_cls3')); return; } state.draft=blankTuto(); state.isNew=true; renderEditor(); }
-function editTuto(id){ if(!canEditTutos()){ toast(T('need_cls3')); return; } state.draft=JSON.parse(JSON.stringify(view(tutos.find(t=>t.id===id)))); state.isNew=false; renderEditor(); }
+const newStep=()=>({text:'',warn:'',img:'',video:null,vurl:'',q:'',opts:[],ok:0});
+/* vidéos ajoutées / retirées pendant l'édition : supprimées d'IndexedDB à l'enregistrement (retirées) ou à l'annulation (ajoutées) */
+const vt=()=>(state.vtmp=state.vtmp||{add:[],del:[]});
+function newTuto(){ if(!canEditTutos()){ toast(T('need_cls3')); return; } state.draft=blankTuto(); state.isNew=true; state.vtmp={add:[],del:[]}; renderEditor(); }
+function editTuto(id){ if(!canEditTutos()){ toast(T('need_cls3')); return; } state.draft=JSON.parse(JSON.stringify(view(tutos.find(t=>t.id===id)))); state.draft.reward=normReward(rewardOf(state.draft)); state.isNew=false; state.vtmp={add:[],del:[]}; renderEditor(); }
 function renderEditor(){
   state.view='edit';
   $('filters').classList.add('hidden');
@@ -1297,6 +1396,9 @@ function renderEditor(){
      <textarea oninput="state.draft.safety=lines(this.value)">${esc((d.safety||[]).join('\n'))}</textarea>
      <label>${esc(T('f_tools'))}</label>
      <textarea oninput="state.draft.tools=lines(this.value)">${esc((d.tools||[]).join('\n'))}</textarea>
+     <label>${L('Récompense à la 1re réussite du tuto (progression de classe)','Reward on first completion (class progression)')}</label>
+     <div class="row" id="rwEd">${rwEdHTML()}</div>
+     <p class="meta" style="margin:6px 0 0">${L('Seules les classes 1 et 2 s’obtiennent par les tutos ; les classes 3 et 4 restent données par un administrateur.','Only classes 1 and 2 are earned through tutorials; classes 3 and 4 are still granted by an administrator.')}</p>
    </div>
    <div class="panel">
      <div class="row" style="justify-content:space-between"><b>${esc(T('steps'))}</b><button onclick="addStep()">${esc(T('add_step'))}</button></div>
@@ -1309,6 +1411,14 @@ function renderEditor(){
  lines(texte) = transforme un champ "une ligne par élément" en liste (lignes vides ignorées) : sécurité, matériel.
 */
 const lines = v => v.split('\n').map(s=>s.trim()).filter(Boolean);
+function rwEdHTML(){
+  const r=state.draft.reward=normReward(state.draft.reward);
+  const modes=[['none',L('Aucune','None')],['pct',L('Donne un pourcentage vers la classe suivante','Gives a % toward the next class')],['class',L('Fait passer directement à une classe','Promotes directly to a class')]];
+  return `<select style="width:auto" onchange="setRwMode(this.value)">${modes.map(([v,l])=>`<option value="${v}" ${v===r.mode?'selected':''}>${esc(l)}</option>`).join('')}</select>`+
+   (r.mode==='pct'?`<input type="number" min="1" max="100" style="width:90px" value="${r.pct}" oninput="state.draft.reward.pct=Math.max(1,Math.min(100,+this.value||1))"> %`:'')+
+   (r.mode==='class'?`<select style="width:auto" onchange="state.draft.reward.cls=+this.value">${Array.from({length:MAXAUTO},(_,k)=>k+1).map(c=>`<option value="${c}" ${c===r.cls?'selected':''}>${esc(clsL(c))}</option>`).join('')}</select>`:'');
+}
+function setRwMode(m){ state.draft.reward.mode=m; $('rwEd').innerHTML=rwEdHTML(); }
 function renderStepsEditor(){
   $('stepsEd').innerHTML = state.draft.steps.map((s,i)=>`
    <div class="edit-step">
@@ -1328,12 +1438,35 @@ function renderStepsEditor(){
        ${s.img?`<button class="small danger" onclick="rmPhoto(${i})">${esc(T('rm_photo'))}</button>`:''}
      </div>
      ${s.img?`<img src="${s.img}" alt="" style="max-width:220px;border-radius:8px;margin-top:8px">`:''}
+     <label>${L('Vidéo : fichier (40 Mo max, gardé sur cet appareil)','Video: file (40 MB max, kept on this device)')}</label>
+     <div class="row">
+       <input type="file" accept="video/*" style="max-width:320px" onchange="addVideo(${i},this)">
+       ${s.video?`<span class="meta">🎬 ${esc(s.video.name)}</span><button class="small danger" onclick="rmVideo(${i})">${esc(T('remove'))}</button>`:''}
+     </div>
+     <label>${L('ou lien vidéo (YouTube ou fichier .mp4 en ligne)','or video link (YouTube or online .mp4 file)')}</label>
+     <input value="${esc(s.vurl||'')}" oninput="state.draft.steps[${i}].vurl=this.value.trim()" placeholder="https://…">
+     <label>${L('Question pour valider l’étape (facultatif)','Question to validate the step (optional)')}</label>
+     <input value="${esc(s.q||'')}" oninput="state.draft.steps[${i}].q=this.value" placeholder="${esc(L('Ex : Que faut-il faire avant d’ouvrir le capot ?','e.g. What must be done before opening the cover?'))}">
+     <label>${L('Réponses possibles (une par ligne, 2 minimum)','Possible answers (one per line, min 2)')}</label>
+     <textarea oninput="state.draft.steps[${i}].opts=lines(this.value)">${esc((s.opts||[]).join('\n'))}</textarea>
+     <label>${L('N° de la bonne réponse (1 = la première ligne)','Number of the right answer (1 = first line)')}</label>
+     <input type="number" min="1" style="width:100px" value="${(+s.ok||0)+1}" oninput="state.draft.steps[${i}].ok=Math.max(0,(+this.value||1)-1)">
    </div>`).join('');
 }
-function addStep(){ state.draft.steps.push({text:'',warn:'',img:''}); renderStepsEditor(); }
-function delStep(i){ if(state.draft.steps.length<=1){ state.draft.steps=[{text:'',warn:'',img:''}]; } else state.draft.steps.splice(i,1); renderStepsEditor(); }
+function addStep(){ state.draft.steps.push(newStep()); renderStepsEditor(); }
+function delStep(i){ const s=state.draft.steps[i]; if(s&&s.video) vt().del.push(s.video.key); if(state.draft.steps.length<=1){ state.draft.steps=[newStep()]; } else state.draft.steps.splice(i,1); renderStepsEditor(); }
 function moveStep(i,dir){ const a=state.draft.steps, j=i+dir; if(j<0||j>=a.length) return; [a[i],a[j]]=[a[j],a[i]]; renderStepsEditor(); }
 function rmPhoto(i){ state.draft.steps[i].img=''; renderStepsEditor(); }
+/* vidéo d'étape : le fichier va dans IndexedDB (trop gros pour le localStorage) ; l'étape ne garde que {key,name,size} */
+async function addVideo(i,inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  if(f.size>40*1024*1024){ toast(L('Vidéo trop lourde (40 Mo max)','Video too large (40 MB max)')); inp.value=''; return; }
+  const s=state.draft.steps[i]; if(s.video) vt().del.push(s.video.key);
+  const key='tv_'+uid();
+  try{ await idbPut(key,f); }catch(e){ toast(T('storage_full')); return; }
+  vt().add.push(key); s.video={key,name:f.name,size:f.size}; renderStepsEditor();
+}
+function rmVideo(i){ const s=state.draft.steps[i]; if(s.video) vt().del.push(s.video.key); s.video=null; renderStepsEditor(); }
 /*
  ===================== ILLUSTRATIONS : LES PHOTOS AJOUTEES =====================
  readImg(fichier, tailleMax, qualité, callback)
@@ -1394,16 +1527,25 @@ function saveDraft(){
   const d=state.draft;
   if(!d.title.trim()){ toast(T('need_title')); return; }
   if(!d.machine.trim()) d.machine='Non précisée';
-  d.steps=d.steps.filter(s=>s.text.trim()||s.img);
+  for(const s of d.steps){
+    s.opts=(s.opts||[]).map(x=>String(x).trim()).filter(Boolean);
+    if(!(s.q||'').trim()){ s.q=''; s.opts=[]; s.ok=0; }
+    else if(s.opts.length<2){ toast(L('Une question demande au moins 2 réponses','A question needs at least 2 answers')); return; }
+    else if((+s.ok||0)>=s.opts.length){ toast(L('Le n° de la bonne réponse est trop grand','The right-answer number is too high')); return; }
+  }
+  d.steps=d.steps.filter(s=>s.text.trim()||s.img||s.video||(s.vurl||'').trim());
+  d.reward=normReward(d.reward);
   d.updated=Date.now();
   const i=tutos.findIndex(t=>t.id===d.id);
   if(i>=0) tutos[i]=d; else tutos.unshift(d);
-  save(); toast(T('saved')); openTuto(d.id);
+  save(); vt().del.forEach(k=>idbDel(k).catch(()=>{})); state.vtmp={add:[],del:[]};
+  toast(T('saved')); openTuto(d.id);
 }
-function cancelEdit(){ if(state.isNew) renderList(); else openTuto(state.draft.id); }
+function cancelEdit(){ vt().add.forEach(k=>idbDel(k).catch(()=>{})); state.vtmp={add:[],del:[]}; if(state.isNew) renderList(); else openTuto(state.draft.id); }
 function delTuto(){
   if(!canEditTutos()){ toast(T('need_cls3')); return; }
   if(!confirm(T('confirm_del'))) return;
+  const old=tutos.find(t=>t.id===state.draft.id); ((old&&old.steps)||[]).forEach(s=>{ if(s.video&&s.video.key) idbDel(s.video.key).catch(()=>{}); });
   tutos=tutos.filter(t=>t.id!==state.draft.id); save(); toast(T('deleted')); renderList();
 }
 
@@ -1455,7 +1597,7 @@ function importJSON(ev){
 */
 /* ---------- CLASSES / PARAMÈTRES / MENU ---------- */
 const SKEY='sibelco_settings_v1', FKEY='sibelco_fiches_v1';
-// ✏️ MODIFIABLE : les 5 classes d'utilisateurs et leur description
+//  MODIFIABLE : les 5 classes d'utilisateurs et leur description
 const CLS=[
  {fr:'Classe 0 – Découverte',en:'Class 0 – Beginner',dfr:'Ne connaît pas les trieurs optiques : formation obligatoire avant les autres tutos.',den:'New to optical sorters: mandatory training before the other tutorials.'},
  {fr:'Classe 1 – Opérateur',en:'Class 1 – Operator',dfr:'Connaît les trieurs : accès aux tutos Facile / Moyen.',den:'Knows the sorters: access to Easy / Medium tutorials.'},
@@ -1500,14 +1642,69 @@ function markDone(id){ settings.doneTutos=settings.doneTutos||{}; settings.doneT
 function redoTuto(id){ state.done[id]=[]; openTuto(id); }
 // Fiches : "Présentation" et "Pièces consommables" réservées aux classes 3 et 4 (les fiches constructeur restent ouvertes)
 const canEditFiche=type=>type==='constructeur'||canEditTutos();
-function validateTraining(){ if(settings.cls<1) settings.cls=1; settings.chosen=true; settings.trained=Date.now(); saveSettings(); buildNav(); toast(T('trained_ok')); }
+function validateTraining(){ const up=settings.cls<1; if(up){ settings.cls=1; settings.pct=0; } settings.chosen=true; settings.trained=Date.now(); saveSettings(); buildNav(); if(up) toast(T('trained_ok')); }
+/*
+ ===================== PROGRESSION DES CLASSES =====================
+ Chaque tutoriel a une RÉCOMPENSE (réglable dans l'éditeur, réservé aux classes 3 et 4) :
+   - none  : rien ;
+   - pct   : donne X % vers la classe suivante (à 100 % on passe à la classe suivante, le surplus est reporté) ;
+   - class : fait passer directement à la classe choisie.
+ Règles :
+   - la récompense n'est donnée qu'à la PREMIÈRE réussite du tuto (le refaire ne redonne rien) ;
+   - on ne gagne que les classes 1 et 2 par les tutos (MAXAUTO) : les classes 3 et 4 restent données par un administrateur ;
+   - si on a déjà la classe visée (ou plus), AUCUN message « classe débloquée » n'est affiché.
+ Le pourcentage est enregistré dans le compte (settings.pct).
+ Un tuto enregistré avant cette mise à jour n'a pas de champ "reward" : rewardOf() lui donne « aucune », sauf la formation obligatoire (→ classe 1).
+*/
+const MAXAUTO=2;
+function normReward(r){ r=r||{}; return {mode:['none','pct','class'].includes(r.mode)?r.mode:'none', pct:Math.max(1,Math.min(100,Math.round(+r.pct)||25)), cls:Math.max(1,Math.min(MAXAUTO,Math.round(+r.cls)||1))}; }
+const rewardOf=t=>t.reward||(t.mandatory?{mode:'class',cls:1}:{mode:'none'});
+/* petit texte « ce que ce tuto peut vous rapporter » (vide si déjà réalisé ou sans intérêt pour votre classe) */
+function rewardTxt(t){
+  if(isDone(t.id)) return '';
+  const r=normReward(rewardOf(t));
+  if(r.mode==='pct'&&settings.cls<MAXAUTO) return '🎯 +'+r.pct+' % '+L('vers la classe suivante','toward the next class');
+  if(r.mode==='class'&&settings.cls<r.cls) return '🎓 '+L('Débloque : ','Unlocks: ')+clsL(r.cls);
+  return '';
+}
+function giveReward(t,first){
+  const r=normReward(rewardOf(t)); let msg='';
+  if(r.mode==='class'){
+    if(settings.cls<r.cls){ settings.cls=r.cls; settings.pct=0; saveSettings(); msg='🎉 '+L('Classe débloquée : ','Class unlocked: ')+clsL(settings.cls); }
+  }else if(r.mode==='pct'&&first&&settings.cls<MAXAUTO){
+    const before=settings.cls; let v=(settings.pct||0)+r.pct;
+    while(v>=100&&settings.cls<MAXAUTO){ v-=100; settings.cls++; }
+    settings.pct=settings.cls>=MAXAUTO?0:v; saveSettings();
+    msg= settings.cls>before ? '🎉 '+L('Classe débloquée : ','Class unlocked: ')+clsL(settings.cls)
+                             : '🎯 +'+r.pct+' % '+L('vers ','toward ')+clsL(settings.cls+1)+' ('+Math.round(settings.pct)+' %)';
+  }
+  return msg;
+}
+/* barre « Progression vers la classe suivante » (accueil et paramètres) */
+function progHTML(wrap){
+  const c=settings.cls; if(c>=MAXAUTO) return '';
+  const p=Math.round(settings.pct||0);
+  return `<div class="${wrap?'panel':''}"><div class="row" style="justify-content:space-between"><b>${L('Progression vers','Progress toward')} ${esc(clsL(c+1))}</b><span class="meta">${p} %</span></div><div class="progress"><div style="width:${p}%"></div></div><p class="meta" style="margin:4px 0 0">${L('Chaque tuto réalisé qui donne des points vous rapproche de la classe suivante.','Each completed tutorial that gives points brings you closer to the next class.')}</p></div>`;
+}
+/* ===================== PHOTOS DES TUILES D'ACCUEIL =====================
+ Les classes 3 et 4 peuvent mettre une photo sur chaque tuile de l'accueil (bouton 📷). Gardées dans le navigateur (clé sibelco_tilepics_v1). */
+const TPKEY='sibelco_tilepics_v1';
+let tilePics=(()=>{try{return JSON.parse(localStorage.getItem(TPKEY))||{};}catch(e){return {};}})();
+function saveTilePics(){ try{localStorage.setItem(TPKEY,JSON.stringify(tilePics));}catch(e){toast(T('storage_full'));} }
+function setTilePic(k,inp){ if(!canEditTutos()){ toast(T('need_cls3')); return; } const f=inp.files&&inp.files[0]; if(!f) return; readImg(f,720,0.75,u=>{ tilePics[k]=u; saveTilePics(); renderHome(); }); }
+function rmTilePic(k){ delete tilePics[k]; saveTilePics(); renderHome(); }
+function tileHTML(k,l){
+  const pic=tilePics[k];
+  return `<div class="card tcard" onclick="go('${k}')"><div class="cover c-${k}">${pic?`<img src="${pic}" alt="" loading="lazy">`:icoSVG(k)}</div><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div>`+
+   (canEditTutos()?`<div class="row noprint tpedit" onclick="event.stopPropagation()"><label class="tpbtn">📷 ${L('Photo','Photo')}<input type="file" accept="image/*" class="hidden" onchange="setTilePic('${k}',this)"></label>${pic?`<button class="small danger" onclick="event.stopPropagation();rmTilePic('${k}')">✕</button>`:''}</div>`:'')+`</div>`;
+}
 
 /*
  NAV = les rubriques du menu : [clé, (inutilisé), clé de traduction]. L'ordre ici = l'ordre dans le menu.
  buildNav() redessine le menu : badge de classe, boutons épingle (garder le menu ouvert sur grand écran),
  les rubriques, "Déconnexion". Le bouton de la rubrique active reçoit la classe "on" (bleu clair).
 */
-const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['jeux','','nav_jeux'],['settings','','nav_set']];
+const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['...','','nav_Point'],['jeux','','nav_jeux'],['settings','','nav_set']];
 function buildNav(){
   $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px"><button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button></div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
    NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
@@ -1570,11 +1767,12 @@ function renderHome(){
    ${!settings.chosen?`<div class="panel"><b>${esc(T('ask_level'))}</b><div class="row" style="margin-top:8px">${CLS.slice(0,4).map((x,i)=>`<button onclick="chooseCls(${i})">${esc(clsL(i))}</button>`).join('')}</div></div>`:''}
    ${(c<1&&ob)?`<div class="box danger"><b>${esc(T('oblig_title'))}</b><br>${esc(T('oblig_txt'))}<div style="margin-top:8px"><button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button></div></div>`:''}
    ${settings.trained?`<div class="box" style="border-left-color:var(--ok)">${esc(T('trained_on'))} ${esc(new Date(settings.trained).toLocaleDateString(lang))}</div>`:''}
-   <div class="tiles">${NAV.slice(1,7).map(([k,i,l])=>`<div class="card tcard" onclick="go('${k}')"><div class="cover c-${k}">${icoSVG(k)}</div><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div></div>`).join('')}</div>
+   ${progHTML(true)}
+   <div class="tiles">${NAV.slice(1,7).map(([k,i,l])=>tileHTML(k,l)).join('')}</div>
    <p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
-function chooseCls(i){ if(i>=1&&!confirm(T('confirm_cls'))) return; settings.cls=i; settings.chosen=true; saveSettings(); renderHome(); }
+function chooseCls(i){ if(i>=1&&!confirm(T('confirm_cls'))) return; settings.cls=i; settings.pct=0; settings.chosen=true; saveSettings(); renderHome(); }
 
 /*
  ===================== COMPTES, CONNEXION, PARAMETRES =====================
@@ -1685,20 +1883,28 @@ async function seedAdmin(){
  POUR AJOUTER UN SITE : déposez le fichier dans "flowsheets/", ajoutez une ligne dans FLOW_SITES ci-dessous,
  puis ajoutez-le dans la liste FILES de sw.js (et changez le numéro de version du cache).
 */
-// ✏️ MODIFIABLE : liste des sites (un plan par site)
+//  MODIFIABLE : liste des sites (un plan par site)
 const FLOW_SITES=[
  {id:'saint-romain', name:'Saint-Romain-le-Puy', js:'./flowsheets/saint-romain.js'}
+ //{id:'Reims', name:'Reims', js:'./flowsheets/Reims.js'}
 ];
 /* Les infos saisies dans l'appli (photo, description, fiche liée) sont gardées à part, par site et par équipement : FL.ov[site][tag] */
 const FLKEY='sibelco_flow_v1';
 const FL={site:null,data:null,svg:null,vb:null,full:null,ov:(()=>{try{return JSON.parse(localStorage.getItem(FLKEY))||{};}catch(e){return {};}})(),show:false,edit:false,cache:{},pin:null,ptr:new Map(),moved:0};
 function flSave(){ try{localStorage.setItem(FLKEY,JSON.stringify(FL.ov));}catch(e){toast(T('storage_full'));} }
 const flEq=tag=>FL.data&&FL.data.equipment.find(e=>e.tag===tag);
-/* infos d'un équipement = données du plan + corrections saisies dans l'appli */
+/* TRADUCTION des équipements du plan : les plans (flowsheets/<site>.js) sont écrits en français ; en anglais, le « type » et la
+   « description » sont traduits avec ces deux tables (clé = texte français EXACT du plan). Un texte absent de la table reste en français.
+   Les textes modifiés à la main dans l'appli (« Modifier les infos ») ne sont pas traduits : ils s'affichent tels que saisis.
+   POUR UN NOUVEAU SITE : ajoutez ici les types / descriptions nouveaux. */
+const FL_EN_KIND={'Aspiration':'Dust extraction',"Vanne d'aiguillage motorisée":'Motorised diverter valve','Crible / bande vibrante':'Screen / vibrating belt','Trémie / bunker':'Hopper / bunker','Trémie tampon':'Buffer hopper','Broyeur / briseur':'Crusher / breaker','Machine C':'C machine','Trieur optique':'Optical sorter','Répartiteur / diviseur':'Splitter / divider','Équipement EC':'EC equipment','Élévateur':'Elevator','Séparateur magnétique (overband)':'Magnetic separator (overband)','Séparateur magnétique':'Magnetic separator','Séparateur métaux non ferreux':'Non-ferrous metal separator','Convoyeur à bande':'Belt conveyor','Trémie':'Hopper','Ventilation / filtration':'Ventilation / filtration','Filtre / cyclone':'Filter / cyclone'};
+const FL_EN_DESC={"Point d'aspiration des poussières.":'Dust extraction point.',"Aiguille le flux de produit vers l'une ou l'autre des voies.":'Diverts the product flow to one lane or the other.','Équipement vibrant avec moteurs et détection de température.':'Vibrating equipment with motors and temperature detection.','Bunker de stockage.':'Storage bunker.','Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).':'Buffer hopper with high (GSH) and low (GSL) level detectors.','Équipement de réduction de granulométrie.':'Particle-size reduction equipment.','Équipement principal du circuit (à décrire).':'Main equipment of the circuit (to be described).',"Trieur optique : caméras + buses d'éjection (PT = détecteur, EJ = éjecteur).":'Optical sorter: cameras + ejection nozzles (PT = detector, EJ = ejector).','Répartit ou dévie le flux de produit entre plusieurs voies.':'Splits or diverts the product flow between several lanes.','À décrire.':'To be described.',"Élévateur qui remonte le produit vers l'étage supérieur.":'Elevator that lifts the product to the upper floor.','Retire les métaux ferreux du flux de produit.':'Removes ferrous metals from the product flow.','Séparation magnétique (à préciser).':'Magnetic separation (to be specified).','Retire les métaux non ferreux du flux de produit.':'Removes non-ferrous metals from the product flow.','Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).':'Product conveyor (motor, frequency drive, belt drift control).',"Trémie d'alimentation ou de stockage.":'Feed or storage hopper.',"Organe de ventilation ou de filtration du circuit d'air.":'Ventilation or filtration component of the air circuit.',"Séparation des poussières de l'air aspiré.":'Separates dust from the extracted air.'};
+const flTr=(s,m)=>(lang==='en'&&s&&m[s])||s||'';
+/* infos d'un équipement = données du plan (traduites selon la langue) + corrections saisies dans l'appli */
 function flInfo(tag){
   const e=flEq(tag)||{tag}, o=((FL.ov[FL.site]||{})[tag])||{};
   const f=flFiche(tag);
-  return {tag, name:o.name||e.name||tag, kind:e.kind||'', model:e.model||'', desc:o.desc||e.desc||'', photo:o.photo||e.photo||(f&&f.cover)||'', fiche:f, linked:!!f};
+  return {tag, name:o.name||e.name||tag, kind:flTr(e.kind,FL_EN_KIND), model:e.model||'', desc:o.desc||flTr(e.desc,FL_EN_DESC), photo:o.photo||e.photo||(f&&f.cover)||'', fiche:f, linked:!!f};
 }
 /* fiche constructeur liée : choisie à la main, sinon trouvée automatiquement si le titre/machine de la fiche contient le repère (ex. "CL4") */
 function flFiche(tag){
@@ -1722,12 +1928,12 @@ function renderFlow(id){
   const canEd=canEditFiche('constructeur');
   $('app').innerHTML=`<div class="row noprint" style="margin:8px 0;gap:8px;flex-wrap:wrap">
     <h2 style="margin:0">${esc(T('nav_flow'))}</h2>
-    ${FLOW_SITES.length>1?`<select onchange="renderFlow(this.value)">${FLOW_SITES.map(s=>`<option value="${s.id}" ${s.id===FL.site?'selected':''}>${esc(s.name)}</option>`).join('')}</select>`:`<span class="meta">${esc(FLOW_SITES.find(s=>s.id===FL.site).name)}</span>`}
+    <select id="flSite" style="width:auto" title="${esc(L('Choisir le site','Choose the site'))}" aria-label="${esc(L('Site','Site'))}" onchange="renderFlow(this.value)">${FLOW_SITES.map(s=>`<option value="${s.id}" ${s.id===FL.site?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
     <input id="flQ" type="search" list="flDl" placeholder="${esc(L('Chercher un repère (ex : CL4, T12…)','Find a tag (e.g. CL4, T12…)'))}" style="min-width:190px;flex:1;max-width:280px" onchange="flFind(this.value)" onkeydown="if(event.key==='Enter')flFind(this.value)"><datalist id="flDl"></datalist>
     <button onclick="flZoom(.6)" title="Zoom +">＋</button><button onclick="flZoom(1/.6)" title="Zoom −">−</button>
     <button onclick="flFit()">${L('Vue d’ensemble','Fit')}</button>
     <button id="flShow" onclick="flToggleShow()" aria-pressed="false">${L('Voir les zones','Show zones')}</button>
-    ${canEd?`<button id="flEdit" onclick="flToggleEdit()" aria-pressed="false">${L('✏️ Modifier les infos','✏️ Edit info')}</button>`:''}
+    ${canEd?`<button id="flEdit" onclick="flToggleEdit()" aria-pressed="false">${L(' Modifier les infos',' Edit info')}</button>`:''}
   </div>
   <div id="flBox" class="flbox"><div class="meta" style="padding:20px">${L('Chargement du flowsheet…','Loading flowsheet…')}</div><div id="flTip" class="fltip" hidden></div></div>
   <p class="meta noprint" style="margin:6px 0 0">${L('Molette / pincer : zoom · glisser : déplacer · survol : photo et rôle · clic : fiche constructeur.','Wheel / pinch: zoom · drag: pan · hover: photo and role · click: manufacturer sheet.')}</p>`;
@@ -1740,7 +1946,7 @@ function renderFlow(id){
     const NS='http://www.w3.org/2000/svg', g=document.createElementNS(NS,'g'); g.setAttribute('id','flHot');
     data.equipment.forEach(e=>e.rects.forEach(([rx,ry,rw,rh])=>{ const r=document.createElementNS(NS,'rect'); r.setAttribute('x',rx); r.setAttribute('y',ry); r.setAttribute('width',rw); r.setAttribute('height',rh); r.setAttribute('rx',3); r.setAttribute('class','fh'); r.dataset.tag=e.tag; g.appendChild(r); }));
     el.appendChild(g); flMarkLinks();
-    $('flDl').innerHTML=data.equipment.map(e=>`<option value="${esc(e.tag)}">${esc(e.kind)}</option>`).join('');
+    $('flDl').innerHTML=data.equipment.map(e=>`<option value="${esc(e.tag)}">${esc(flTr(e.kind,FL_EN_KIND))}</option>`).join('');
     flBind(box); flFit();
   }).catch(()=>{ const b=$('flBox'); if(b) b.innerHTML=`<div class="box danger" style="margin:12px">${L('Flowsheet introuvable (fichiers du dossier « flowsheets/ » manquants).','Flowsheet not found (missing files in the "flowsheets/" folder, ).')}</div>`; });
   window.scrollTo(0,0);
@@ -1774,7 +1980,7 @@ function flTipHTML(tag){
   const ph=i.photo?`<img src="${i.photo}" alt="">`:`<div class="flph">${icoSVG('flowsheet')}<span>${L('Photo à ajouter','Photo to add')}</span></div>`;
   return `${ph}<div class="flt"><b>${esc(i.tag)}</b>${i.name!==i.tag?` · ${esc(i.name)}`:''}<div class="meta">${esc(i.kind)}${i.model?' · '+esc(i.model):''}</div>
    <p>${esc(i.desc)}</p>
-   <div class="flgo ${i.linked?'ok':''}">${FL.edit?L('✏️ Clic : modifier les infos','✏️ Click: edit info'):i.linked?L('Clic : ouvrir la fiche constructeur → ','Click: open manufacturer sheet → ')+esc(i.fiche.title):L('Aucune fiche constructeur liée','No manufacturer sheet linked')}</div></div>`;
+   <div class="flgo ${i.linked?'ok':''}">${FL.edit?L('✏️ Clic : modifier les infos',' Click: edit info'):i.linked?L('Clic : ouvrir la fiche constructeur → ','Click: open manufacturer sheet → ')+esc(i.fiche.title):L('Aucune fiche constructeur liée','No manufacturer sheet linked')}</div></div>`;
 }
 function flTipShow(tag,px,py,pinned){
   const t=$('flTip'),box=$('flBox'); if(!t) return; t.innerHTML=flTipHTML(tag)+(pinned?`<div class="row" style="padding:0 10px 10px;gap:6px">${(flInfo(tag).linked&&!FL.edit)?`<button class="primary" onclick="flOpen('${tag}')">${L('Ouvrir la fiche','Open sheet')}</button>`:''}${canEditFiche('constructeur')?`<button onclick="flEditor('${tag}')">${L('Modifier','Edit')}</button>`:''}<button onclick="flTipHide()">✕</button></div>`:'');
@@ -1833,7 +2039,8 @@ function flEditor(tag){
 function flPhoto(inp){ const f=inp.files&&inp.files[0]; if(!f) return; readImg(f,640,0.72,u=>{ FL.ed.photo=u; $('flEp').innerHTML=`<img src="${u}" style="max-width:160px;border-radius:8px;display:block;margin-bottom:6px">`; }); }
 function flEdClose(){ const d=$('flEd'); if(d) d.remove(); }
 function flEdSave(){ const tag=FL.ed.tag, s=(FL.ov[FL.site]=FL.ov[FL.site]||{});
-  s[tag]={name:$('flEn').value.trim(),desc:$('flEd2').value.trim(),photo:FL.ed.photo,fiche:$('flEf').value}; flSave(); flEdClose(); flMarkLinks(); toast(T('saved')); }
+  const e0=flEq(tag)||{}, dsc=$('flEd2').value.trim(), same=!dsc||dsc===(e0.desc||'')||dsc===flTr(e0.desc,FL_EN_DESC);
+  s[tag]={name:$('flEn').value.trim(),desc:same?'':dsc,photo:FL.ed.photo,fiche:$('flEf').value}; flSave(); flEdClose(); flMarkLinks(); toast(T('saved')); }
 function flEdReset(){ const s=FL.ov[FL.site]||{}; delete s[FL.ed.tag]; flSave(); flEdClose(); flMarkLinks(); }
 
 async function boot(){
@@ -1853,6 +2060,7 @@ function renderSettings(){
   $('app').innerHTML=`<div class="panel"><h2 style="margin-top:0">${esc(T('nav_set'))}</h2>
    <div class="row"><span class="cls cls${settings.cls}">${esc(clsL(settings.cls))}</span><span class="meta">${L('Identifiant','Login')} : ${esc(settings.id||'')}</span></div>
    <p class="meta">${esc(clsD(settings.cls))}</p>
+   ${progHTML(false)}
    <label>${esc(T('set_name'))}</label><input value="${esc(settings.name)}" oninput="settings.name=this.value;saveSettings();buildNav()">
    <label>${esc(T('set_theme'))}</label><select onchange="settings.theme=this.value;saveSettings();applyTheme()">${[['auto','theme_auto'],['light','theme_light'],['dark','theme_dark']].map(([v,l])=>`<option value="${v}" ${v===settings.theme?'selected':''}>${esc(T(l))}</option>`).join('')}</select>
    <label>${L('Langue','Language')}</label><select onchange="setLang(this.value)">${[['fr','Français'],['en','English']].map(([v,t])=>`<option value="${v}" ${v===lang?'selected':''}>${esc(t)}</option>`).join('')}</select>
@@ -1861,7 +2069,7 @@ function renderSettings(){
 function adminHTML(){
   const co=sel=>CLS.map((x,i)=>i<4||settings.cls>=4?`<option value="${i}" ${i===sel?'selected':''}>${esc(clsL(i))}</option>`:'').join('');
   return `<div class="panel"><h3 style="margin-top:0">${L('Travailleurs et classes','Workers and classes')}</h3>`+
-   users.map(u=>u.cls>=4&&settings.cls<4?`<div class="edit-step"><div class="row" style="justify-content:space-between"><b>${esc(u.name)} <span class="meta">(${esc(u.id)})</span></b><span class="cls cls${u.cls}">${esc(clsL(u.cls))}</span></div></div>`:`<div class="edit-step"><div class="row" style="justify-content:space-between"><b>${esc(u.name)} <span class="meta">(${esc(u.id)})</span></b><span class="cls cls${u.cls}">${esc(clsL(u.cls))}</span></div>
+   users.map(u=>u.cls>=4&&settings.cls<4?`<div class="edit-step"><div class="row" style="justify-content:space-between"><b>${esc(u.name)} <span class="meta">(${esc(u.id)})</span></b><span><span class="cls cls${u.cls}">${esc(clsL(u.cls))}</span>${u.cls<MAXAUTO?` <span class="meta">${Math.round(u.pct||0)} %</span>`:''}</span></div></div>`:`<div class="edit-step"><div class="row" style="justify-content:space-between"><b>${esc(u.name)} <span class="meta">(${esc(u.id)})</span></b><span><span class="cls cls${u.cls}">${esc(clsL(u.cls))}</span>${u.cls<MAXAUTO?` <span class="meta">${Math.round(u.pct||0)} %</span>`:''}</span></div>
     <div class="row" style="margin-top:8px"><select style="width:auto" onchange="setUserCls('${u.id}',this.value)">${co(u.cls)}</select><button class="small" onclick="resetPw('${u.id}')">${L('Mot de passe','Password')}</button>${u.id!==settings.id?`<button class="small danger" onclick="delUser('${u.id}')">${esc(T('delete'))}</button>`:''}</div></div>`).join('')+
    `<h4>${L('Ajouter un travailleur','Add a worker')}</h4>
     <div class="row"><input id="nu_id" placeholder="${L('Identifiant','Login')}" autocapitalize="none" style="flex:1;min-width:130px"><input id="nu_name" placeholder="${L('Nom Prénom','Full name')}" style="flex:1;min-width:130px"><input id="nu_pw" type="text" placeholder="${L('Mot de passe initial','Initial password')}" style="flex:1;min-width:130px"></div>
@@ -1879,7 +2087,7 @@ function setUserCls(id,v){
   if(settings.cls<4&&(v>=4||u.cls>=4)){ renderSettings(); return; }
   if(v<4&&u.cls>=4&&users.filter(x=>x.cls>=4).length<2){ toast(L('Il doit rester au moins un administrateur','At least one administrator must remain')); renderSettings(); return; }
   if(v<3&&u.cls>=3&&users.filter(x=>x.cls>=3).length<2){ toast(L('Il doit rester au moins un référent','At least one referent must remain')); renderSettings(); return; }
-  u.cls=v; if(v===0) u.trained=0; saveUsers(); renderSettings();
+  u.cls=v; u.pct=0; if(v===0) u.trained=0; saveUsers(); renderSettings();
 }
 async function resetPw(id){
   const u=users.find(x=>x.id===id); if(u&&u.cls>=4&&settings.cls<4) return;
@@ -3899,7 +4107,7 @@ function fullBackup(){
 }
 function fullRestore(ev){
   const f=ev.target.files[0]; if(!f) return; const r=new FileReader();
-  r.onload=()=>{ try{
+  r.onload=()=>{ try{edit
       const d=JSON.parse(r.result); if(!d||d.app!=='sibelco-tutos'||!d.data||typeof d.data!=='object') throw 0;
       if(!confirm(L('Remplacer TOUTES les données de cet appareil (tutos, fiches, comptes, scores) par celles de la sauvegarde ?','Replace ALL data on this device (tutorials, sheets, accounts, scores) with the backup?'))) return;
       Object.keys(d.data).forEach(k=>{ if(BK_KEYS.includes(k)&&typeof d.data[k]==='string') localStorage.setItem(k,d.data[k]); });
