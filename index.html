@@ -659,6 +659,32 @@ header .row{gap:6px;flex-wrap:nowrap}
 .m3 [contenteditable="true"][data-k]:focus{outline-style:solid;background:rgba(10,90,168,.08)}
 .m3 [contenteditable="true"][data-k]:empty:before{content:attr(data-ph);opacity:.55}
 .m3 .m3hint[contenteditable="true"]{pointer-events:auto}
+
+/* ===== FLOWSHEET INTERACTIF ===== */
+.cover.c-flowsheet{background:linear-gradient(135deg,#0a3d62,#38b6a8)}
+.wrap.flowwide{max-width:none}
+.flbox{position:relative;height:calc(100vh - 215px);min-height:420px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.flbox:active{cursor:grabbing}
+.flsvg{width:100%;height:100%;display:block}
+.fh{fill:transparent;stroke:none;cursor:pointer;vector-effect:non-scaling-stroke}
+.fh:hover{fill:rgba(10,90,168,.22);stroke:#0a5aa8;stroke-width:2}
+.flshow .fh{fill:rgba(45,143,224,.16);stroke:#2d8fe0;stroke-width:1}
+.flshow .fh.ln{fill:rgba(26,138,74,.18);stroke:#1a8a4a}
+.fh.hit{fill:rgba(255,170,0,.45);stroke:#e08a00;stroke-width:3;animation:flblink .8s ease-in-out 4}
+@keyframes flblink{50%{fill:rgba(255,170,0,.1)}}
+.fltip{position:absolute;z-index:5;width:250px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);overflow:hidden;pointer-events:none;font-size:.88rem}
+.fltip.pin{pointer-events:auto}
+.fltip[hidden]{display:none}
+.fltip img{width:100%;height:130px;object-fit:cover;display:block}
+.fltip .flph{height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:linear-gradient(135deg,#0a3d62,#38b6a8);color:#fff;font-size:.75rem}
+.fltip .flph svg{width:34px;height:34px;fill:none;stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.fltip .flt{padding:10px 12px}
+.fltip .flt p{margin:6px 0}
+.fltip .flgo{font-size:.78rem;color:var(--muted)}
+.fltip .flgo.ok{color:var(--ok);font-weight:600}
+.flmodal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto}
+.flmodal .panel{width:min(480px,100%);max-height:94vh;overflow:auto;margin:0}
+@media(max-width:640px){.flbox{height:calc(100vh - 260px)}.fltip{width:220px}}
 </style>
 </head>
 <body>
@@ -787,7 +813,7 @@ const I18N = {
   storage_full:'Stockage plein ou indisponible : pensez à exporter en JSON',
   footer:'Projet réalisé par Lecertisseur Gautier, Coordinateur Tri Optiques · Sibelco Reims',
   unspecified:'Non précisée', locked_tag:'Verrouillé',
-  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_cons2:'Pièces consommables', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', items:'élément(s)',
+  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_cons2:'Pièces consommables', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', nav_flow:'Flowsheet', items:'élément(s)',
   welcome:'Bienvenue', your_class:'Votre classe :', ask_level:'Quel est votre niveau sur les trieurs optiques ?',
   confirm_cls:'Je confirme avoir le niveau de cette classe (déclaratif, à valider avec le référent).',
   oblig_title:'Formation obligatoire', oblig_txt:"Vous ne connaissez pas encore les trieurs optiques : terminez d'abord la formation pour débloquer les autres tutoriels.", oblig_go:'Commencer la formation',
@@ -827,7 +853,7 @@ const I18N = {
   storage_full:'Storage full or unavailable: please export to JSON',
   footer:'Project by Lecertisseur Gautier, Optical Sorting Coordinator · Sibelco Reims',
   unspecified:'Not specified', locked_tag:'Locked',
-  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_cons2:'Consumable parts', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', items:'item(s)',
+  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_cons2:'Consumable parts', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', nav_flow:'Flowsheet', items:'item(s)',
   welcome:'Welcome', your_class:'Your class:', ask_level:'What is your level on optical sorters?',
   confirm_cls:'I confirm I have the level of this class (self-declared, to be validated with the referent).',
   oblig_title:'Mandatory training', oblig_txt:'You do not know optical sorters yet: complete the training first to unlock the other tutorials.', oblig_go:'Start training',
@@ -1132,6 +1158,7 @@ const ICO={
  constructeur:'<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>',
  consommables:'<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
  presentation:'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8M7 12l3-3 3 2 4-4"/>',
+ flowsheet:'<rect x="3" y="3" width="6" height="5" rx="1"/><rect x="15" y="9.5" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><path d="M9 5.5h3v7h3M12 12.5v6H9"/>',
  jeux:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
  quiz:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.6 2.4c-.7.4-1.1 1-1.1 1.8M12 17h.01"/>',
  link:'<circle cx="5" cy="7" r="2.2"/><circle cx="19" cy="17" r="2.2"/><path d="M7.2 7.6C13 8 11 16 16.8 16.4"/><circle cx="5" cy="17" r="2.2"/><circle cx="19" cy="7" r="2.2"/><path d="M7.2 16.4C13 16 11 8 16.8 7.6"/>',
@@ -1480,11 +1507,11 @@ function validateTraining(){ if(settings.cls<1) settings.cls=1; settings.chosen=
  buildNav() redessine le menu : badge de classe, boutons épingle (garder le menu ouvert sur grand écran),
  les rubriques, "Déconnexion". Le bouton de la rubrique active reçoit la classe "on" (bleu clair).
 */
-const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['jeux','','nav_jeux'],['settings','','nav_set']];
+const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['jeux','','nav_jeux'],['settings','','nav_set']];
 function buildNav(){
   $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px"><button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button></div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
    NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
-  document.querySelector('header').classList.toggle('big',state.section!=='tutos');
+  document.querySelector('header').classList.toggle('big',state.section!=='tutos'); $('app').classList.toggle('flowwide',state.section==='flowsheet');
   $('actions').classList.toggle('hidden',state.section!=='tutos');
   $('btnNew').classList.toggle('hidden',!canEditTutos());
   $('btnImp').classList.toggle('hidden',!canEditTutos());
@@ -1517,13 +1544,14 @@ window.addEventListener('resize',()=>{ if($('side').classList.contains('open')){
  renderSection() : réaffiche la page courante (utile après un changement de langue).
  cnt(k) : nombre d'éléments affiché sur les tuiles de l'accueil.
 */
-function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else renderFiches(k); }
+function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else if(k==='flowsheet') renderFlow(); else renderFiches(k); }
 function renderSection(){ const v=state.view;
   if(v==='home') renderHome(); else if(v==='settings') renderSettings(); else if(v==='fiches') renderFiches(state.section);
   else if(v==='jeux') renderGame();
+  else if(v==='flow') renderFlow();
   else if(v==='machines') renderMachines3D();
   else if(v==='fiche') openFiche(state.fid); else if(v==='fedit') renderFicheEditor(); else renderList(); }
-function cnt(k){ if(k==='jeux') return GAMES.length; if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
+function cnt(k){ if(k==='jeux') return GAMES.length; if(k==='flowsheet') return FLOW_SITES.length; if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
 
 /*
  ACCUEIL : bienvenue, classe de l'utilisateur, alerte "formation obligatoire" si classe 0, et les 5 tuiles illustrées
@@ -1542,7 +1570,7 @@ function renderHome(){
    ${!settings.chosen?`<div class="panel"><b>${esc(T('ask_level'))}</b><div class="row" style="margin-top:8px">${CLS.slice(0,4).map((x,i)=>`<button onclick="chooseCls(${i})">${esc(clsL(i))}</button>`).join('')}</div></div>`:''}
    ${(c<1&&ob)?`<div class="box danger"><b>${esc(T('oblig_title'))}</b><br>${esc(T('oblig_txt'))}<div style="margin-top:8px"><button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button></div></div>`:''}
    ${settings.trained?`<div class="box" style="border-left-color:var(--ok)">${esc(T('trained_on'))} ${esc(new Date(settings.trained).toLocaleDateString(lang))}</div>`:''}
-   <div class="tiles">${NAV.slice(1,6).map(([k,i,l])=>`<div class="card tcard" onclick="go('${k}')"><div class="cover c-${k}">${icoSVG(k)}</div><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div></div>`).join('')}</div>
+   <div class="tiles">${NAV.slice(1,7).map(([k,i,l])=>`<div class="card tcard" onclick="go('${k}')"><div class="cover c-${k}">${icoSVG(k)}</div><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div></div>`).join('')}</div>
    <p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
@@ -1647,6 +1675,167 @@ async function seedAdmin(){
    - une session mémorisée existe -> enter(u) (accueil direct) ; - aucun compte -> renderSetup() (création du 1er compte) ;
    - sinon -> renderLogin(). boot() est lancé par safeBoot() tout en bas du fichier.
 */
+/*
+ ===================== FLOWSHEET INTERACTIF =====================
+ Principe : le plan d'origine (PDF constructeur) est converti en SVG vectoriel, SANS le redessiner : les formes sont donc
+ exactement celles du plan. Par-dessus, on pose des zones invisibles cliquables (une par équipement).
+   - souris sur une zone  -> bulle avec photo + rôle de l'équipement
+   - clic sur une zone    -> ouvre la fiche constructeur liée (sur téléphone : 1er toucher = bulle, bouton "Ouvrir la fiche")
+ Chaque SITE = 1 fichier dans le dossier "flowsheets/" : <site>.js (contient le plan et la liste des équipements).
+ POUR AJOUTER UN SITE : déposez le fichier dans "flowsheets/", ajoutez une ligne dans FLOW_SITES ci-dessous,
+ puis ajoutez-le dans la liste FILES de sw.js (et changez le numéro de version du cache).
+*/
+// ✏️ MODIFIABLE : liste des sites (un plan par site)
+const FLOW_SITES=[
+ {id:'saint-romain', name:'Saint-Romain-le-Puy', js:'./flowsheets/saint-romain.js'}
+];
+/* Les infos saisies dans l'appli (photo, description, fiche liée) sont gardées à part, par site et par équipement : FL.ov[site][tag] */
+const FLKEY='sibelco_flow_v1';
+const FL={site:null,data:null,svg:null,vb:null,full:null,ov:(()=>{try{return JSON.parse(localStorage.getItem(FLKEY))||{};}catch(e){return {};}})(),show:false,edit:false,cache:{},pin:null,ptr:new Map(),moved:0};
+function flSave(){ try{localStorage.setItem(FLKEY,JSON.stringify(FL.ov));}catch(e){toast(T('storage_full'));} }
+const flEq=tag=>FL.data&&FL.data.equipment.find(e=>e.tag===tag);
+/* infos d'un équipement = données du plan + corrections saisies dans l'appli */
+function flInfo(tag){
+  const e=flEq(tag)||{tag}, o=((FL.ov[FL.site]||{})[tag])||{};
+  const f=flFiche(tag);
+  return {tag, name:o.name||e.name||tag, kind:e.kind||'', model:e.model||'', desc:o.desc||e.desc||'', photo:o.photo||e.photo||(f&&f.cover)||'', fiche:f, linked:!!f};
+}
+/* fiche constructeur liée : choisie à la main, sinon trouvée automatiquement si le titre/machine de la fiche contient le repère (ex. "CL4") */
+function flFiche(tag){
+  const o=((FL.ov[FL.site]||{})[tag])||{};
+  if(o.fiche){ const f=fiches.find(x=>x.id===o.fiche); if(f) return f; }
+  const re=new RegExp('(^|[^A-Za-z0-9])'+tag.replace(/[-.]/g,'\\$&')+'([^A-Za-z0-9]|$)','i');
+  return fiches.find(f=>f.type==='constructeur'&&(re.test(f.title||'')||re.test(f.machine||'')))||null;
+}
+/* chargement par balise <script> (fonctionne en ouvrant index.html directement, sans serveur) */
+window.FLOW_PACK=window.FLOW_PACK||{};
+function flLoad(id){
+  return new Promise((ok,ko)=>{
+    if(FLOW_PACK[id]) return ok(FLOW_PACK[id]);
+    const s=FLOW_SITES.find(x=>x.id===id), el=document.createElement('script');
+    el.src=s.js; el.onload=()=>FLOW_PACK[id]?ok(FLOW_PACK[id]):ko(); el.onerror=()=>ko(); document.head.appendChild(el);
+  });
+}
+function renderFlow(id){
+  state.section='flowsheet'; state.view='flow'; $('filters').classList.add('hidden'); buildNav();
+  FL.site=id||FL.site||FLOW_SITES[0].id; FL.pin=null;
+  const canEd=canEditFiche('constructeur');
+  $('app').innerHTML=`<div class="row noprint" style="margin:8px 0;gap:8px;flex-wrap:wrap">
+    <h2 style="margin:0">${esc(T('nav_flow'))}</h2>
+    ${FLOW_SITES.length>1?`<select onchange="renderFlow(this.value)">${FLOW_SITES.map(s=>`<option value="${s.id}" ${s.id===FL.site?'selected':''}>${esc(s.name)}</option>`).join('')}</select>`:`<span class="meta">${esc(FLOW_SITES.find(s=>s.id===FL.site).name)}</span>`}
+    <input id="flQ" type="search" list="flDl" placeholder="${esc(L('Chercher un repère (ex : CL4, T12…)','Find a tag (e.g. CL4, T12…)'))}" style="min-width:190px;flex:1;max-width:280px" onchange="flFind(this.value)" onkeydown="if(event.key==='Enter')flFind(this.value)"><datalist id="flDl"></datalist>
+    <button onclick="flZoom(.6)" title="Zoom +">＋</button><button onclick="flZoom(1/.6)" title="Zoom −">−</button>
+    <button onclick="flFit()">${L('Vue d’ensemble','Fit')}</button>
+    <button id="flShow" onclick="flToggleShow()" aria-pressed="false">${L('Voir les zones','Show zones')}</button>
+    ${canEd?`<button id="flEdit" onclick="flToggleEdit()" aria-pressed="false">${L('✏️ Modifier les infos','✏️ Edit info')}</button>`:''}
+  </div>
+  <div id="flBox" class="flbox"><div class="meta" style="padding:20px">${L('Chargement du flowsheet…','Loading flowsheet…')}</div><div id="flTip" class="fltip" hidden></div></div>
+  <p class="meta noprint" style="margin:6px 0 0">${L('Molette / pincer : zoom · glisser : déplacer · survol : photo et rôle · clic : fiche constructeur.','Wheel / pinch: zoom · drag: pan · hover: photo and role · click: manufacturer sheet.')}</p>`;
+  flLoad(FL.site).then(({svg,data})=>{
+    FL.data=data; const box=$('flBox'); if(!box||state.view!=='flow') return;
+    box.insertAdjacentHTML('afterbegin',svg);
+    const el=box.querySelector('svg'); box.querySelector('.meta')&&box.querySelector('.meta').remove();
+    FL.svg=el; el.removeAttribute('width'); el.removeAttribute('height'); el.setAttribute('class','flsvg');
+    const [x,y,w,h]=data.viewBox; FL.full={x,y,w,h};
+    const NS='http://www.w3.org/2000/svg', g=document.createElementNS(NS,'g'); g.setAttribute('id','flHot');
+    data.equipment.forEach(e=>e.rects.forEach(([rx,ry,rw,rh])=>{ const r=document.createElementNS(NS,'rect'); r.setAttribute('x',rx); r.setAttribute('y',ry); r.setAttribute('width',rw); r.setAttribute('height',rh); r.setAttribute('rx',3); r.setAttribute('class','fh'); r.dataset.tag=e.tag; g.appendChild(r); }));
+    el.appendChild(g); flMarkLinks();
+    $('flDl').innerHTML=data.equipment.map(e=>`<option value="${esc(e.tag)}">${esc(e.kind)}</option>`).join('');
+    flBind(box); flFit();
+  }).catch(()=>{ const b=$('flBox'); if(b) b.innerHTML=`<div class="box danger" style="margin:12px">${L('Flowsheet introuvable (fichiers du dossier « flowsheets/ » manquants).','Flowsheet not found (missing files in the "flowsheets/" folder, ).')}</div>`; });
+  window.scrollTo(0,0);
+}
+/* les zones qui ont une fiche liée sont repérées (liseré vert quand "Voir les zones" est actif) */
+function flMarkLinks(){ document.querySelectorAll('#flHot .fh').forEach(r=>r.classList.toggle('ln',!!flFiche(r.dataset.tag))); }
+function flToggleShow(){ FL.show=!FL.show; $('flBox').classList.toggle('flshow',FL.show); $('flShow').setAttribute('aria-pressed',FL.show); $('flShow').classList.toggle('primary',FL.show); }
+function flToggleEdit(){ FL.edit=!FL.edit; $('flEdit').setAttribute('aria-pressed',FL.edit); $('flEdit').classList.toggle('primary',FL.edit); toast(FL.edit?L('Mode modification : cliquez un équipement pour le modifier','Edit mode: click an item to edit it'):L('Mode lecture','Read mode')); flTipHide(); }
+/* ---- vue (zoom / déplacement) : on modifie le viewBox du SVG, donc le dessin reste net à tous les zooms ---- */
+function flSetVB(v){
+  const box=$('flBox'); if(!box||!FL.svg) return; const r=box.getBoundingClientRect(); const asp=r.height/Math.max(1,r.width);
+  v.w=Math.min(FL.full.w*1.3,Math.max(110,v.w)); v.h=v.w*asp;
+  v.x=Math.min(FL.full.x+FL.full.w-v.w*.15,Math.max(FL.full.x-v.w*.85,v.x)); v.y=Math.min(FL.full.y+FL.full.h-v.h*.15,Math.max(FL.full.y-v.h*.85,v.y));
+  FL.vb=v; FL.svg.setAttribute('viewBox',`${v.x} ${v.y} ${v.w} ${v.h}`);
+}
+function flFit(){ const box=$('flBox'); if(!box||!FL.full) return; const r=box.getBoundingClientRect(); const asp=r.height/Math.max(1,r.width);
+  let w=FL.full.w, h=w*asp; if(h<FL.full.h){ h=FL.full.h; w=h/asp; } flSetVB({x:FL.full.x+(FL.full.w-w)/2,y:FL.full.y+(FL.full.h-h)/2,w,h}); }
+function flZoom(k,cx,cy){ const v=FL.vb; if(!v) return; if(cx===undefined){ cx=v.x+v.w/2; cy=v.y+v.h/2; }
+  const nw=Math.min(FL.full.w*1.3,Math.max(110,v.w*k)), kk=nw/v.w; flSetVB({x:cx-(cx-v.x)*kk,y:cy-(cy-v.y)*kk,w:nw,h:v.h*kk}); }
+function flPt(e){ const r=$('flBox').getBoundingClientRect(),v=FL.vb; return {x:v.x+(e.clientX-r.left)/r.width*v.w,y:v.y+(e.clientY-r.top)/r.height*v.h}; }
+/* recherche : zoom sur l'équipement et clignotement */
+function flFind(q){ q=(q||'').trim().toUpperCase(); if(!q||!FL.data) return;
+  const e=FL.data.equipment.find(x=>x.tag.toUpperCase()===q)||FL.data.equipment.find(x=>x.tag.toUpperCase().startsWith(q));
+  if(!e){ toast(L('Repère introuvable','Tag not found')); return; }
+  const [x,y,w,h]=e.rects[0], w2=380; flSetVB({x:x+w/2-w2/2,y:y+h/2-w2*(FL.vb.h/FL.vb.w)/2,w:w2,h:0});
+  document.querySelectorAll('#flHot .fh').forEach(r=>{ if(r.dataset.tag===e.tag){ r.classList.add('hit'); setTimeout(()=>r.classList.remove('hit'),3200); } });
+  const r0=document.querySelector(`#flHot .fh[data-tag="${e.tag}"]`); if(r0){ const b=r0.getBoundingClientRect(),bx=$('flBox').getBoundingClientRect(); flTipShow(e.tag,b.left-bx.left+b.width/2,b.top-bx.top+b.height,true); } }
+/* ---- bulle (survol) ---- */
+function flTipHTML(tag){
+  const i=flInfo(tag);
+  const ph=i.photo?`<img src="${i.photo}" alt="">`:`<div class="flph">${icoSVG('flowsheet')}<span>${L('Photo à ajouter','Photo to add')}</span></div>`;
+  return `${ph}<div class="flt"><b>${esc(i.tag)}</b>${i.name!==i.tag?` · ${esc(i.name)}`:''}<div class="meta">${esc(i.kind)}${i.model?' · '+esc(i.model):''}</div>
+   <p>${esc(i.desc)}</p>
+   <div class="flgo ${i.linked?'ok':''}">${FL.edit?L('✏️ Clic : modifier les infos','✏️ Click: edit info'):i.linked?L('Clic : ouvrir la fiche constructeur → ','Click: open manufacturer sheet → ')+esc(i.fiche.title):L('Aucune fiche constructeur liée','No manufacturer sheet linked')}</div></div>`;
+}
+function flTipShow(tag,px,py,pinned){
+  const t=$('flTip'),box=$('flBox'); if(!t) return; t.innerHTML=flTipHTML(tag)+(pinned?`<div class="row" style="padding:0 10px 10px;gap:6px">${(flInfo(tag).linked&&!FL.edit)?`<button class="primary" onclick="flOpen('${tag}')">${L('Ouvrir la fiche','Open sheet')}</button>`:''}${canEditFiche('constructeur')?`<button onclick="flEditor('${tag}')">${L('Modifier','Edit')}</button>`:''}<button onclick="flTipHide()">✕</button></div>`:'');
+  t.hidden=false; t.classList.toggle('pin',!!pinned);
+  const bw=box.clientWidth,bh=box.clientHeight,tw=t.offsetWidth,th=t.offsetHeight;
+  let x=px+16,y=py+16; if(x+tw>bw-6) x=px-tw-16; if(y+th>bh-6) y=py-th-16; t.style.left=Math.max(6,x)+'px'; t.style.top=Math.max(6,y)+'px';
+}
+function flTipHide(){ const t=$('flTip'); if(t){ t.hidden=true; t.classList.remove('pin'); } FL.pin=null; }
+function flOpen(tag){ const i=flInfo(tag); if(i.fiche){ flTipHide(); openFiche(i.fiche.id); } else toast(L('Aucune fiche constructeur liée à cet équipement','No manufacturer sheet linked to this item')); }
+/* ---- souris, doigts, molette ---- */
+function flBind(box){
+  const hot=e=>e.target.closest&&e.target.closest('.fh');
+  box.addEventListener('pointermove',e=>{
+    if(FL.ptr.has(e.pointerId)){
+      const p=FL.ptr.get(e.pointerId), dx=e.clientX-p.x, dy=e.clientY-p.y; FL.moved+=Math.abs(dx)+Math.abs(dy); p.x=e.clientX; p.y=e.clientY;
+      if(FL.ptr.size===2){ const [a,b]=[...FL.ptr.values()], d=Math.hypot(a.x-b.x,a.y-b.y); if(FL.d0){ const r=box.getBoundingClientRect(); const c=flPt({clientX:(a.x+b.x)/2,clientY:(a.y+b.y)/2}); flZoom(FL.d0/d,c.x,c.y); } FL.d0=d; return; }
+      if(FL.moved>6){ const r=box.getBoundingClientRect(),v=FL.vb; flSetVB({x:v.x-dx/r.width*v.w,y:v.y-dy/r.height*v.h,w:v.w,h:v.h}); flTipHide(); return; }
+    }
+    if(e.pointerType==='mouse'&&!FL.ptr.size){ const h=hot(e); if(h){ const r=box.getBoundingClientRect(); flTipShow(h.dataset.tag,e.clientX-r.left,e.clientY-r.top,false); } else if(!FL.pin) flTipHide(); }
+  });
+  box.addEventListener('pointerdown',e=>{ if(e.target.closest('#flTip')) return; FL.ptr.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(FL.ptr.size===1) FL.moved=0; FL.d0=0; box.setPointerCapture&&box.setPointerCapture(e.pointerId); });
+  const up=e=>{
+    const was=FL.ptr.has(e.pointerId); FL.ptr.delete(e.pointerId); FL.d0=0; if(!was) return;
+    if(FL.moved<=6&&FL.ptr.size===0){
+      const el=document.elementFromPoint(e.clientX,e.clientY), h=el&&el.closest&&el.closest('.fh');
+      if(h){ const tag=h.dataset.tag;
+        if(FL.edit) flEditor(tag);
+        else if(e.pointerType==='mouse'){ if(flInfo(tag).linked) flOpen(tag); else flTipShow(tag,e.clientX-box.getBoundingClientRect().left,e.clientY-box.getBoundingClientRect().top,true); }
+        else { const r=box.getBoundingClientRect(); FL.pin=tag; flTipShow(tag,Math.max(10,e.clientX-r.left-60),Math.max(10,e.clientY-r.top-20),true); }
+      } else flTipHide();
+    }
+  };
+  box.addEventListener('pointerup',up); box.addEventListener('pointercancel',e=>{FL.ptr.delete(e.pointerId);});
+  box.addEventListener('pointerleave',e=>{ if(e.pointerType==='mouse'&&!FL.pin){ flTipHide(); } });
+  box.addEventListener('wheel',e=>{ e.preventDefault(); const p=flPt(e); flZoom(e.deltaY>0?1.18:1/1.18,p.x,p.y); },{passive:false});
+  box.addEventListener('dblclick',e=>{ const p=flPt(e); flZoom(.5,p.x,p.y); });
+}
+window.addEventListener('resize',()=>{ if(state.view==='flow'&&FL.vb&&$('flBox')){ const v=FL.vb; flSetVB({x:v.x,y:v.y,w:v.w,h:v.h}); } });
+/* ---- édition d'un équipement (classes 3 et 4) : nom, description, photo, fiche constructeur liée ---- */
+function flEditor(tag){
+  if(!canEditFiche('constructeur')){ toast(T('need_cls3')); return; }
+  flTipHide(); const i=flInfo(tag), o=((FL.ov[FL.site]||{})[tag])||{};
+  FL.ed={tag,photo:o.photo||''};
+  const opts=fiches.filter(f=>f.type==='constructeur').map(f=>`<option value="${f.id}" ${o.fiche===f.id?'selected':''}>${esc(f.title)}</option>`).join('');
+  const d=document.createElement('div'); d.id='flEd'; d.className='flmodal';
+  d.innerHTML=`<div class="panel"><h3 style="margin-top:0">${esc(tag)} · ${esc(i.kind)}</h3>
+   <label>${L('Nom affiché','Display name')}</label><input id="flEn" value="${esc(o.name||'')}" placeholder="${esc(i.name)}">
+   <label>${L('Rôle / description','Role / description')}</label><textarea id="flEd2" rows="3">${esc(o.desc||i.desc)}</textarea>
+   <label>${L('Photo de l’équipement','Equipment photo')}</label><div id="flEp">${FL.ed.photo?`<img src="${FL.ed.photo}" style="max-width:160px;border-radius:8px;display:block;margin-bottom:6px">`:''}</div>
+   <input type="file" accept="image/*" onchange="flPhoto(this)"> ${FL.ed.photo?`<button onclick="FL.ed.photo='';$('flEp').innerHTML=''">${L('Retirer la photo','Remove photo')}</button>`:''}
+   <label>${L('Fiche constructeur liée','Linked manufacturer sheet')}</label>
+   <select id="flEf"><option value="">${L('Automatique (cherche le repère dans le titre)','Automatic (looks for the tag in the title)')}</option>${opts}</select>
+   <div class="row" style="margin-top:12px;gap:8px"><button class="primary" onclick="flEdSave()">${T('save')}</button><button onclick="flEdClose()">${L('Annuler','Cancel')}</button><button onclick="flEdReset()">${L('Revenir au plan d’origine','Reset')}</button></div></div>`;
+  document.body.appendChild(d);
+}
+function flPhoto(inp){ const f=inp.files&&inp.files[0]; if(!f) return; readImg(f,640,0.72,u=>{ FL.ed.photo=u; $('flEp').innerHTML=`<img src="${u}" style="max-width:160px;border-radius:8px;display:block;margin-bottom:6px">`; }); }
+function flEdClose(){ const d=$('flEd'); if(d) d.remove(); }
+function flEdSave(){ const tag=FL.ed.tag, s=(FL.ov[FL.site]=FL.ov[FL.site]||{});
+  s[tag]={name:$('flEn').value.trim(),desc:$('flEd2').value.trim(),photo:FL.ed.photo,fiche:$('flEf').value}; flSave(); flEdClose(); flMarkLinks(); toast(T('saved')); }
+function flEdReset(){ const s=FL.ov[FL.site]||{}; delete s[FL.ed.tag]; flSave(); flEdClose(); flMarkLinks(); }
+
 async function boot(){
   await seedAdmin();
   applyStatic(); let sid=null; try{sid=localStorage.getItem(SESS);}catch(e){}

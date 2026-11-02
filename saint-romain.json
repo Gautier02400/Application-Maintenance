@@ -1,0 +1,3252 @@
+{
+"id": "saint-romain",
+"name": "Saint-Romain-le-Puy",
+"viewBox": [
+0,
+0,
+3369.75,
+2383.5
+],
+"equipment": [
+{
+"tag": "ASP3",
+"name": "ASP3",
+"kind": "Aspiration",
+"desc": "Point d'aspiration des poussières.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+580.6,
+1020.1,
+36,
+22
+]
+]
+},
+{
+"tag": "ASP2",
+"name": "ASP2",
+"kind": "Aspiration",
+"desc": "Point d'aspiration des poussières.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+958.3,
+1023.7,
+36,
+22
+]
+]
+},
+{
+"tag": "ASP4",
+"name": "ASP4",
+"kind": "Aspiration",
+"desc": "Point d'aspiration des poussières.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2061.2,
+1683.3,
+36,
+22
+]
+]
+},
+{
+"tag": "ASP1",
+"name": "ASP1",
+"kind": "Aspiration",
+"desc": "Point d'aspiration des poussières.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1334.0,
+1024.3,
+36,
+22
+]
+]
+},
+{
+"tag": "ASP5",
+"name": "ASP5",
+"kind": "Aspiration",
+"desc": "Point d'aspiration des poussières.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1964.8,
+506.0,
+36,
+22
+]
+]
+},
+{
+"tag": "ASP0-2",
+"name": "ASP0-2",
+"kind": "Aspiration",
+"desc": "Point d'aspiration des poussières.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2200.6,
+1680.5,
+36,
+22
+]
+]
+},
+{
+"tag": "ASP0-1",
+"name": "ASP0-1",
+"kind": "Aspiration",
+"desc": "Point d'aspiration des poussières.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2258.0,
+1680.5,
+36,
+22
+]
+]
+},
+{
+"tag": "AV13",
+"name": "AV13",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+813.5,
+975.4,
+60,
+20
+]
+]
+},
+{
+"tag": "AV12",
+"name": "AV12",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1189.2,
+975.4,
+60,
+20
+]
+]
+},
+{
+"tag": "AV11",
+"name": "AV11",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1518.3,
+975.4,
+60,
+20
+]
+]
+},
+{
+"tag": "AV16",
+"name": "AV16",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1214.7,
+1741.0,
+60,
+20
+]
+]
+},
+{
+"tag": "AV17",
+"name": "AV17",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1288.7,
+1939.5,
+60,
+20
+]
+]
+},
+{
+"tag": "AV19",
+"name": "AV19",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1182.0,
+2231.5,
+60,
+20
+]
+]
+},
+{
+"tag": "AV18",
+"name": "AV18",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1505.0,
+1904.0,
+60,
+20
+]
+]
+},
+{
+"tag": "AV15",
+"name": "AV15",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1217.5,
+1535.4,
+60,
+20
+]
+]
+},
+{
+"tag": "AV1",
+"name": "AV1",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2894.4,
+174.4,
+60,
+20
+]
+]
+},
+{
+"tag": "AV27",
+"name": "AV27",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2412.3,
+557.2,
+60,
+20
+]
+]
+},
+{
+"tag": "AV21",
+"name": "AV21",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+750.3,
+1904.0,
+60,
+20
+]
+]
+},
+{
+"tag": "AV22",
+"name": "AV22",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+675.1,
+2152.1,
+60,
+20
+]
+]
+},
+{
+"tag": "AV25",
+"name": "AV25",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+848.9,
+1939.5,
+60,
+20
+]
+]
+},
+{
+"tag": "AV24",
+"name": "AV24",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+647.3,
+1939.5,
+60,
+20
+]
+]
+},
+{
+"tag": "AV20",
+"name": "AV20",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+828.2,
+1719.7,
+60,
+20
+]
+]
+},
+{
+"tag": "AV29",
+"name": "AV29",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1653.9,
+606.8,
+60,
+20
+]
+]
+},
+{
+"tag": "AV2",
+"name": "AV2",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2773.9,
+174.4,
+60,
+20
+]
+]
+},
+{
+"tag": "AV28",
+"name": "AV28",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1483.8,
+323.2,
+60,
+20
+]
+]
+},
+{
+"tag": "AV37",
+"name": "AV37",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2259.5,
+330.3,
+60,
+20
+]
+]
+},
+{
+"tag": "AV32",
+"name": "AV32",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1420.0,
+1705.6,
+60,
+20
+]
+]
+},
+{
+"tag": "AV33",
+"name": "AV33",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1686.3,
+1741.0,
+60,
+20
+]
+]
+},
+{
+"tag": "AV35",
+"name": "AV35",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1356.2,
+2031.6,
+60,
+20
+]
+]
+},
+{
+"tag": "AV36",
+"name": "AV36",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1683.5,
+1939.5,
+60,
+20
+]
+]
+},
+{
+"tag": "AV34",
+"name": "AV34",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1342.0,
+1918.2,
+60,
+20
+]
+]
+},
+{
+"tag": "AV30",
+"name": "AV30",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1512.1,
+1315.7,
+60,
+20
+]
+]
+},
+{
+"tag": "AV31",
+"name": "AV31",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1299.4,
+1393.6,
+60,
+20
+]
+]
+},
+{
+"tag": "AV3",
+"name": "AV3",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2979.4,
+869.1,
+60,
+20
+],
+[
+2242.2,
+540.7,
+60,
+20
+],
+[
+2456.7,
+316.1,
+60,
+20
+]
+]
+},
+{
+"tag": "AV4",
+"name": "AV4",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+409.2,
+127.6,
+60,
+20
+]
+]
+},
+{
+"tag": "AV5",
+"name": "AV5",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2362.7,
+869.1,
+60,
+20
+]
+]
+},
+{
+"tag": "AV6",
+"name": "AV6",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2695.9,
+1712.6,
+60,
+20
+]
+]
+},
+{
+"tag": "AV7",
+"name": "AV7",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2416.6,
+1989.1,
+60,
+20
+]
+]
+},
+{
+"tag": "AV8",
+"name": "AV8",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2497.4,
+1266.0,
+60,
+20
+]
+]
+},
+{
+"tag": "AV9",
+"name": "AV9",
+"kind": "Vanne d'aiguillage motorisée",
+"desc": "Aiguille le flux de produit vers l'une ou l'autre des voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1639.8,
+231.1,
+60,
+20
+]
+]
+},
+{
+"tag": "B1",
+"name": "B1",
+"kind": "Crible / bande vibrante",
+"desc": "Équipement vibrant avec moteurs et détection de température.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2492.4,
+640.9,
+36,
+22
+]
+]
+},
+{
+"tag": "B2",
+"name": "B2",
+"kind": "Crible / bande vibrante",
+"desc": "Équipement vibrant avec moteurs et détection de température.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2512.5,
+640.9,
+36,
+22
+]
+]
+},
+{
+"tag": "B3",
+"name": "B3",
+"kind": "Crible / bande vibrante",
+"desc": "Équipement vibrant avec moteurs et détection de température.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2556.2,
+1339.1,
+36,
+22
+]
+]
+},
+{
+"tag": "B4",
+"name": "B4",
+"kind": "Crible / bande vibrante",
+"desc": "Équipement vibrant avec moteurs et détection de température.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2594.7,
+1339.1,
+36,
+22
+]
+]
+},
+{
+"tag": "BB1",
+"name": "BB1",
+"kind": "Trémie / bunker",
+"desc": "Bunker de stockage.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1966.4,
+2250.4,
+36,
+22
+]
+]
+},
+{
+"tag": "BB2",
+"name": "BB2",
+"kind": "Trémie / bunker",
+"desc": "Bunker de stockage.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2023.1,
+2249.8,
+36,
+22
+]
+]
+},
+{
+"tag": "BB3",
+"name": "BB3",
+"kind": "Trémie / bunker",
+"desc": "Bunker de stockage.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+379.5,
+1103.0,
+36,
+22
+]
+]
+},
+{
+"tag": "BB4",
+"name": "BB4",
+"kind": "Trémie / bunker",
+"desc": "Bunker de stockage.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+436.2,
+1103.0,
+36,
+22
+]
+]
+},
+{
+"tag": "BP13",
+"name": "BP13",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1624.5,
+460.0,
+36,
+22
+]
+]
+},
+{
+"tag": "BP1",
+"name": "BP1",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2548.1,
+478.8,
+36,
+22
+]
+]
+},
+{
+"tag": "BP12",
+"name": "BP12",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+391.2,
+999.5,
+36,
+22
+]
+]
+},
+{
+"tag": "BP15",
+"name": "BP15",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1025.7,
+2152.3,
+36,
+22
+]
+]
+},
+{
+"tag": "BP10",
+"name": "BP10",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1366.0,
+2189.7,
+36,
+22
+]
+]
+},
+{
+"tag": "BP16",
+"name": "BP16",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+899.2,
+2189.7,
+36,
+22
+]
+]
+},
+{
+"tag": "BP14",
+"name": "BP14",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1525.3,
+1601.3,
+36,
+22
+]
+]
+},
+{
+"tag": "BP11",
+"name": "BP11",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1104.8,
+141.0,
+36,
+22
+]
+]
+},
+{
+"tag": "BP2",
+"name": "BP2",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2537.0,
+1183.1,
+36,
+22
+]
+]
+},
+{
+"tag": "BP3",
+"name": "BP3",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2707.1,
+1653.8,
+36,
+22
+]
+]
+},
+{
+"tag": "BP4",
+"name": "BP4",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1882.9,
+471.4,
+36,
+22
+]
+]
+},
+{
+"tag": "BP5",
+"name": "BP5",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+162.5,
+911.5,
+36,
+22
+]
+]
+},
+{
+"tag": "BP6",
+"name": "BP6",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1184.1,
+343.8,
+36,
+22
+]
+]
+},
+{
+"tag": "BP8",
+"name": "BP8",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1984.1,
+2175.5,
+36,
+22
+]
+]
+},
+{
+"tag": "BP9",
+"name": "BP9",
+"kind": "Trémie tampon",
+"desc": "Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1190.2,
+2152.5,
+36,
+22
+]
+]
+},
+{
+"tag": "BRI1",
+"name": "BRI1",
+"kind": "Broyeur / briseur",
+"desc": "Équipement de réduction de granulométrie.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2991.8,
+594.7,
+36,
+22
+]
+]
+},
+{
+"tag": "C1",
+"name": "C1",
+"kind": "Machine C",
+"desc": "Équipement principal du circuit (à décrire).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2251.4,
+460.0,
+36,
+22
+]
+]
+},
+{
+"tag": "C2",
+"name": "C2",
+"kind": "Machine C",
+"desc": "Équipement principal du circuit (à décrire).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2726.3,
+761.8,
+36,
+22
+]
+]
+},
+{
+"tag": "CL1",
+"name": "CL1",
+"kind": "Trieur optique",
+"desc": "Trieur optique : caméras + buses d'éjection (PT = détecteur, EJ = éjecteur).",
+"model": "CLARITY 1400 FM",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1173.2,
+1603.3,
+92,
+92
+]
+]
+},
+{
+"tag": "CL2",
+"name": "CL2",
+"kind": "Trieur optique",
+"desc": "Trieur optique : caméras + buses d'éjection (PT = détecteur, EJ = éjecteur).",
+"model": "CLARITY 1400 FM",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1173.2,
+1801.8,
+92,
+92
+]
+]
+},
+{
+"tag": "CL3",
+"name": "CL3",
+"kind": "Trieur optique",
+"desc": "Trieur optique : caméras + buses d'éjection (PT = détecteur, EJ = éjecteur).",
+"model": "CLARITY 1400 Fine",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1163.0,
+2000.3,
+92,
+92
+]
+]
+},
+{
+"tag": "CL4",
+"name": "CL4",
+"kind": "Trieur optique",
+"desc": "Trieur optique : caméras + buses d'éjection (PT = détecteur, EJ = éjecteur).",
+"model": "CLARITY 1400",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+719.5,
+1779.1,
+92,
+92
+]
+]
+},
+{
+"tag": "CL5",
+"name": "CL5",
+"kind": "Trieur optique",
+"desc": "Trieur optique : caméras + buses d'éjection (PT = détecteur, EJ = éjecteur).",
+"model": "MIKROSORT",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+606.1,
+2000.3,
+92,
+92
+]
+]
+},
+{
+"tag": "CL6",
+"name": "CL6",
+"kind": "Trieur optique",
+"desc": "Trieur optique : caméras + buses d'éjection (PT = détecteur, EJ = éjecteur).",
+"model": "MIKROSORT",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+798.6,
+1998.9,
+92,
+92
+]
+]
+},
+{
+"tag": "CL7",
+"name": "CL7",
+"kind": "Trieur optique",
+"desc": "Trieur optique : caméras + buses d'éjection (PT = détecteur, EJ = éjecteur).",
+"model": "MIKROSORT",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+635.1,
+2210.7,
+92,
+92
+]
+]
+},
+{
+"tag": "CL8",
+"name": "CL8",
+"kind": "Trieur optique",
+"desc": "Trieur optique : caméras + buses d'éjection (PT = détecteur, EJ = éjecteur).",
+"model": "COMPLETE",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1641.2,
+1800.2,
+92,
+92
+]
+]
+},
+{
+"tag": "CL9",
+"name": "CL9",
+"kind": "Trieur optique",
+"desc": "Trieur optique : caméras + buses d'éjection (PT = détecteur, EJ = éjecteur).",
+"model": "CLARITY 1400",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1643.2,
+2000.3,
+92,
+92
+]
+]
+},
+{
+"tag": "DV12",
+"name": "DV12",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+141.0,
+295.9,
+52,
+18
+]
+]
+},
+{
+"tag": "DV14",
+"name": "DV14",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+484.1,
+295.9,
+52,
+18
+]
+]
+},
+{
+"tag": "DV11",
+"name": "DV11",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1214.1,
+785.0,
+52,
+18
+]
+]
+},
+{
+"tag": "DV10",
+"name": "DV10",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2028.5,
+2028.4,
+52,
+18
+],
+[
+3151.2,
+710.7,
+52,
+18
+]
+]
+},
+{
+"tag": "DV1",
+"name": "DV1",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1796.5,
+365.3,
+52,
+18
+]
+]
+},
+{
+"tag": "DV15",
+"name": "DV15",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+651.3,
+295.9,
+52,
+18
+]
+]
+},
+{
+"tag": "DV13",
+"name": "DV13",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+313.9,
+295.9,
+52,
+18
+]
+]
+},
+{
+"tag": "DV2",
+"name": "DV2",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2749.2,
+1455.6,
+52,
+18
+],
+[
+2504.2,
+708.4,
+52,
+18
+]
+]
+},
+{
+"tag": "DV3",
+"name": "DV3",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1661.6,
+154.1,
+52,
+18
+]
+]
+},
+{
+"tag": "DV4",
+"name": "DV4",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2164.0,
+861.0,
+52,
+18
+]
+]
+},
+{
+"tag": "DV5",
+"name": "DV5",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1477.8,
+209.4,
+52,
+18
+]
+]
+},
+{
+"tag": "DV6",
+"name": "DV6",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+3075.5,
+710.3,
+52,
+18
+],
+[
+126.6,
+809.1,
+52,
+18
+]
+]
+},
+{
+"tag": "DV7",
+"name": "DV7",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+953.3,
+804.3,
+52,
+18
+]
+]
+},
+{
+"tag": "DV8",
+"name": "DV8",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1259.0,
+1470.6,
+52,
+18
+]
+]
+},
+{
+"tag": "DV9",
+"name": "DV9",
+"kind": "Répartiteur / diviseur",
+"desc": "Répartit ou dévie le flux de produit entre plusieurs voies.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+839.9,
+1671.1,
+52,
+18
+]
+]
+},
+{
+"tag": "EC1",
+"name": "EC1",
+"kind": "Équipement EC",
+"desc": "À décrire.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+521.5,
+1923.2,
+36,
+22
+]
+]
+},
+{
+"tag": "EL1",
+"name": "EL1",
+"kind": "Élévateur",
+"desc": "Élévateur qui remonte le produit vers l'étage supérieur.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1995.1,
+208.8,
+40,
+22
+]
+]
+},
+{
+"tag": "EL2",
+"name": "EL2",
+"kind": "Élévateur",
+"desc": "Élévateur qui remonte le produit vers l'étage supérieur.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1057.4,
+1474.0,
+40,
+22
+]
+]
+},
+{
+"tag": "EL3",
+"name": "EL3",
+"kind": "Élévateur",
+"desc": "Élévateur qui remonte le produit vers l'étage supérieur.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+997.4,
+1742.8,
+40,
+22
+]
+]
+},
+{
+"tag": "EL4",
+"name": "EL4",
+"kind": "Élévateur",
+"desc": "Élévateur qui remonte le produit vers l'étage supérieur.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+980.4,
+1990.4,
+40,
+22
+]
+]
+},
+{
+"tag": "OV1",
+"name": "OV1",
+"kind": "Séparateur magnétique (overband)",
+"desc": "Retire les métaux ferreux du flux de produit.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+3296.1,
+1275.3,
+36,
+22
+],
+[
+2610.0,
+216.7,
+36,
+22
+]
+]
+},
+{
+"tag": "OV2",
+"name": "OV2",
+"kind": "Séparateur magnétique (overband)",
+"desc": "Retire les métaux ferreux du flux de produit.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+3040.9,
+835.7,
+36,
+22
+]
+]
+},
+{
+"tag": "OV3",
+"name": "OV3",
+"kind": "Séparateur magnétique (overband)",
+"desc": "Retire les métaux ferreux du flux de produit.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2232.9,
+835.7,
+36,
+22
+]
+]
+},
+{
+"tag": "OV4",
+"name": "OV4",
+"kind": "Séparateur magnétique (overband)",
+"desc": "Retire les métaux ferreux du flux de produit.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2431.3,
+835.7,
+36,
+22
+]
+]
+},
+{
+"tag": "OV5",
+"name": "OV5",
+"kind": "Séparateur magnétique (overband)",
+"desc": "Retire les métaux ferreux du flux de produit.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1857.2,
+112.7,
+36,
+22
+]
+]
+},
+{
+"tag": "PM1",
+"name": "PM1",
+"kind": "Séparateur magnétique",
+"desc": "Séparation magnétique (à préciser).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+3221.8,
+890.2,
+36,
+22
+]
+]
+},
+{
+"tag": "PM2",
+"name": "PM2",
+"kind": "Séparateur magnétique",
+"desc": "Séparation magnétique (à préciser).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2290.2,
+963.3,
+36,
+22
+]
+]
+},
+{
+"tag": "PM3",
+"name": "PM3",
+"kind": "Séparateur magnétique",
+"desc": "Séparation magnétique (à préciser).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2479.0,
+967.0,
+36,
+22
+]
+]
+},
+{
+"tag": "SMNF2",
+"name": "SMNF2",
+"kind": "Séparateur métaux non ferreux",
+"desc": "Retire les métaux non ferreux du flux de produit.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2329.8,
+1083.9,
+36,
+22
+]
+]
+},
+{
+"tag": "SMNF1",
+"name": "SMNF1",
+"kind": "Séparateur métaux non ferreux",
+"desc": "Retire les métaux non ferreux du flux de produit.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+3038.6,
+1083.9,
+36,
+22
+]
+]
+},
+{
+"tag": "SMNF3",
+"name": "SMNF3",
+"kind": "Séparateur métaux non ferreux",
+"desc": "Retire les métaux non ferreux du flux de produit.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2705.5,
+1083.9,
+36,
+22
+]
+]
+},
+{
+"tag": "T1",
+"name": "T1",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2865.8,
+237.2,
+34,
+20
+]
+]
+},
+{
+"tag": "T2",
+"name": "T2",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2992.2,
+828.4,
+34,
+20
+],
+[
+2970.7,
+1205.5,
+34,
+20
+],
+[
+2596.4,
+258.4,
+34,
+20
+]
+]
+},
+{
+"tag": "T3",
+"name": "T3",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2688.6,
+563.2,
+34,
+20
+]
+]
+},
+{
+"tag": "T4",
+"name": "T4",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2773.7,
+627.0,
+34,
+20
+]
+]
+},
+{
+"tag": "T5",
+"name": "T5",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+3057.2,
+400.2,
+34,
+20
+]
+]
+},
+{
+"tag": "T6",
+"name": "T6",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2681.5,
+868.1,
+34,
+20
+]
+]
+},
+{
+"tag": "T7",
+"name": "T7",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2681.5,
+981.5,
+34,
+20
+]
+]
+},
+{
+"tag": "T8",
+"name": "T8",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2320.0,
+1250.9,
+34,
+20
+]
+]
+},
+{
+"tag": "T9",
+"name": "T9",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2709.9,
+1194.2,
+34,
+20
+]
+]
+},
+{
+"tag": "T10",
+"name": "T10",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2842.6,
+1512.3,
+34,
+20
+],
+[
+2518.5,
+740.5,
+34,
+20
+]
+]
+},
+{
+"tag": "T11",
+"name": "T11",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2561.0,
+1520.2,
+34,
+20
+]
+]
+},
+{
+"tag": "T12",
+"name": "T12",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2291.7,
+2108.6,
+34,
+20
+]
+]
+},
+{
+"tag": "T13",
+"name": "T13",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1880.5,
+145.0,
+34,
+20
+]
+]
+},
+{
+"tag": "T14",
+"name": "T14",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1432.6,
+499.4,
+34,
+20
+]
+]
+},
+{
+"tag": "T15",
+"name": "T15",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1263.9,
+272.6,
+34,
+20
+]
+]
+},
+{
+"tag": "T16",
+"name": "T16",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+654.3,
+705.0,
+34,
+20
+]
+]
+},
+{
+"tag": "T17",
+"name": "T17",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+264.4,
+924.8,
+34,
+20
+]
+]
+},
+{
+"tag": "T18",
+"name": "T18",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1122.1,
+423.2,
+34,
+20
+]
+]
+},
+{
+"tag": "T19",
+"name": "T19",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1058.8,
+513.6,
+34,
+20
+]
+]
+},
+{
+"tag": "T20",
+"name": "T20",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1090.3,
+615.4,
+34,
+20
+]
+]
+},
+{
+"tag": "T21",
+"name": "T21",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+604.7,
+1357.2,
+34,
+20
+],
+[
+3130.4,
+697.9,
+34,
+20
+]
+]
+},
+{
+"tag": "T22",
+"name": "T22",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+533.8,
+1442.3,
+34,
+20
+]
+]
+},
+{
+"tag": "T23",
+"name": "T23",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+874.0,
+1456.4,
+34,
+20
+]
+]
+},
+{
+"tag": "T24",
+"name": "T24",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+533.8,
+1548.6,
+34,
+20
+]
+]
+},
+{
+"tag": "T26",
+"name": "T26",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+158.1,
+1300.5,
+34,
+20
+]
+]
+},
+{
+"tag": "T27",
+"name": "T27",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+193.6,
+1435.1,
+34,
+20
+]
+]
+},
+{
+"tag": "T28",
+"name": "T28",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1492.0,
+2172.4,
+34,
+20
+]
+]
+},
+{
+"tag": "T29",
+"name": "T29",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1265.1,
+2278.7,
+34,
+20
+]
+]
+},
+{
+"tag": "T30",
+"name": "T30",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+413.3,
+1807.3,
+34,
+20
+]
+]
+},
+{
+"tag": "T31",
+"name": "T31",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+229.0,
+1754.2,
+34,
+20
+]
+]
+},
+{
+"tag": "T32",
+"name": "T32",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+191.0,
+1952.2,
+34,
+20
+]
+]
+},
+{
+"tag": "T33",
+"name": "T33",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+328.2,
+2122.8,
+34,
+20
+]
+]
+},
+{
+"tag": "T34",
+"name": "T34",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+186.5,
+2190.8,
+34,
+20
+]
+]
+},
+{
+"tag": "T35",
+"name": "T35",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+484.2,
+740.5,
+34,
+20
+]
+]
+},
+{
+"tag": "T36",
+"name": "T36",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+314.6,
+2080.3,
+34,
+20
+],
+[
+569.2,
+1626.6,
+34,
+20
+]
+]
+},
+{
+"tag": "T37",
+"name": "T37",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2043.6,
+2108.6,
+34,
+20
+],
+[
+1848.8,
+528.7,
+34,
+20
+]
+]
+},
+{
+"tag": "T38",
+"name": "T38",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2227.9,
+740.5,
+34,
+20
+]
+]
+},
+{
+"tag": "T39",
+"name": "T39",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+3050.1,
+981.5,
+34,
+20
+]
+]
+},
+{
+"tag": "T40",
+"name": "T40",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2979.2,
+1236.7,
+34,
+20
+],
+[
+2437.5,
+315.1,
+34,
+20
+]
+]
+},
+{
+"tag": "T41",
+"name": "T41",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2872.9,
+981.5,
+34,
+20
+]
+]
+},
+{
+"tag": "T47",
+"name": "T47",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1711.7,
+676.7,
+34,
+20
+]
+]
+},
+{
+"tag": "T48",
+"name": "T48",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1527.4,
+1378.5,
+34,
+20
+]
+]
+},
+{
+"tag": "T49",
+"name": "T49",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1416.7,
+676.7,
+34,
+20
+]
+]
+},
+{
+"tag": "T50",
+"name": "T50",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1584.1,
+2094.6,
+34,
+20
+]
+]
+},
+{
+"tag": "T51",
+"name": "T51",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1584.1,
+2278.7,
+34,
+20
+]
+]
+},
+{
+"tag": "T52",
+"name": "T52",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1796.8,
+2172.4,
+34,
+20
+]
+]
+},
+{
+"tag": "T53",
+"name": "T53",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1765.4,
+2278.7,
+34,
+20
+]
+]
+},
+{
+"tag": "T54",
+"name": "T54",
+"kind": "Convoyeur à bande",
+"desc": "Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+135.1,
+1867.6,
+34,
+20
+]
+]
+},
+{
+"tag": "TR10",
+"name": "TR10",
+"kind": "Trémie",
+"desc": "Trémie d'alimentation ou de stockage.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+717.1,
+247.4,
+36,
+22
+]
+]
+},
+{
+"tag": "TR1",
+"name": "TR1",
+"kind": "Trémie",
+"desc": "Trémie d'alimentation ou de stockage.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2955.1,
+102.2,
+36,
+22
+]
+]
+},
+{
+"tag": "TR2",
+"name": "TR2",
+"kind": "Trémie",
+"desc": "Trémie d'alimentation ou de stockage.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2827.5,
+102.2,
+36,
+22
+]
+]
+},
+{
+"tag": "TR7",
+"name": "TR7",
+"kind": "Trémie",
+"desc": "Trémie d'alimentation ou de stockage.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+204.9,
+247.4,
+36,
+22
+]
+]
+},
+{
+"tag": "TR8",
+"name": "TR8",
+"kind": "Trémie",
+"desc": "Trémie d'alimentation ou de stockage.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+375.0,
+247.4,
+36,
+22
+]
+]
+},
+{
+"tag": "TR9",
+"name": "TR9",
+"kind": "Trémie",
+"desc": "Trémie d'alimentation ou de stockage.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+545.1,
+247.4,
+36,
+22
+]
+]
+},
+{
+"tag": "VEX1",
+"name": "VEX1",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2288.1,
+1530.5,
+36,
+22
+]
+]
+},
+{
+"tag": "VEX2",
+"name": "VEX2",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2025.0,
+1530.5,
+36,
+22
+]
+]
+},
+{
+"tag": "VEX4",
+"name": "VEX4",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2978.5,
+686.9,
+36,
+22
+]
+]
+},
+{
+"tag": "VEX3",
+"name": "VEX3",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1988.2,
+442.5,
+36,
+22
+]
+]
+},
+{
+"tag": "VEX1-1",
+"name": "VEX1-1",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2183.9,
+1417.0,
+36,
+22
+]
+]
+},
+{
+"tag": "VR1",
+"name": "VR1",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2243.8,
+1750.2,
+36,
+22
+]
+]
+},
+{
+"tag": "VR2",
+"name": "VR2",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2214.2,
+1750.2,
+36,
+22
+]
+]
+},
+{
+"tag": "VR3",
+"name": "VR3",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2008.7,
+1778.6,
+36,
+22
+]
+]
+},
+{
+"tag": "VRC2",
+"name": "VRC2",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1018.5,
+1105.1,
+36,
+22
+]
+]
+},
+{
+"tag": "VRC1",
+"name": "VRC1",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1387.0,
+1105.1,
+36,
+22
+]
+]
+},
+{
+"tag": "VRC3",
+"name": "VRC3",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+642.8,
+1105.1,
+36,
+22
+]
+]
+},
+{
+"tag": "VRE3",
+"name": "VRE3",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+734.7,
+1024.9,
+36,
+22
+]
+]
+},
+{
+"tag": "VRE1",
+"name": "VRE1",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1528.6,
+1072.5,
+36,
+22
+]
+]
+},
+{
+"tag": "VRE2",
+"name": "VRE2",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1110.4,
+1027.1,
+36,
+22
+]
+]
+},
+{
+"tag": "VRS2",
+"name": "VRS2",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1110.3,
+1296.5,
+36,
+22
+]
+]
+},
+{
+"tag": "VRS1",
+"name": "VRS1",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1488.8,
+1298.8,
+36,
+22
+]
+]
+},
+{
+"tag": "VRS3",
+"name": "VRS3",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+741.7,
+1296.5,
+36,
+22
+]
+]
+},
+{
+"tag": "VSF2",
+"name": "VSF2",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2056.7,
+1736.0,
+36,
+22
+]
+]
+},
+{
+"tag": "VSF3",
+"name": "VSF3",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2035.4,
+1849.5,
+36,
+22
+]
+]
+},
+{
+"tag": "VSF4",
+"name": "VSF4",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+2035.4,
+1920.3,
+36,
+22
+]
+]
+},
+{
+"tag": "Ventil2",
+"name": "Ventil2",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+931.0,
+975.0,
+36,
+22
+]
+]
+},
+{
+"tag": "Ventil1",
+"name": "Ventil1",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1309.0,
+975.0,
+36,
+22
+]
+]
+},
+{
+"tag": "Ventil3",
+"name": "Ventil3",
+"kind": "Ventilation / filtration",
+"desc": "Organe de ventilation ou de filtration du circuit d'air.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+555.6,
+980.4,
+36,
+22
+]
+]
+},
+{
+"tag": "ZZ1",
+"name": "ZZ1",
+"kind": "Filtre / cyclone",
+"desc": "Séparation des poussières de l'air aspiré.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1537.1,
+1218.5,
+36,
+22
+]
+]
+},
+{
+"tag": "ZZ2",
+"name": "ZZ2",
+"kind": "Filtre / cyclone",
+"desc": "Séparation des poussières de l'air aspiré.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+1161.4,
+1218.5,
+36,
+22
+]
+]
+},
+{
+"tag": "ZZ3",
+"name": "ZZ3",
+"kind": "Filtre / cyclone",
+"desc": "Séparation des poussières de l'air aspiré.",
+"model": "",
+"photo": "",
+"fiche": "",
+"rects": [
+[
+778.6,
+1218.5,
+36,
+22
+]
+]
+}
+]
+}
