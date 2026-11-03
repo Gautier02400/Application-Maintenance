@@ -228,7 +228,7 @@ label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
 .step.done .num{background:var(--ok)}
 .step.done .txt{color:var(--muted);text-decoration:line-through}
 .step .body{flex:1;min-width:0}
-.step img{max-width:100%;border-radius:8px;border:1px solid var(--line);margin-top:8px;display:block}
+.step img{max-width:100%;width:auto;height:auto;max-height:min(520px,75vh);object-fit:contain;border-radius:8px;border:1px solid var(--line);margin-top:8px;display:block}
 .step label.chk{display:flex;gap:8px;align-items:center;margin:8px 0 0;color:var(--muted);cursor:pointer}
 .step input[type=checkbox]{width:20px;height:20px;padding:0}
 .edit-step{border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0;background:var(--bg)}
@@ -391,7 +391,7 @@ header.big .menu-btn{font-size:1rem;padding:5px 8px}
 .card .cover{margin:-14px -14px 4px;aspect-ratio:2/1;overflow:hidden;background:linear-gradient(135deg,#0a2f5a,#2d8fe0);display:grid;place-items:center}
 .card .cover img{width:100%;height:100%;object-fit:cover;display:block}
 .card .cover svg{width:34%;height:34%;stroke:#fff;stroke-opacity:.6;fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
-.tcover{width:100%;max-height:320px;object-fit:cover;border-radius:10px;margin-bottom:10px;display:block}
+.tcover{width:auto;max-width:100%;height:auto;max-height:min(440px,62vh);object-fit:contain;border-radius:10px;margin:0 auto 10px;display:block}
 
 /*
  COULEUR DU FOND DE CHAQUE ILLUSTRATION
@@ -696,11 +696,12 @@ header .row{gap:6px;flex-wrap:nowrap}
 .glf:focus-visible{box-shadow:0 0 0 3px var(--accent)}
 .glfi{display:grid;min-height:190px}
 .glfa,.glfb{grid-area:1/1;border-radius:18px;position:relative;overflow:hidden;transition:opacity .35s ease,transform .35s ease,visibility .35s}
-.glfa{background:radial-gradient(120% 120% at 0% 0%,#0f5fb0 0%,#0a3a73 45%,#071f3d 100%);color:#fff;padding:16px 18px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;box-shadow:0 8px 22px rgba(7,31,61,.35);border:1px solid rgba(90,174,234,.35)}
+.glfa{background:linear-gradient(135deg,rgba(45,143,224,.10),rgba(45,143,224,.03)),var(--card);color:var(--text);padding:16px 18px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.glfa::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#38a3f0,#0a4a8a);opacity:.55}
 .glt,.glword,.glhint{position:relative;z-index:1}
 .glogo{width:30px;height:30px;border-radius:50%;background:#fff;padding:2px;object-fit:contain;flex:none}
-.glword{font-size:1.4rem;font-weight:800;line-height:1.2;text-shadow:0 1px 8px rgba(0,0,0,.4);overflow-wrap:anywhere}
-.glhint{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.glword{font-size:1.4rem;font-weight:800;line-height:1.2;color:var(--accent);overflow-wrap:anywhere}
+.glhint{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .glfb{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);opacity:0;visibility:hidden;transform:scale(.96);display:flex;flex-direction:column}
 .glfb::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#38a3f0,#0a4a8a)}
 .glbk{padding:16px 18px 12px 22px;position:relative;z-index:1;flex:1}
@@ -713,6 +714,17 @@ header .row{gap:6px;flex-wrap:nowrap}
 .glband{display:flex;align-items:center;gap:10px;padding:10px 12px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M0 0h22L11 22z' fill='%23fff' fill-opacity='.10'/%3E%3Cpath d='M0 22h22L11 0z' fill='%2338b6f0' fill-opacity='.16'/%3E%3C/svg%3E"),linear-gradient(120deg,#0a2f5a,#0a5aa8);color:#fff}
 .glband b{font-size:1rem}
 .glband .glogo{width:28px;height:28px}
+/* dossiers à l'intérieur d'une fiche constructeur */
+.fdsec{border:1px solid var(--line);border-left:4px solid #2d8fe0;border-radius:12px;padding:10px 12px;margin:10px 0;background:linear-gradient(135deg,rgba(45,143,224,.08),rgba(45,143,224,.02)),var(--card)}
+details.fdsec>summary{cursor:pointer;display:flex;align-items:center;gap:10px;font-weight:700;list-style:none}
+details.fdsec>summary::-webkit-details-marker{display:none}
+details.fdsec>summary::after{content:"›";margin-left:auto;font-size:1.4rem;color:var(--accent);transition:transform .2s}
+details.fdsec[open]>summary::after{transform:rotate(90deg)}
+.fdsec svg.fdic{width:24px;height:24px;flex:none;color:var(--accent)}
+.fdsec .fpdfs{margin-top:10px}
+.fdsec .fdhead{display:flex;align-items:center;gap:8px}
+.fdsec .fdhead input{flex:1;min-width:0;font-weight:700}
+.fpdfrow select{max-width:150px}
 /* fiches constructeur : liste de PDF */
 .fpdfs{display:flex;flex-direction:column;gap:8px;margin:6px 0}
 .fpdfrow{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-left:4px solid #2d8fe0;border-radius:10px;padding:10px 12px;text-align:left;width:100%}
@@ -760,7 +772,7 @@ header .row{gap:6px;flex-wrap:nowrap}
 .fltip{position:absolute;z-index:5;width:250px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);overflow:hidden;pointer-events:none;font-size:.88rem}
 .fltip.pin{pointer-events:auto}
 .fltip[hidden]{display:none}
-.fltip img{width:100%;height:130px;object-fit:cover;display:block}
+.fltip img{width:100%;height:140px;object-fit:contain;background:var(--bg);display:block}
 .fltip .flph{height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:linear-gradient(135deg,#0a3d62,#38b6a8);color:#fff;font-size:.75rem}
 .fltip .flph svg{width:34px;height:34px;fill:none;stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .fltip .flt{padding:10px 12px}
@@ -770,6 +782,15 @@ header .row{gap:6px;flex-wrap:nowrap}
 .flmodal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto}
 .flmodal .panel{width:min(480px,100%);max-height:94vh;overflow:auto;margin:0}
 @media(max-width:640px){.flbox{height:calc(100vh - 260px)}.fltip{width:220px}}
+/* ===== PHOTOS D'ILLUSTRATION : jamais déformées, jamais coupées n'importe comment =====
+   Photo de format proche de la carte -> elle la remplit (cover). Photo verticale ou très différente -> elle est affichée
+   en ENTIER (contain) sur un fond flou fait avec la photo elle-même (classe .fitc posée par fitCover() dans le script). */
+.card .cover img{position:relative;z-index:1}
+.card .cover::after{z-index:2;pointer-events:none}
+.card .cover.fitc{background:#0b1118}
+.card .cover.fitc::before{content:"";position:absolute;inset:-14%;background:var(--ci) center/cover no-repeat;filter:blur(18px) saturate(1.15) brightness(.8);z-index:0}
+.card .cover.fitc img{object-fit:contain}
+img{image-orientation:from-image}
 </style>
 </head>
 <body>
@@ -2403,18 +2424,58 @@ function glEdDel(){
 */
 const fSize=n=>!n?'':(n>1048576?(n/1048576).toFixed(1)+' Mo':Math.round(n/1024)+' Ko');
 const fFiles=f=>Array.isArray(f.files)?f.files:(f.file?[{key:f.id,name:f.file.name,size:f.file.size,label:(f.file.name||'').replace(/\.pdf$/i,'')}]:[]);
+const FD_ICO='<svg class="fdic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+/* DOSSIERS DANS UNE FICHE : f.folders=[{id,name}] ; chaque PDF a un champ "folder" (id du dossier, vide = hors dossier).
+   Ils sont enregistrés avec la fiche (donc aussi dans la sauvegarde et dans donnees.json). */
 function fMultiEdHTML(){
-  const fl=state.fd.files||[];
+  const d=state.fd, fl=d.files||[], fo=d.folders=d.folders||[];
+  const inFo=x=>x.folder&&fo.some(o=>o.id===x.folder)?x.folder:'';
+  const mv=x=>fo.length?`<select onchange="mvFPdf('${x.key}',this.value)" title="${esc(L('Déplacer dans un dossier','Move to a folder'))}"><option value="">${esc(L('Hors dossier','No folder'))}</option>${fo.map(o=>`<option value="${o.id}" ${inFo(x)===o.id?'selected':''}>${esc(o.name||L('(sans nom)','(unnamed)'))}</option>`).join('')}</select>`:'';
+  const rows=fid=>{ const l=fl.map((x,i)=>[x,i]).filter(([x])=>inFo(x)===fid);
+    return l.length?`<div class="fpdfs">${l.map(([x,i])=>`<div class="fpdfrow"><span class="fpdfic">PDF</span><input value="${esc(x.label||x.name)}" oninput="state.fd.files[${i}].label=this.value" aria-label="${esc(L('Nom affiché','Display name'))}">${mv(x)}<span class="meta">${fSize(x.size)}</span><button class="small danger" onclick="rmFPdf(${i})">${L('Retirer','Remove')}</button></div>`).join('')}</div>`:''; };
+  const add=fid=>`<div class="row" style="margin-top:8px"><input type="file" accept="application/pdf,.pdf" multiple style="max-width:340px" onchange="addFPdfs(this,'${fid}')"></div>`;
   return `<label>${L('Documents PDF','PDF documents')}</label>
-   ${fl.length?`<div class="fpdfs">${fl.map((x,i)=>`<div class="fpdfrow"><span class="fpdfic">PDF</span><input value="${esc(x.label||x.name)}" oninput="state.fd.files[${i}].label=this.value" aria-label="${esc(L('Nom affiché','Display name'))}"><span class="meta">${fSize(x.size)}</span><button class="small danger" onclick="rmFPdf(${i})">${L('Retirer','Remove')}</button></div>`).join('')}</div>`:`<p class="meta" style="margin:4px 0">${L('Aucun PDF pour le moment.','No PDF yet.')}</p>`}
-   <div class="row" style="margin-top:8px"><input type="file" accept="application/pdf,.pdf" multiple style="max-width:340px" onchange="addFPdfs(this)"></div>
-   <p class="meta" style="margin:6px 0 0">${L('Vous pouvez ajouter plusieurs PDF (30 Mo max chacun) et changer le nom affiché. Sur la fiche, on choisit le PDF à ouvrir dans une liste.','You can add several PDFs (30 MB max each) and change the display name. On the sheet, you pick the PDF to open from a list.')}</p>`;
+   ${rows('')||`<p class="meta" style="margin:4px 0">${L('Aucun PDF hors dossier.','No PDF outside folders.')}</p>`}${add('')}
+   ${fo.map((o,j)=>`<div class="fdsec"><div class="fdhead">${FD_ICO}<input value="${esc(o.name)}" placeholder="${esc(L('Nom du dossier','Folder name'))}" oninput="state.fd.folders[${j}].name=this.value"><button class="small danger" onclick="rmFFolder(${j})">${L('Supprimer le dossier','Delete folder')}</button></div>
+     ${rows(o.id)||`<p class="meta" style="margin:8px 0 0">${L('Dossier vide : ajoutez des PDF ci-dessous.','Empty folder: add PDFs below.')}</p>`}${add(o.id)}</div>`).join('')}
+   <div class="row" style="margin-top:12px"><button onclick="addFFolder()">+ ${L('Ajouter un dossier dans cette fiche','Add a folder in this sheet')}</button></div>
+   <label style="margin-top:12px">📂 ${L('Importer un dossier de mon ordinateur (ses PDF et sous-dossiers)','Import a folder from my computer (its PDFs and subfolders)')}</label>
+   <div class="row"><input type="file" webkitdirectory directory multiple style="max-width:340px" onchange="importFFolder(this)"></div>
+   <p class="meta" style="margin:6px 0 0">${L('Vous pouvez ajouter plusieurs PDF (30 Mo max chacun), les ranger dans des dossiers et changer leur nom affiché. Sur la fiche, on choisit le PDF à ouvrir dans une liste.','You can add several PDFs (30 MB max each), sort them into folders and change their display name. On the sheet, you pick the PDF to open from a list.')}</p>`;
 }
-function addFPdfs(inp){
+function addFFolder(){
+  const n=(prompt(L('Nom du dossier :','Folder name:'))||'').trim(); if(!n) return;
+  const d=state.fd; (d.folders=d.folders||[]).push({id:'d'+uid(),name:n}); renderFicheEditor();
+}
+function rmFFolder(j){
+  const d=state.fd, o=(d.folders||[])[j]; if(!o) return;
+  if(!confirm(L('Supprimer le dossier « '+(o.name||'')+' » ? Ses PDF sont conservés, hors dossier.','Delete folder “'+(o.name||'')+'”? Its PDFs are kept, outside any folder.'))) return;
+  (d.files||[]).forEach(x=>{ if(x.folder===o.id) x.folder=''; }); d.folders.splice(j,1); renderFicheEditor();
+}
+/* Import d'un dossier entier : chaque sous-dossier devient un dossier de la fiche (les PDF placés directement dans le dossier choisi
+   vont dans un dossier portant son nom). Les fichiers qui ne sont pas des PDF, ou de plus de 30 Mo, sont ignorés. */
+function importFFolder(inp){
+  const all=[...(inp.files||[])]; if(!all.length) return;
+  const d=state.fd; d.files=d.files||[]; d.folders=d.folders||[]; state.fdAdd=state.fdAdd||{};
+  let bad=0, n=0;
+  const list=all.filter(f=>{ const ok=(isPdfName(f.name)||f.type==='application/pdf')&&f.size<=30e6; if(!ok) bad++; return ok; })
+    .sort((a,b)=>(a.webkitRelativePath||a.name).localeCompare(b.webkitRelativePath||b.name,undefined,{numeric:true}));
+  list.forEach(f=>{
+    const p=(f.webkitRelativePath||f.name).split('/'), root=p[0], dirs=p.slice(1,-1);
+    const name=dirs.length?dirs.join(' / '):root;
+    let o=d.folders.find(x=>(x.name||'').toLowerCase()===name.toLowerCase());
+    if(!o){ o={id:'d'+uid(),name}; d.folders.push(o); }
+    const key=d.id+':'+uid(); state.fdAdd[key]=f; d.files.push({key,name:f.name,size:f.size,label:f.name.replace(/\.pdf$/i,''),folder:o.id}); n++;
+  });
+  toast(n?L(n+' PDF importé(s)'+(bad?' · '+bad+' ignoré(s) (pas PDF ou > 30 Mo)':'')+' : pensez à Enregistrer',n+' PDF imported'+(bad?' · '+bad+' skipped (not PDF or > 30 MB)':'')+': remember to Save'):L('Aucun PDF trouvé dans ce dossier','No PDF found in this folder'));
+  renderFicheEditor();
+}
+function mvFPdf(key,fid){ const x=(state.fd.files||[]).find(y=>y.key===key); if(x){ x.folder=fid; renderFicheEditor(); } }
+function addFPdfs(inp,fid){
   const d=state.fd; d.files=d.files||[]; state.fdAdd=state.fdAdd||{}; let bad=0;
   [...(inp.files||[])].forEach(f=>{
     if(!(isPdfName(f.name)||f.type==='application/pdf')||f.size>30e6){ bad++; return; }
-    const key=d.id+':'+uid(); state.fdAdd[key]=f; d.files.push({key,name:f.name,size:f.size,label:f.name.replace(/\.pdf$/i,'')});
+    const key=d.id+':'+uid(); state.fdAdd[key]=f; d.files.push({key,name:f.name,size:f.size,label:f.name.replace(/\.pdf$/i,''),folder:fid||''});
   });
   if(bad) toast(L(bad+' fichier(s) refusé(s) : PDF de 30 Mo max uniquement',bad+' file(s) rejected: PDF files up to 30 MB only'));
   renderFicheEditor();
@@ -2427,7 +2488,11 @@ function rmFPdf(i){
 /* sur la fiche : liste des PDF, puis ouverture de celui qu'on choisit */
 function fPdfList(f){
   const box=$('pdfBox'); if(!box||!f) return; const fl=fFiles(f); if(!fl.length){ box.innerHTML=''; return; }
-  box.innerHTML=`<h3 style="margin:16px 0 8px">${L('Documents','Documents')} (${fl.length})</h3><div class="fpdfs">${fl.map((x,i)=>`<button class="fpdfrow fpdfbtn" onclick="fPdfOpen('${f.id}',${i})"><span class="fpdfic">PDF</span><span class="fpdfn">${esc(x.label||x.name)}</span><span class="meta">${fSize(x.size)}</span><span class="fpdfgo">›</span></button>`).join('')}</div>`;
+  const fo=f.folders||[], inFo=x=>x.folder&&fo.some(o=>o.id===x.folder)?x.folder:'';
+  const btns=fid=>fl.map((x,i)=>[x,i]).filter(([x])=>inFo(x)===fid).map(([x,i])=>`<button class="fpdfrow fpdfbtn" onclick="fPdfOpen('${f.id}',${i})"><span class="fpdfic">PDF</span><span class="fpdfn">${esc(x.label||x.name)}</span><span class="meta">${fSize(x.size)}</span><span class="fpdfgo">›</span></button>`).join('');
+  const root=btns('');
+  box.innerHTML=`<h3 style="margin:16px 0 8px">${L('Documents','Documents')} (${fl.length})</h3>${root?`<div class="fpdfs">${root}</div>`:''}`+
+   fo.map(o=>{ const n=fl.filter(x=>inFo(x)===o.id).length; return `<details class="fdsec"><summary>${FD_ICO}<span>${esc(o.name||L('Dossier','Folder'))}</span><span class="meta">${n} PDF</span></summary>${n?`<div class="fpdfs">${btns(o.id)}</div>`:`<p class="meta" style="margin:8px 0 0">${L('Dossier vide.','Empty folder.')}</p>`}</details>`; }).join('');
 }
 function fPdfOpen(id,i){
   const f=fiches.find(x=>x.id===id), x=f&&fFiles(f)[i], box=$('pdfBox'); if(!x||!box) return;
@@ -2747,6 +2812,7 @@ async function saveFiche(){
   saveFiches(); toast(fToast(d.type,i<0?'add':'edit')); openFiche(d.id);
 }
 function delFiche(){ if(!canEditFiche(state.fd.type)){ toast(T('need_cls3')); return; } if(!confirm(L('Supprimer définitivement cette fiche ?','Delete this sheet permanently?'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); { const o=fiches.find(f=>f.id===state.fd.id); [...(o?fFiles(o):[]).map(x=>x.key),...(state.fdDel||[])].forEach(k=>idbDel(k).catch(()=>{})); } fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(fToast(t,'del')); renderFiches(t); }
+
 
 /*
  ===================== JEU 1 : TRIEUR SIBELCO (dessiné dans un <canvas>) =====================
@@ -4483,6 +4549,48 @@ async function bkNow(){ try{ const data=bkSnapshot(); if(data[KEY]||data[UKEY]) 
 // stockage persistant : le navigateur ne doit plus effacer nos données de lui-même
 async function askPersist(){ try{ if(navigator.storage&&navigator.storage.persist&&!(await navigator.storage.persisted())) await navigator.storage.persist(); }catch(e){} }
 // RESTAURATION : appelée AVANT le démarrage. Si tout a disparu du stockage principal mais que la copie de secours existe -> on remet tout.
+
+/* ============================================================================
+ DONNEES PARTAGEES DU SITE : fichier donnees.json (à mettre à côté de index.html, dans le dépôt Git)
+   - Paramètres > "Exporter pour le site" télécharge donnees.json (tutos, fiches, mots-clés, flowsheet, textes, photos d'accueil).
+     Les comptes, mots de passe, scores et réglages personnels n'y sont JAMAIS mis (le dépôt peut être public).
+   - Vous remplacez donnees.json dans le dépôt puis vous faites le commit : au prochain chargement, chaque appareil
+     fusionne ce fichier avec ses données (même identifiant = la version du fichier gagne ; le reste est conservé).
+   - La fusion n'a lieu que si le contenu du fichier a changé depuis la dernière fois (vos modifs locales ne sont pas écrasées à chaque ouverture).
+ ============================================================================ */
+const SH_ARR=[KEY,FKEY,GLKEY], SH_OBJ=[FLKEY,FZKEY,M3_TXT_KEY,TPKEY], SH_HASH='sibelco_shared_hash';
+const shHash=t=>{ let h=5381; for(let i=0;i<t.length;i++) h=((h<<5)+h+t.charCodeAt(i))|0; return t.length+':'+h; };
+async function sharedSync(){
+  try{
+    const r=await fetch('donnees.json',{cache:'no-store'}); if(!r.ok) return false;
+    const txt=await r.text(), h=shHash(txt);
+    if(localStorage.getItem(SH_HASH)===h) return false;
+    const d=JSON.parse(txt); if(!d||d.app!=='sibelco-tutos'||!d.data||typeof d.data!=='object') return false;
+    SH_ARR.forEach(k=>{
+      if(typeof d.data[k]!=='string') return;
+      const fa=JSON.parse(d.data[k]); if(!Array.isArray(fa)) return;
+      let la=null; try{ la=JSON.parse(localStorage.getItem(k)); }catch(e){}
+      if(!Array.isArray(la)){ localStorage.setItem(k,JSON.stringify(fa)); return; }
+      fa.forEach(it=>{ const i=it&&it.id!==undefined?la.findIndex(x=>x&&x.id===it.id):-1; if(i>=0) la[i]=it; else la.push(it); });
+      localStorage.setItem(k,JSON.stringify(la));
+    });
+    SH_OBJ.forEach(k=>{
+      if(typeof d.data[k]!=='string') return;
+      const fo=JSON.parse(d.data[k]); if(!fo||typeof fo!=='object'||Array.isArray(fo)) return;
+      let lo={}; try{ lo=JSON.parse(localStorage.getItem(k))||{}; }catch(e){}
+      localStorage.setItem(k,JSON.stringify(Object.assign(lo,fo)));
+    });
+    localStorage.setItem(SH_HASH,h);
+    location.reload(); return true;
+  }catch(e){ return false; }
+}
+function siteExport(){
+  const data={}; [...SH_ARR,...SH_OBJ].forEach(k=>{ try{ const v=localStorage.getItem(k); if(v!==null) data[k]=v; }catch(e){} });
+  const blob=new Blob([JSON.stringify({app:'sibelco-tutos',version:2,date:new Date().toISOString(),data},null,1)],{type:'application/json'});
+  const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='donnees.json';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
+  toast(L('donnees.json téléchargé : remplacez-le dans le dépôt puis faites le commit','donnees.json downloaded: replace it in the repo then commit'));
+}
 async function safeBoot(){
   let restored=false;
   try{
@@ -4493,6 +4601,7 @@ async function safeBoot(){
     }
   }catch(e){}
   if(restored){ location.reload(); return; }          // le script relit alors les données restaurées
+  if(await sharedSync()) return;                      // nouveau donnees.json dans le dépôt : fusion puis rechargement
   try{ sessionStorage.removeItem('sibelco_restoring'); }catch(e){}
   boot(); askPersist(); setTimeout(bkNow,1500);
 }
@@ -4506,7 +4615,7 @@ function fullBackup(){
 }
 function fullRestore(ev){
   const f=ev.target.files[0]; if(!f) return; const r=new FileReader();
-  r.onload=()=>{ try{edit
+  r.onload=()=>{ try{
       const d=JSON.parse(r.result); if(!d||d.app!=='sibelco-tutos'||!d.data||typeof d.data!=='object') throw 0;
       if(!confirm(L('Remplacer TOUTES les données de cet appareil (tutos, fiches, comptes, scores) par celles de la sauvegarde ?','Replace ALL data on this device (tutorials, sheets, accounts, scores) with the backup?'))) return;
       Object.keys(d.data).forEach(k=>{ if(BK_KEYS.includes(k)&&typeof d.data[k]==='string') localStorage.setItem(k,d.data[k]); });
@@ -4526,6 +4635,7 @@ const fmtD=t=>t?new Date(+t).toLocaleString(lang,{dateStyle:'short',timeStyle:'s
       <div id="safest" class="meta" style="display:block;line-height:1.9">…</div>
       ${adm?`<div class="row" style="margin-top:10px"><button class="primary" onclick="fullBackup()">${L('Télécharger la sauvegarde complète','Download full backup')}</button>
       <button onclick="document.getElementById('fullimp').click()">${L('Restaurer depuis un fichier','Restore from file')}</button>
+      <button onclick="siteExport()">${L('Exporter pour le site (donnees.json)','Export for the site (donnees.json)')}</button>
       <input id="fullimp" type="file" accept="application/json" class="hidden" onchange="fullRestore(event)"></div>`:''}</div>`);
     (async()=>{
       let per=false, use='', snap=null;
@@ -4544,6 +4654,19 @@ const fmtD=t=>t?new Date(+t).toLocaleString(lang,{dateStyle:'short',timeStyle:'s
  mountLogos() : transforme les .logo3d déjà présents en globes ; netUpdate() : affiche la pastille Hors ligne si besoin ;
  instUpdate() : affiche le bouton Installer si le navigateur le propose.
 */
+/* PHOTOS DES CARTES : fitCover() choisit entre « remplir » et « afficher en entier sur fond flou » selon le format de la photo.
+   Un observateur l'applique à toutes les cartes (accueil, tutos, fiches, dossiers...) dès qu'elles sont dessinées. */
+function fitCover(img){
+  const c=img.parentElement; if(!c||!c.classList.contains('cover')) return;
+  const go=()=>{ if(!img.naturalWidth) return; const r=img.naturalWidth/img.naturalHeight, box=c.clientHeight?c.clientWidth/c.clientHeight:2;
+    const near=Math.abs(Math.log(r/box))<0.3; c.classList.toggle('fitc',!near);
+    if(!near) c.style.setProperty('--ci','url("'+img.src+'")'); };
+  if(img.complete&&img.naturalWidth) go(); else img.addEventListener('load',go,{once:true});
+}
+(function(){
+  const run=()=>document.querySelectorAll('.card .cover img:not([data-fit])').forEach(i=>{ i.dataset.fit='1'; fitCover(i); });
+  new MutationObserver(run).observe(document.body,{childList:true,subtree:true}); run();
+})();
 mountLogos(); netUpdate(); instUpdate();
 
 /* EXPLICATION SUPPLÉMENTAIRE : PHOTO DE FOND FACULTATIVE
