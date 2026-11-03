@@ -689,19 +689,57 @@ header .row{gap:6px;flex-wrap:nowrap}
 .cover.c-flowsheet{background:linear-gradient(135deg,#0a3d62,#38b6a8)}
 .cover.c-glossaire{background:linear-gradient(135deg,#5a3a0a,#e0b04a)}
 /* ===== MOTS-CLES / DEFINITIONS ===== */
-.glf{perspective:1000px;cursor:pointer;outline:none}
-.glfi{display:grid;transition:transform .5s;transform-style:preserve-3d}
-.glf.flip .glfi{transform:rotateY(180deg)}
-.glfa,.glfb{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;text-align:center;min-height:130px}
-.glfa b{font-size:1.15rem}
-.glfb{transform:rotateY(180deg);border-color:var(--accent);align-items:flex-start;justify-content:flex-start;text-align:left}
-.glfb p{margin:0}
-.glf:hover .glfa,.glf:focus-visible .glfa{border-color:var(--accent)}
+/* cartes Sibelco : face avant = bleu nuit + globe à facettes du logo ; face arrière = définition. Pas de 3D (fiable sur tous les téléphones) : fondu entre les deux faces. */
+.glgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.glf{position:relative;cursor:pointer;outline:none;border-radius:18px;-webkit-tap-highlight-color:transparent;transition:transform .2s ease}
+.glf:hover{transform:translateY(-3px)}
+.glf:focus-visible{box-shadow:0 0 0 3px var(--accent)}
+.glfi{display:grid;min-height:190px}
+.glfa,.glfb{grid-area:1/1;border-radius:18px;position:relative;overflow:hidden;transition:opacity .35s ease,transform .35s ease,visibility .35s}
+.glfa{background:radial-gradient(120% 120% at 0% 0%,#0f5fb0 0%,#0a3a73 45%,#071f3d 100%);color:#fff;padding:16px 18px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;box-shadow:0 8px 22px rgba(7,31,61,.35);border:1px solid rgba(90,174,234,.35)}
+.glt,.glword,.glhint{position:relative;z-index:1}
+.glogo{width:30px;height:30px;border-radius:50%;background:#fff;padding:2px;object-fit:contain;flex:none}
+.glword{font-size:1.4rem;font-weight:800;line-height:1.2;text-shadow:0 1px 8px rgba(0,0,0,.4);overflow-wrap:anywhere}
+.glhint{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.glfb{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);opacity:0;visibility:hidden;transform:scale(.96);display:flex;flex-direction:column}
+.glfb::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#38a3f0,#0a4a8a)}
+.glbk{padding:16px 18px 12px 22px;position:relative;z-index:1;flex:1}
+.glbk h4{margin:0 0 8px;color:var(--accent);font-size:1.05rem;display:flex;align-items:center;gap:8px}
+.glbk .glogo{width:24px;height:24px;border:1px solid var(--line)}
+.glbk p{margin:0;line-height:1.5;color:var(--text)}
+.glfb .small{margin:0 18px 14px 22px;align-self:flex-start;position:relative;z-index:1}
+.glf.flip .glfa{opacity:0;visibility:hidden;transform:scale(1.03)}
+.glf.flip .glfb{opacity:1;visibility:visible;transform:none}
+.glband{display:flex;align-items:center;gap:10px;padding:10px 12px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M0 0h22L11 22z' fill='%23fff' fill-opacity='.10'/%3E%3Cpath d='M0 22h22L11 0z' fill='%2338b6f0' fill-opacity='.16'/%3E%3C/svg%3E"),linear-gradient(120deg,#0a2f5a,#0a5aa8);color:#fff}
+.glband b{font-size:1rem}
+.glband .glogo{width:28px;height:28px}
+/* fiches constructeur : liste de PDF */
+.fpdfs{display:flex;flex-direction:column;gap:8px;margin:6px 0}
+.fpdfrow{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-left:4px solid #2d8fe0;border-radius:10px;padding:10px 12px;text-align:left;width:100%}
+.fpdfbtn{cursor:pointer;font:inherit;color:var(--text)}
+.fpdfbtn:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.fpdfic{flex:none;background:#d33;color:#fff;font-weight:800;font-size:.7rem;letter-spacing:.06em;padding:6px 8px;border-radius:6px}
+.fpdfn{flex:1;font-weight:600;overflow-wrap:anywhere}
+.fpdfgo{font-size:1.4rem;color:var(--accent)}
+.fpdfrow input{flex:1;min-width:0}
 .gllist{display:flex;flex-direction:column;gap:8px}
 .glrow{display:grid;grid-template-columns:minmax(110px,220px) 1fr auto;gap:12px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .glw{font-weight:700}
 .gld{cursor:pointer;transition:filter .2s}
 .gld.blur{filter:blur(7px);user-select:none;-webkit-user-select:none}
+.glrow{border-left:4px solid #2d8fe0}
+.glw{color:var(--accent)}
+/* évaluation */
+.gle{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);max-width:720px;margin:8px auto}
+.gle .glband{justify-content:space-between}
+.gle .glbody{padding:16px}
+.gleq{font-size:1.05rem;line-height:1.5;padding:14px;border-left:4px solid #2d8fe0;background:rgba(45,143,224,.08);border-radius:8px;margin:0 0 12px}
+.gleo{display:block;width:100%;text-align:left;margin:6px 0;padding:11px 14px;font-size:.98rem}
+.gleo.ok{background:rgba(26,138,74,.2);border-color:var(--ok);color:var(--text)}
+.gleo.ko{background:rgba(211,51,51,.18);border-color:#d33;color:var(--text)}
+.gleo[disabled]{opacity:1;cursor:default}
+.glescore{font-size:2.8rem;font-weight:800;color:var(--accent);text-align:center;margin:4px 0}
+.glemiss{border-left:4px solid #d33;padding:6px 10px;margin:6px 0;background:rgba(211,51,51,.07);border-radius:6px;font-size:.92rem}
 @media(max-width:640px){.glrow{grid-template-columns:1fr auto}.glrow .glw{grid-column:1/-1}}
 /* ===== FLOWSHEET : modification des cases ===== */
 .flbox.zedit{cursor:crosshair}
@@ -2201,38 +2239,129 @@ function glItems(){
   return GL.items;
 }
 function glSave(){ try{ localStorage.setItem(GLKEY,JSON.stringify(GL.items)); }catch(e){ toast(T('storage_full')); } }
-function glUi(){ try{ localStorage.setItem(GLUI,JSON.stringify({mode:GL.mode,blur:GL.blur})); }catch(e){} }
+function glUi(){ try{ localStorage.setItem(GLUI,JSON.stringify({mode:GL.mode==='list'?'list':'cards',blur:GL.blur})); }catch(e){} }
 const glW=g=>(lang==='en'&&g.word_en)||g.word, glD=g=>(lang==='en'&&g.def_en)||g.def;
+/*
+ ===================== MODE EVALUATION (mots-clés / définitions) =====================
+ Questionnaire à choix multiples : on affiche une définition, il faut retrouver le bon mot parmi 4 propositions.
+ RECOMPENSE : si le score atteint le seuil de réussite, on gagne GLE.pct % vers la classe suivante (même barre de progression que les tutos).
+   - un seul gain par jour et par personne (settings.glDay), pour éviter de « farmer » les points en refaisant l'évaluation ;
+   - uniquement tant que la classe est inférieure à MAXAUTO (les classes 3 et 4 sont données par un administrateur) ;
+   - refaire l'évaluation reste toujours possible pour s'entraîner.
+ REGLAGES (classes 3 et 4, sur l'écran de départ de l'évaluation) : nombre de questions (n), seuil de réussite en % (pass), gain en % (pct).
+ Gardés dans le navigateur (clé GLEKEY, incluse dans la sauvegarde JSON).
+*/
+const GLEKEY='sibelco_gloss_eval_v1';
+const GLE=Object.assign({n:10,pass:80,pct:5},(()=>{ try{ return JSON.parse(localStorage.getItem(GLEKEY))||{}; }catch(e){ return {}; } })());
+const glClamp=(v,a,b,d)=>{ v=Math.round(+v); return isNaN(v)?d:Math.max(a,Math.min(b,v)); };
+function glESave(){ GLE.n=glClamp(GLE.n,3,50,10); GLE.pass=glClamp(GLE.pass,1,100,80); GLE.pct=glClamp(GLE.pct,1,100,5); try{ localStorage.setItem(GLEKEY,JSON.stringify(GLE)); }catch(e){ toast(T('storage_full')); } }
+const glToday=()=>new Date().toLocaleDateString('en-CA');
+const glMix=a=>{ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const glById=id=>glItems().find(x=>x.id===id);
+
 function renderGloss(){
   state.section='glossaire'; state.view='gloss'; $('filters').classList.add('hidden'); buildNav(); glItems();
   const ed=canEditTutos();
   $('app').innerHTML=`<div class="row noprint" style="margin:8px 0;gap:8px;flex-wrap:wrap">
     <h2 style="margin:0">${esc(T('nav_gloss'))}</h2>
     <input id="glQ" type="search" value="${esc(GL.q)}" placeholder="${esc(L('Chercher un mot…','Search a word…'))}" style="min-width:190px;flex:1;max-width:280px" oninput="GL.q=this.value;glRender()">
-    <button id="glMc" onclick="glMode('cards')">${L('Cartes','Cards')}</button><button id="glMl" onclick="glMode('list')">${L('Standard','Standard')}</button>
+    <button id="glMc" onclick="glMode('cards')">${L('Cartes','Cards')}</button><button id="glMl" onclick="glMode('list')">${L('Standard','Standard')}</button><button id="glMe" onclick="glMode('eval')">${L('Évaluation','Evaluation')}</button>
     <button id="glBl" onclick="glBlur()" aria-pressed="false">${L('Flouter les définitions','Blur definitions')}</button>
-    <button onclick="glShuffle()">${L('Mélanger','Shuffle')}</button>
-    ${ed?`<button class="primary" onclick="glEdit('')">${L('+ Ajouter un mot','+ Add a word')}</button>`:''}</div>
+    <button id="glShb" onclick="glShuffle()">${L('Mélanger','Shuffle')}</button>
+    ${ed?`<button id="glAdd" class="primary" onclick="glEdit('')">${L('+ Ajouter un mot','+ Add a word')}</button>`:''}</div>
    <p class="meta noprint" id="glHint" style="margin:0 0 8px"></p><div id="glBox"></div>`;
   glRender(); window.scrollTo(0,0);
 }
 function glRender(){
   const b=$('glBox'); if(!b) return;
-  const q=GL.q.trim().toLowerCase(), ed=canEditTutos();
+  const q=GL.q.trim().toLowerCase(), ed=canEditTutos(), ev=GL.mode==='eval';
+  const on=(id,v)=>{ const e=$(id); if(e){ e.classList.toggle('primary',v); e.setAttribute('aria-pressed',v); } };
+  on('glMc',GL.mode==='cards'); on('glMl',GL.mode==='list'); on('glMe',ev); on('glBl',GL.mode==='list'&&GL.blur);
+  const hide=(id,v)=>{ const e=$(id); if(e) e.classList.toggle('hidden',v); };
+  hide('glQ',ev); hide('glShb',ev); hide('glAdd',ev); hide('glBl',GL.mode!=='list');
+  const h=$('glHint'); if(h) h.textContent=ev?'':GL.mode==='cards'?L('Touchez une carte pour la retourner et voir la définition.','Tap a card to flip it and see the definition.'):(GL.blur?L('Touchez une définition floutée pour la révéler.','Tap a blurred definition to reveal it.'):'');
+  if(ev){ glEvalRender(); return; }
   let l=glItems().filter(g=>!q||[g.word,g.def,g.word_en,g.def_en].join(' ').toLowerCase().includes(q));
   if(GL.shuf) l=l.slice().sort((a,c)=>GL.shuf.indexOf(a.id)-GL.shuf.indexOf(c.id));
-  const on=(id,v)=>{ const e=$(id); if(e){ e.classList.toggle('primary',v); e.setAttribute('aria-pressed',v); } };
-  on('glMc',GL.mode==='cards'); on('glMl',GL.mode==='list'); on('glBl',GL.mode==='list'&&GL.blur);
-  const bl=$('glBl'); if(bl) bl.classList.toggle('hidden',GL.mode!=='list');
-  const h=$('glHint'); if(h) h.textContent=GL.mode==='cards'?L('Touchez une carte pour la retourner et voir la définition.','Tap a card to flip it and see the definition.'):(GL.blur?L('Touchez une définition floutée pour la révéler.','Tap a blurred definition to reveal it.'):'');
   if(!l.length){ b.innerHTML=`<div class="box">${glItems().length?L('Aucun mot ne correspond à la recherche.','No word matches your search.'):L('Aucun mot pour le moment.','No word yet.')}</div>`; return; }
   if(GL.mode==='cards'){
-    b.innerHTML=`<div class="grid">`+l.map(g=>`<div class="glf" tabindex="0" role="button" aria-label="${esc(glW(g))}" onclick="this.classList.toggle('flip')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('flip')}"><div class="glfi"><div class="glfa"><b>${esc(glW(g))}</b><span class="meta">${L('Toucher pour voir la définition','Tap to see the definition')}</span></div><div class="glfb"><b>${esc(glW(g))}</b><p>${esc(glD(g)).replace(/\n/g,'<br>')}</p>${ed?`<button class="small noprint" onclick="event.stopPropagation();glEdit('${g.id}')">${L('Modifier','Edit')}</button>`:''}</div></div></div>`).join('')+`</div>`;
+    b.innerHTML=`<div class="glgrid">`+l.map(g=>`<div class="glf" tabindex="0" role="button" aria-label="${esc(glW(g))}" onclick="this.classList.toggle('flip')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('flip')}"><div class="glfi">
+      <div class="glfa"><b class="glword">${esc(glW(g))}</b><span class="glhint">${L('Toucher pour voir la définition','Tap to see the definition')}</span></div>
+      <div class="glfb"><div class="glbk"><h4>${esc(glW(g))}</h4><p>${esc(glD(g)).replace(/\n/g,'<br>')}</p></div>${canEditTutos()?`<button class="small noprint" onclick="event.stopPropagation();glEdit('${g.id}')">${L('Modifier','Edit')}</button>`:''}</div></div></div>`).join('')+`</div>`;
   } else {
     b.innerHTML=`<div class="gllist">`+l.map(g=>`<div class="glrow"><div class="glw">${esc(glW(g))}</div><div class="gld ${GL.blur&&!GL.rev[g.id]?'blur':''}" onclick="glRev('${g.id}',this)">${esc(glD(g)).replace(/\n/g,'<br>')}</div>${ed?`<button class="small noprint" onclick="glEdit('${g.id}')" title="${esc(L('Modifier','Edit'))}">✎</button>`:'<span></span>'}</div>`).join('')+`</div>`;
   }
 }
-function glMode(m){ GL.mode=m; glUi(); glRender(); }
+
+/* ---- évaluation : écrans (départ / question / résultat) ---- */
+function glEvalRender(){
+  const b=$('glBox'); if(!b) return; const e=GL.ev, ed=canEditTutos();
+  const head=r=>`<div class="glband"><span style="display:flex;align-items:center;gap:10px"><img class="glogo" src="icon-192.png" alt=""><b>${L('Évaluation · mots-clés','Evaluation · keywords')}</b></span><span>${r||''}</span></div>`;
+  if(!e){
+    const words=glItems().filter(g=>glW(g)&&glD(g)).length, can=words>=2, n=Math.min(GLE.n,words);
+    const reward=settings.cls<MAXAUTO?`🎯 ${L('Score ≥','Score ≥')} ${GLE.pass} % → <b>+${GLE.pct} %</b> ${L('vers','toward')} ${esc(clsL(settings.cls+1))} <span class="meta">(${L('1 fois par jour','once a day')})</span>`:`<span class="meta">${L('Vous avez la classe maximale accessible par les tutos : l’évaluation sert d’entraînement.','You have the highest class reachable through tutorials: the evaluation is for practice.')}</span>`;
+    b.innerHTML=`<div class="gle">${head('')}<div class="glbody">
+      <p style="margin-top:0">${L('On vous montre une définition : retrouvez le bon mot parmi les propositions.','You are shown a definition: find the right word among the options.')}</p>
+      <p><b>${can?n:0}</b> ${L('questions','questions')} · ${reward}</p>
+      ${progHTML(false)}
+      ${can?'':`<div class="box">${L('Il faut au moins 2 mots dans la liste pour lancer une évaluation.','At least 2 words are needed to start an evaluation.')}</div>`}
+      <div class="row" style="margin-top:12px"><button class="primary" ${can?'':'disabled'} onclick="glEvalStart()">${L('Commencer l’évaluation','Start the evaluation')}</button></div>
+      ${ed?`<details style="margin-top:14px"><summary class="meta">${L('Réglages (classes 3 et 4)','Settings (classes 3 and 4)')}</summary>
+        <label>${L('Nombre de questions','Number of questions')}</label><input type="number" min="3" max="50" value="${GLE.n}" style="max-width:120px" onchange="GLE.n=this.value;glESave();glRender()">
+        <label>${L('Seuil de réussite (%)','Pass mark (%)')}</label><input type="number" min="1" max="100" value="${GLE.pass}" style="max-width:120px" onchange="GLE.pass=this.value;glESave();glRender()">
+        <label>${L('Gain vers la classe suivante (%)','Gain toward next class (%)')}</label><input type="number" min="1" max="100" value="${GLE.pct}" style="max-width:120px" onchange="GLE.pct=this.value;glESave();glRender()"></details>`:''}
+    </div></div>`;
+    return;
+  }
+  if(e.done){
+    const pass=e.score>=GLE.pass;
+    b.innerHTML=`<div class="gle">${head(e.ok+' / '+e.qs.length)}<div class="glbody">
+      <div class="glescore" style="${pass?'':'color:#d33'}">${e.score} %</div>
+      <p style="text-align:center;margin:0 0 10px"><b>${pass?L('Évaluation réussie !','Evaluation passed!'):L('Pas encore… continuez à réviser.','Not yet… keep revising.')}</b></p>
+      <div class="box" style="margin:8px 0">${e.reward}</div>
+      ${progHTML(false)}
+      ${e.miss.length?`<h4 style="margin:14px 0 6px">${L('À revoir','To review')}</h4>`+e.miss.map(id=>{ const g=glById(id); return g?`<div class="glemiss"><b>${esc(glW(g))}</b> — ${esc(glD(g))}</div>`:''; }).join(''):`<p class="meta">${L('Aucune erreur, bravo !','No mistakes, well done!')}</p>`}
+      <div class="row" style="margin-top:14px;gap:8px;flex-wrap:wrap"><button class="primary" onclick="glEvalStart()">${L('Recommencer','Try again')}</button><button onclick="glMode('cards')">${L('Revoir en cartes','Review with cards')}</button><button onclick="GL.ev=null;glRender()">${L('Quitter','Leave')}</button></div>
+    </div></div>`;
+    return;
+  }
+  const q=e.qs[e.i], g=glById(q.id); if(!g){ GL.ev=null; glRender(); return; }
+  const last=e.i>=e.qs.length-1;
+  b.innerHTML=`<div class="gle">${head((e.i+1)+' / '+e.qs.length)}<div class="glbody">
+    <div class="progress"><div style="width:${Math.round(e.i/e.qs.length*100)}%"></div></div>
+    <p class="meta" style="margin:10px 0 6px">${L('Quel mot correspond à cette définition ?','Which word matches this definition?')}</p>
+    <p class="gleq">${esc(glD(g)).replace(/\n/g,'<br>')}</p>
+    ${q.opts.map(id=>{ const o=glById(id); if(!o) return ''; const c=e.ans?(id===q.id?'ok':(id===e.ans?'ko':'')):''; return `<button class="gleo ${c}" ${e.ans?'disabled':''} onclick="glAnswer('${id}')">${esc(glW(o))}</button>`; }).join('')}
+    ${e.ans?`<p style="margin:10px 0 0">${e.ans===q.id?'✅ '+L('Bonne réponse !','Correct!'):'❌ '+L('La bonne réponse était : ','The right answer was: ')+'<b>'+esc(glW(g))+'</b>'}</p><div class="row" style="margin-top:10px"><button class="primary" onclick="glNext()">${last?L('Voir le résultat','See the result'):L('Question suivante','Next question')}</button></div>`:''}
+  </div></div>`;
+}
+function glEvalStart(){
+  const all=glItems().filter(g=>glW(g)&&glD(g)); if(all.length<2){ toast(L('Il faut au moins 2 mots','At least 2 words needed')); return; }
+  const qs=glMix(all).slice(0,Math.min(GLE.n,all.length)).map(g=>{
+    const others=glMix(all.filter(x=>x.id!==g.id&&glW(x)!==glW(g))).slice(0,3);
+    return {id:g.id,opts:glMix([g,...others]).map(x=>x.id)};
+  });
+  GL.mode='eval'; GL.ev={qs,i:0,ok:0,ans:null,miss:[],done:false,score:0,reward:''}; glRender(); window.scrollTo(0,0);
+}
+function glAnswer(id){ const e=GL.ev; if(!e||e.ans) return; const q=e.qs[e.i]; e.ans=id; if(id===q.id) e.ok++; else e.miss.push(q.id); glEvalRender(); }
+function glNext(){
+  const e=GL.ev; if(!e) return; e.ans=null; e.i++;
+  if(e.i>=e.qs.length){ e.score=Math.round(e.ok/e.qs.length*100); e.reward=glEvalReward(e.score); e.done=true; }
+  glEvalRender(); window.scrollTo(0,0);
+}
+/* gain de pourcentage vers la classe suivante (même mécanique que les tutos : à 100 % on passe à la classe suivante, le surplus est reporté) */
+function glEvalReward(score){
+  if(score<GLE.pass) return '❌ '+L('Score insuffisant : il faut au moins '+GLE.pass+' % pour gagner des points.','Score too low: at least '+GLE.pass+' % is needed to earn points.');
+  if(settings.cls>=MAXAUTO) return 'ℹ️ '+L('Classe maximale atteinte par les tutos : pas de points à gagner.','Highest tutorial class reached: no points to earn.');
+  const today=glToday();
+  if(settings.glDay===today) return 'ℹ️ '+L('Vous avez déjà gagné des points aujourd’hui : revenez demain pour en gagner de nouveau.','You already earned points today: come back tomorrow to earn more.');
+  const before=settings.cls; let v=(settings.pct||0)+GLE.pct;
+  while(v>=100&&settings.cls<MAXAUTO){ v-=100; settings.cls++; }
+  settings.pct=settings.cls>=MAXAUTO?0:v; settings.glDay=today; saveSettings(); buildNav();
+  return settings.cls>before?'🎉 '+L('Classe débloquée : ','Class unlocked: ')+clsL(settings.cls)
+                            :'🎯 +'+GLE.pct+' % '+L('vers ','toward ')+clsL(settings.cls+1)+' ('+Math.round(settings.pct)+' %)';
+}
+function glMode(m){ GL.mode=m; if(m==='eval') GL.ev=null; glUi(); glRender(); }
 function glBlur(){ GL.blur=!GL.blur; GL.rev={}; glUi(); glRender(); }
 function glRev(id,el){ if(!GL.blur) return; GL.rev[id]=!GL.rev[id]; el.classList.toggle('blur',!GL.rev[id]); }
 function glShuffle(){ const a=glItems().map(g=>g.id); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } GL.shuf=a; GL.rev={}; glRender(); }
@@ -2262,6 +2391,48 @@ function glEdDel(){
   const d=$('glEd'); if(!d) return; const id=d.dataset.gid;
   if(!confirm(L('Supprimer ce mot ?','Delete this word?'))) return;
   GL.items=glItems().filter(x=>x.id!==id); glSave(); glEdClose(); glRender(); toast(L('Mot supprimé','Word deleted'));
+}
+
+/*
+ ===================== FICHES CONSTRUCTEUR : PLUSIEURS PDF =====================
+ Une fiche constructeur peut avoir PLUSIEURS PDF : f.files = [{key,name,size,label}] (key = clé IndexedDB, label = nom affiché, modifiable).
+ Sur la fiche, les PDF sont d'abord présentés en LISTE (aucun PDF n'est ouvert d'office) ; on touche celui qu'on veut voir.
+ Anciennes fiches (un seul PDF dans f.file, rangé sous la clé f.id) : fFiles() les reconnaît automatiquement.
+ Dans l'éditeur : ajout de plusieurs PDF d'un coup, renommage, retrait. Rien n'est stocké avant « Enregistrer » (state.fdAdd / state.fdDel).
+ Les autres rubriques (consommables, présentation) restent à un seul fichier.
+*/
+const fSize=n=>!n?'':(n>1048576?(n/1048576).toFixed(1)+' Mo':Math.round(n/1024)+' Ko');
+const fFiles=f=>Array.isArray(f.files)?f.files:(f.file?[{key:f.id,name:f.file.name,size:f.file.size,label:(f.file.name||'').replace(/\.pdf$/i,'')}]:[]);
+function fMultiEdHTML(){
+  const fl=state.fd.files||[];
+  return `<label>${L('Documents PDF','PDF documents')}</label>
+   ${fl.length?`<div class="fpdfs">${fl.map((x,i)=>`<div class="fpdfrow"><span class="fpdfic">PDF</span><input value="${esc(x.label||x.name)}" oninput="state.fd.files[${i}].label=this.value" aria-label="${esc(L('Nom affiché','Display name'))}"><span class="meta">${fSize(x.size)}</span><button class="small danger" onclick="rmFPdf(${i})">${L('Retirer','Remove')}</button></div>`).join('')}</div>`:`<p class="meta" style="margin:4px 0">${L('Aucun PDF pour le moment.','No PDF yet.')}</p>`}
+   <div class="row" style="margin-top:8px"><input type="file" accept="application/pdf,.pdf" multiple style="max-width:340px" onchange="addFPdfs(this)"></div>
+   <p class="meta" style="margin:6px 0 0">${L('Vous pouvez ajouter plusieurs PDF (30 Mo max chacun) et changer le nom affiché. Sur la fiche, on choisit le PDF à ouvrir dans une liste.','You can add several PDFs (30 MB max each) and change the display name. On the sheet, you pick the PDF to open from a list.')}</p>`;
+}
+function addFPdfs(inp){
+  const d=state.fd; d.files=d.files||[]; state.fdAdd=state.fdAdd||{}; let bad=0;
+  [...(inp.files||[])].forEach(f=>{
+    if(!(isPdfName(f.name)||f.type==='application/pdf')||f.size>30e6){ bad++; return; }
+    const key=d.id+':'+uid(); state.fdAdd[key]=f; d.files.push({key,name:f.name,size:f.size,label:f.name.replace(/\.pdf$/i,'')});
+  });
+  if(bad) toast(L(bad+' fichier(s) refusé(s) : PDF de 30 Mo max uniquement',bad+' file(s) rejected: PDF files up to 30 MB only'));
+  renderFicheEditor();
+}
+function rmFPdf(i){
+  const d=state.fd, x=(d.files||[]).splice(i,1)[0]; if(!x) return;
+  if(state.fdAdd&&state.fdAdd[x.key]) delete state.fdAdd[x.key]; else (state.fdDel=state.fdDel||[]).push(x.key);
+  renderFicheEditor();
+}
+/* sur la fiche : liste des PDF, puis ouverture de celui qu'on choisit */
+function fPdfList(f){
+  const box=$('pdfBox'); if(!box||!f) return; const fl=fFiles(f); if(!fl.length){ box.innerHTML=''; return; }
+  box.innerHTML=`<h3 style="margin:16px 0 8px">${L('Documents','Documents')} (${fl.length})</h3><div class="fpdfs">${fl.map((x,i)=>`<button class="fpdfrow fpdfbtn" onclick="fPdfOpen('${f.id}',${i})"><span class="fpdfic">PDF</span><span class="fpdfn">${esc(x.label||x.name)}</span><span class="meta">${fSize(x.size)}</span><span class="fpdfgo">›</span></button>`).join('')}</div>`;
+}
+function fPdfOpen(id,i){
+  const f=fiches.find(x=>x.id===id), x=f&&fFiles(f)[i], box=$('pdfBox'); if(!x||!box) return;
+  box.innerHTML=`<div class="row noprint" style="margin:12px 0;gap:10px"><button onclick="fPdfList(fiches.find(x=>x.id==='${id}'))">← ${L('Liste des PDF','PDF list')}</button><b>${esc(x.label||x.name)}</b></div><div id="pdfBox2"></div>`;
+  showPdf(f,x.key,x.name,'pdfBox2'); box.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 async function boot(){
@@ -2376,10 +2547,13 @@ function loadPdfJs(){
   });
   return _pdfjs;
 }
-async function showPdf(f){
-  let b,box; try{ b=await idbGet(f.id); box=$('pdfBox'); }catch(e){} if(!b||!box) return;
+async function showPdf(f,key,name,boxId){
+  key=key||f.id; name=name||(f.file&&f.file.name)||'document.pdf';
+  let b,box; try{ b=await idbGet(key); box=$(boxId||'pdfBox'); }catch(e){}
+  if(box&&!b){ box.innerHTML=`<div class="box danger">${L('Ce PDF n’est pas disponible sur cet appareil (les PDF sont gardés dans le navigateur où ils ont été ajoutés).','This PDF is not available on this device (PDFs are stored in the browser where they were added).')}</div>`; return; }
+  if(!b||!box) return;
   const u=URL.createObjectURL(b);
-  box.innerHTML=`<div class="row noprint" style="margin:12px 0"><a class="btn" href="${u}" target="_blank" rel="noopener">${L('Ouvrir le PDF','Open PDF')}</a><a class="btn" href="${u}" download="${esc(f.file.name)}">${L('Télécharger','Download')}</a></div><div id="pdfPages" class="pdfpages"><div class="meta">${L('Chargement du PDF…','Loading PDF…')}</div></div>`;
+  box.innerHTML=`<div class="row noprint" style="margin:12px 0"><a class="btn" href="${u}" target="_blank" rel="noopener">${L('Ouvrir le PDF','Open PDF')}</a><a class="btn" href="${u}" download="${esc(name)}">${L('Télécharger','Download')}</a></div><div id="pdfPages" class="pdfpages"><div class="meta">${L('Chargement du PDF…','Loading PDF…')}</div></div>`;
   const pages=$('pdfPages');
   const fallback=()=>{ if(pages.isConnected) pages.innerHTML=`<iframe src="${u}" title="PDF" style="width:100%;height:90vh;border:1px solid var(--line);border-radius:8px"></iframe>`; };
   try{
@@ -2508,7 +2682,7 @@ function renderFiches(type){
   state.section=type; state.view='fiches'; $('filters').classList.add('hidden'); buildNav();
   const l=fiches.filter(f=>f.type===type);
   $('app').innerHTML=`<div class="row" style="margin:12px 0;justify-content:space-between"><h2 style="margin:0">${esc(T(type==='constructeur'?'nav_cons':type==='consommables'?'nav_cons2':'nav_pres'))}</h2>${canEditFiche(type)?`<button class="primary" onclick="editFiche('','${type}')">${esc(T('add_fiche'))}</button>`:''}</div>`+
-   ((l.length||type==='presentation')?`<div class="grid">${type==='presentation'?m3Card():''}${l.map(f=>`<div class="card tcard" onclick="openFiche('${f.id}')"><div class="cover c-${type}">${f.cover?`<img src="${f.cover}" alt="" loading="lazy">`:icoSVG(type)}</div><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${f.file?`<span>${fileKind(f.file)==='ppt'?'PowerPoint':'PDF'}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
+   ((l.length||type==='presentation')?`<div class="grid">${type==='presentation'?m3Card():''}${l.map(f=>`<div class="card tcard" onclick="openFiche('${f.id}')"><div class="cover c-${type}">${f.cover?`<img src="${f.cover}" alt="" loading="lazy">`:icoSVG(type)}</div><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${fFiles(f).length?`<span>${f.type==='constructeur'?fFiles(f).length+' PDF':(fileKind(f.file)==='ppt'?'PowerPoint':'PDF')}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
 /*
@@ -2523,7 +2697,7 @@ function openFiche(id){
   $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="renderFiches('${f.type}')">${esc(T('back'))}</button><div class="row"><button onclick="window.print()">${esc(T('print'))}</button>${canEditFiche(f.type)?`<button onclick="editFiche('${id}')">${esc(T('edit'))}</button>`:''}</div></div>
    <div class="panel">${f.cover?`<img class="tcover" src="${f.cover}" alt="">`:''}<h2 style="margin-top:0">${esc(f.title)}</h2><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span></div>
    <p>${esc(f.text).replace(/\n/g,'<br>')}</p><div id=\"pdfBox\"></div>${ok?`<a class="btn" href="${esc(f.url)}" target="_blank" rel="noopener">${esc(T('open_doc'))}</a>`:''}</div>`;
-  if(f.file) (fileKind(f.file)==='ppt'?showPpt(f):showPdf(f));
+  if(f.type==='constructeur') fPdfList(f); else if(f.file) (fileKind(f.file)==='ppt'?showPpt(f):showPdf(f));
   window.scrollTo(0,0);
 }
 /*
@@ -2533,7 +2707,8 @@ function openFiche(id){
 */
 function editFiche(id,type){
   { const ft=id?(fiches.find(f=>f.id===id)||{}).type:type; if(!canEditFiche(ft)){ toast(T('need_cls3')); return; } }
-  state.fnew=!id; state.fdFile=null; state.fdRm=false; state.fd=id?JSON.parse(JSON.stringify(fiches.find(f=>f.id===id))):{id:uid(),type,title:'',cover:'',machine:'',text:'',url:''};
+  state.fnew=!id; state.fdFile=null; state.fdRm=false; state.fdAdd={}; state.fdDel=[]; state.fd=id?JSON.parse(JSON.stringify(fiches.find(f=>f.id===id))):{id:uid(),type,title:'',cover:'',machine:'',text:'',url:''};
+  if(state.fd.type==='constructeur'){ state.fd.files=fFiles(state.fd).map(x=>({...x})); state.fd.file=null; }
   renderFicheEditor();
 }
 function fCoverEdHTML(){
@@ -2556,7 +2731,7 @@ function renderFicheEditor(){
    <label>${esc(T('f_machine'))}</label><input value="${esc(d.machine)}" oninput="state.fd.machine=this.value" placeholder="${esc(T('ph_machine'))}">
    <label>${esc(T('f_text'))}</label><textarea style="min-height:160px" oninput="state.fd.text=this.value">${esc(d.text)}</textarea>
    <label>${esc(T('f_url'))}</label><input value="${esc(d.url)}" oninput="state.fd.url=this.value" placeholder="${esc(T('ph_url'))}">
-   <label>${d.type==='presentation'?'PDF / PowerPoint':'PDF'}</label><div class="row"><input type="file" accept="${d.type==='presentation'?'.pdf,application/pdf,.ppt,.pptx,.pps,.ppsx,.odp,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint':'application/pdf'}" style="max-width:320px" onchange="pickPdf(this)"><span class="meta">${esc(d.file?d.file.name:'')}</span>${d.file?`<button class="small danger" onclick="rmPdf()">${d.file&&fileKind(d.file)==='ppt'?L('Retirer le PowerPoint','Remove PowerPoint'):L('Retirer le PDF','Remove PDF')}</button>`:''}</div>${d.type==='presentation'?`<p class="meta" style="margin:6px 0 0">${L('Un seul fichier par fiche (PDF ou PowerPoint, 30 Mo max). Un PowerPoint peut être téléchargé et son texte est affiché ; pour un affichage identique à l’écran, exportez-le en PDF depuis PowerPoint.','One file per sheet (PDF or PowerPoint, 30 MB max). A PowerPoint can be downloaded and its text is shown; for a pixel-perfect display, export it to PDF from PowerPoint.')}</p>`:''}</div>`;
+   ${d.type==='constructeur'?fMultiEdHTML():`<label>${d.type==='presentation'?'PDF / PowerPoint':'PDF'}</label><div class="row"><input type="file" accept="${d.type==='presentation'?'.pdf,application/pdf,.ppt,.pptx,.pps,.ppsx,.odp,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-powerpoint':'application/pdf'}" style="max-width:320px" onchange="pickPdf(this)"><span class="meta">${esc(d.file?d.file.name:'')}</span>${d.file?`<button class="small danger" onclick="rmPdf()">${d.file&&fileKind(d.file)==='ppt'?L('Retirer le PowerPoint','Remove PowerPoint'):L('Retirer le PDF','Remove PDF')}</button>`:''}</div>${d.type==='presentation'?`<p class="meta" style="margin:6px 0 0">${L('Un seul fichier par fiche (PDF ou PowerPoint, 30 Mo max). Un PowerPoint peut être téléchargé et son texte est affiché ; pour un affichage identique à l’écran, exportez-le en PDF depuis PowerPoint.','One file per sheet (PDF or PowerPoint, 30 MB max). A PowerPoint can be downloaded and its text is shown; for a pixel-perfect display, export it to PDF from PowerPoint.')}</p>`:''}`}</div>`;
 }
 /*
  saveFiche() : enregistre la fiche (localStorage) ET son fichier (IndexedDB), puis réaffiche la fiche.
@@ -2565,10 +2740,13 @@ function renderFicheEditor(){
 async function saveFiche(){
   const d=state.fd; if(!canEditFiche(d.type)){ toast(T('need_cls3')); return; } if(!d.title.trim()){ toast(L('Donne un titre à la fiche','Please give the sheet a title')); return; }
   const i=fiches.findIndex(f=>f.id===d.id); if(i>=0) fiches[i]=d; else fiches.unshift(d);
-  try{ if(state.fdFile) await idbPut(d.id,state.fdFile); else if(state.fdRm) await idbDel(d.id); }catch(e){ toast(L('Stockage du PDF impossible','Cannot store the PDF')); return; }
+  try{
+    if(d.type==='constructeur'){ for(const k of Object.keys(state.fdAdd||{})) await idbPut(k,state.fdAdd[k]); for(const k of (state.fdDel||[])) await idbDel(k); state.fdAdd={}; state.fdDel=[]; }
+    else if(state.fdFile) await idbPut(d.id,state.fdFile); else if(state.fdRm) await idbDel(d.id);
+  }catch(e){ toast(L('Stockage du PDF impossible','Cannot store the PDF')); return; }
   saveFiches(); toast(fToast(d.type,i<0?'add':'edit')); openFiche(d.id);
 }
-function delFiche(){ if(!canEditFiche(state.fd.type)){ toast(T('need_cls3')); return; } if(!confirm(L('Supprimer définitivement cette fiche ?','Delete this sheet permanently?'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(fToast(t,'del')); renderFiches(t); }
+function delFiche(){ if(!canEditFiche(state.fd.type)){ toast(T('need_cls3')); return; } if(!confirm(L('Supprimer définitivement cette fiche ?','Delete this sheet permanently?'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); { const o=fiches.find(f=>f.id===state.fd.id); [...(o?fFiles(o):[]).map(x=>x.key),...(state.fdDel||[])].forEach(k=>idbDel(k).catch(()=>{})); } fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(fToast(t,'del')); renderFiches(t); }
 
 /*
  ===================== JEU 1 : TRIEUR SIBELCO (dessiné dans un <canvas>) =====================
@@ -4283,7 +4461,7 @@ function m3Start(){
  dans la copie de secours ni dans le fichier .json (trop volumineux). Et chaque appareil a SES données : pour partager
  des tutos entre téléphones, utilisez la sauvegarde en fichier (ou un vrai serveur, non prévu ici).
  ============================================================================ */
-const BK_KEYS=[FLKEY,FZKEY,GLKEY,M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
+const BK_KEYS=[FLKEY,FZKEY,GLKEY,GLEKEY,M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
 const LAST_EXPORT='sibelco_last_export';
 // petite base IndexedDB "sibelco_backup" : un seul enregistrement "snap" = copie de toutes les clés ci-dessus
 function bkDb(){ return new Promise((ok,ko)=>{ const r=indexedDB.open('sibelco_backup',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); }); }
