@@ -687,6 +687,28 @@ header .row{gap:6px;flex-wrap:nowrap}
 
 /* ===== FLOWSHEET INTERACTIF ===== */
 .cover.c-flowsheet{background:linear-gradient(135deg,#0a3d62,#38b6a8)}
+.cover.c-glossaire{background:linear-gradient(135deg,#5a3a0a,#e0b04a)}
+/* ===== MOTS-CLES / DEFINITIONS ===== */
+.glf{perspective:1000px;cursor:pointer;outline:none}
+.glfi{display:grid;transition:transform .5s;transform-style:preserve-3d}
+.glf.flip .glfi{transform:rotateY(180deg)}
+.glfa,.glfb{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;text-align:center;min-height:130px}
+.glfa b{font-size:1.15rem}
+.glfb{transform:rotateY(180deg);border-color:var(--accent);align-items:flex-start;justify-content:flex-start;text-align:left}
+.glfb p{margin:0}
+.glf:hover .glfa,.glf:focus-visible .glfa{border-color:var(--accent)}
+.gllist{display:flex;flex-direction:column;gap:8px}
+.glrow{display:grid;grid-template-columns:minmax(110px,220px) 1fr auto;gap:12px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.glw{font-weight:700}
+.gld{cursor:pointer;transition:filter .2s}
+.gld.blur{filter:blur(7px);user-select:none;-webkit-user-select:none}
+@media(max-width:640px){.glrow{grid-template-columns:1fr auto}.glrow .glw{grid-column:1/-1}}
+/* ===== FLOWSHEET : modification des cases ===== */
+.flbox.zedit{cursor:crosshair}
+.flbox.zedit.zpan{cursor:grab}
+.flbox.zedit .fh{fill:rgba(26,138,74,.16);stroke:#1a8a4a;stroke-width:1;stroke-dasharray:4 3}
+.flbox.zedit .fh:hover{fill:rgba(220,38,38,.3);stroke:#dc2626}
+.fdraw{fill:rgba(224,138,0,.25);stroke:#e08a00;stroke-width:2;stroke-dasharray:6 4;vector-effect:non-scaling-stroke;pointer-events:none}
 .wrap.flowwide{max-width:none}
 .flbox{position:relative;height:calc(100vh - 215px);min-height:420px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
 .flbox:active{cursor:grabbing}
@@ -839,7 +861,7 @@ const I18N = {
   storage_full:'Stockage plein ou indisponible : pensez à exporter en JSON',
   footer:'Projet réalisé par Lecertisseur Gautier, Coordinateur Tri Optiques · Sibelco Reims',
   unspecified:'Non précisée', locked_tag:'Verrouillé',
-  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_cons2:'Pièces consommables', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', nav_flow:'Flowsheet',nav_Point:'...', items:'élément(s)',
+  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_cons2:'Pièces consommables', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', nav_flow:'Flowsheet',nav_gloss:'Mots-clés / Définitions', items:'élément(s)',
   welcome:'Bienvenue', your_class:'Votre classe :', ask_level:'Quel est votre niveau sur les trieurs optiques ?',
   confirm_cls:'Je confirme avoir le niveau de cette classe (déclaratif, à valider avec le référent).',
   oblig_title:'Formation obligatoire', oblig_txt:"Vous ne connaissez pas encore les trieurs optiques : terminez d'abord la formation pour débloquer les autres tutoriels.", oblig_go:'Commencer la formation',
@@ -879,7 +901,7 @@ const I18N = {
   storage_full:'Storage full or unavailable: please export to JSON',
   footer:'Project by Lecertisseur Gautier, Optical Sorting Coordinator · Sibelco Reims',
   unspecified:'Not specified', locked_tag:'Locked',
-  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_cons2:'Consumable parts', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', nav_flow:'Flowsheet',nav_Point:'...', items:'item(s)',
+  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_cons2:'Consumable parts', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', nav_flow:'Flowsheet',nav_gloss:'Keywords / Definitions', items:'item(s)',
   welcome:'Welcome', your_class:'Your class:', ask_level:'What is your level on optical sorters?',
   confirm_cls:'I confirm I have the level of this class (self-declared, to be validated with the referent).',
   oblig_title:'Mandatory training', oblig_txt:'You do not know optical sorters yet: complete the training first to unlock the other tutorials.', oblig_go:'Start training',
@@ -1188,6 +1210,7 @@ const ICO={
  consommables:'<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
  presentation:'<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8M7 12l3-3 3 2 4-4"/>',
  flowsheet:'<rect x="3" y="3" width="6" height="5" rx="1"/><rect x="15" y="9.5" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><path d="M9 5.5h3v7h3M12 12.5v6H9"/>',
+ glossaire:'<path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 8h7M8 12h5"/>',
  jeux:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
  quiz:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.6 2.4c-.7.4-1.1 1-1.1 1.8M12 17h.01"/>',
  link:'<circle cx="5" cy="7" r="2.2"/><circle cx="19" cy="17" r="2.2"/><path d="M7.2 7.6C13 8 11 16 16.8 16.4"/><circle cx="5" cy="17" r="2.2"/><circle cx="19" cy="7" r="2.2"/><path d="M7.2 16.4C13 16 11 8 16.8 7.6"/>',
@@ -1597,7 +1620,7 @@ function importJSON(ev){
 */
 /* ---------- CLASSES / PARAMÈTRES / MENU ---------- */
 const SKEY='sibelco_settings_v1', FKEY='sibelco_fiches_v1';
-//  MODIFIABLE : les 5 classes d'utilisateurs et leur description
+// ✏️ MODIFIABLE : les 5 classes d'utilisateurs et leur description
 const CLS=[
  {fr:'Classe 0 – Découverte',en:'Class 0 – Beginner',dfr:'Ne connaît pas les trieurs optiques : formation obligatoire avant les autres tutos.',den:'New to optical sorters: mandatory training before the other tutorials.'},
  {fr:'Classe 1 – Opérateur',en:'Class 1 – Operator',dfr:'Connaît les trieurs : accès aux tutos Facile / Moyen.',den:'Knows the sorters: access to Easy / Medium tutorials.'},
@@ -1704,7 +1727,7 @@ function tileHTML(k,l){
  buildNav() redessine le menu : badge de classe, boutons épingle (garder le menu ouvert sur grand écran),
  les rubriques, "Déconnexion". Le bouton de la rubrique active reçoit la classe "on" (bleu clair).
 */
-const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['...','','nav_Point'],['jeux','','nav_jeux'],['settings','','nav_set']];
+const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['glossaire','','nav_gloss'],['jeux','','nav_jeux'],['settings','','nav_set']];
 function buildNav(){
   $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px"><button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button></div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
    NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
@@ -1741,14 +1764,15 @@ window.addEventListener('resize',()=>{ if($('side').classList.contains('open')){
  renderSection() : réaffiche la page courante (utile après un changement de langue).
  cnt(k) : nombre d'éléments affiché sur les tuiles de l'accueil.
 */
-function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else if(k==='flowsheet') renderFlow(); else renderFiches(k); }
+function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else if(k==='flowsheet') renderFlow(); else if(k==='glossaire') renderGloss(); else renderFiches(k); }
 function renderSection(){ const v=state.view;
   if(v==='home') renderHome(); else if(v==='settings') renderSettings(); else if(v==='fiches') renderFiches(state.section);
   else if(v==='jeux') renderGame();
   else if(v==='flow') renderFlow();
+  else if(v==='gloss') renderGloss();
   else if(v==='machines') renderMachines3D();
   else if(v==='fiche') openFiche(state.fid); else if(v==='fedit') renderFicheEditor(); else renderList(); }
-function cnt(k){ if(k==='jeux') return GAMES.length; if(k==='flowsheet') return FLOW_SITES.length; if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
+function cnt(k){ if(k==='jeux') return GAMES.length; if(k==='glossaire') return glItems().length; if(k==='flowsheet') return FLOW_SITES.length; if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
 
 /*
  ACCUEIL : bienvenue, classe de l'utilisateur, alerte "formation obligatoire" si classe 0, et les 5 tuiles illustrées
@@ -1885,8 +1909,8 @@ async function seedAdmin(){
 */
 //  MODIFIABLE : liste des sites (un plan par site)
 const FLOW_SITES=[
- {id:'saint-romain', name:'Saint-Romain-le-Puy', js:'./flowsheets/saint-romain.js'}
- //{id:'Reims', name:'Reims', js:'./flowsheets/Reims.js'}
+ {id:'saint-romain', name:'Saint-Romain-le-Puy', js:'./flowsheets/saint-romain.js'},
+ {id:'Reims', name:'Reims', js:'./flowsheets/Reims.js'}
 ];
 /* Les infos saisies dans l'appli (photo, description, fiche liée) sont gardées à part, par site et par équipement : FL.ov[site][tag] */
 const FLKEY='sibelco_flow_v1';
@@ -1896,7 +1920,8 @@ const flEq=tag=>FL.data&&FL.data.equipment.find(e=>e.tag===tag);
 /* TRADUCTION des équipements du plan : les plans (flowsheets/<site>.js) sont écrits en français ; en anglais, le « type » et la
    « description » sont traduits avec ces deux tables (clé = texte français EXACT du plan). Un texte absent de la table reste en français.
    Les textes modifiés à la main dans l'appli (« Modifier les infos ») ne sont pas traduits : ils s'affichent tels que saisis.
-   POUR UN NOUVEAU SITE : ajoutez ici les types / descriptions nouveaux. */
+   POUR UN NOUVEAU SITE : soit ajoutez ici les types / descriptions nouveaux, soit (plus simple) mettez directement "kind_en" et "desc_en"
+   dans chaque équipement du fichier du site (c'est ce que fait Reims.js) : ils passent avant ces tables. */
 const FL_EN_KIND={'Aspiration':'Dust extraction',"Vanne d'aiguillage motorisée":'Motorised diverter valve','Crible / bande vibrante':'Screen / vibrating belt','Trémie / bunker':'Hopper / bunker','Trémie tampon':'Buffer hopper','Broyeur / briseur':'Crusher / breaker','Machine C':'C machine','Trieur optique':'Optical sorter','Répartiteur / diviseur':'Splitter / divider','Équipement EC':'EC equipment','Élévateur':'Elevator','Séparateur magnétique (overband)':'Magnetic separator (overband)','Séparateur magnétique':'Magnetic separator','Séparateur métaux non ferreux':'Non-ferrous metal separator','Convoyeur à bande':'Belt conveyor','Trémie':'Hopper','Ventilation / filtration':'Ventilation / filtration','Filtre / cyclone':'Filter / cyclone'};
 const FL_EN_DESC={"Point d'aspiration des poussières.":'Dust extraction point.',"Aiguille le flux de produit vers l'une ou l'autre des voies.":'Diverts the product flow to one lane or the other.','Équipement vibrant avec moteurs et détection de température.':'Vibrating equipment with motors and temperature detection.','Bunker de stockage.':'Storage bunker.','Trémie tampon avec détecteurs de niveau haut (GSH) et bas (GSL).':'Buffer hopper with high (GSH) and low (GSL) level detectors.','Équipement de réduction de granulométrie.':'Particle-size reduction equipment.','Équipement principal du circuit (à décrire).':'Main equipment of the circuit (to be described).',"Trieur optique : caméras + buses d'éjection (PT = détecteur, EJ = éjecteur).":'Optical sorter: cameras + ejection nozzles (PT = detector, EJ = ejector).','Répartit ou dévie le flux de produit entre plusieurs voies.':'Splits or diverts the product flow between several lanes.','À décrire.':'To be described.',"Élévateur qui remonte le produit vers l'étage supérieur.":'Elevator that lifts the product to the upper floor.','Retire les métaux ferreux du flux de produit.':'Removes ferrous metals from the product flow.','Séparation magnétique (à préciser).':'Magnetic separation (to be specified).','Retire les métaux non ferreux du flux de produit.':'Removes non-ferrous metals from the product flow.','Convoyeur de transport du produit (moteur, variateur de fréquence, contrôle de dérive de bande).':'Product conveyor (motor, frequency drive, belt drift control).',"Trémie d'alimentation ou de stockage.":'Feed or storage hopper.',"Organe de ventilation ou de filtration du circuit d'air.":'Ventilation or filtration component of the air circuit.',"Séparation des poussières de l'air aspiré.":'Separates dust from the extracted air.'};
 const flTr=(s,m)=>(lang==='en'&&s&&m[s])||s||'';
@@ -1904,7 +1929,7 @@ const flTr=(s,m)=>(lang==='en'&&s&&m[s])||s||'';
 function flInfo(tag){
   const e=flEq(tag)||{tag}, o=((FL.ov[FL.site]||{})[tag])||{};
   const f=flFiche(tag);
-  return {tag, name:o.name||e.name||tag, kind:flTr(e.kind,FL_EN_KIND), model:e.model||'', desc:o.desc||flTr(e.desc,FL_EN_DESC), photo:o.photo||e.photo||(f&&f.cover)||'', fiche:f, linked:!!f};
+  return {tag, name:o.name||e.name||tag, kind:(lang==='en'&&e.kind_en)||flTr(e.kind,FL_EN_KIND), model:e.model||'', desc:o.desc||(lang==='en'&&e.desc_en)||flTr(e.desc,FL_EN_DESC), photo:o.photo||e.photo||(f&&f.cover)||'', fiche:f, linked:!!f};
 }
 /* fiche constructeur liée : choisie à la main, sinon trouvée automatiquement si le titre/machine de la fiche contient le repère (ex. "CL4") */
 function flFiche(tag){
@@ -1924,7 +1949,7 @@ function flLoad(id){
 }
 function renderFlow(id){
   state.section='flowsheet'; state.view='flow'; $('filters').classList.add('hidden'); buildNav();
-  FL.site=id||FL.site||FLOW_SITES[0].id; FL.pin=null;
+  FL.site=id||FL.site||FLOW_SITES[0].id; FL.pin=null; FL.zedit=false; FL.zd=null;
   const canEd=canEditFiche('constructeur');
   $('app').innerHTML=`<div class="row noprint" style="margin:8px 0;gap:8px;flex-wrap:wrap">
     <h2 style="margin:0">${esc(T('nav_flow'))}</h2>
@@ -1933,8 +1958,11 @@ function renderFlow(id){
     <button onclick="flZoom(.6)" title="Zoom +">＋</button><button onclick="flZoom(1/.6)" title="Zoom −">−</button>
     <button onclick="flFit()">${L('Vue d’ensemble','Fit')}</button>
     <button id="flShow" onclick="flToggleShow()" aria-pressed="false">${L('Voir les zones','Show zones')}</button>
+    ${canEditTutos()?`<button id="flZ" onclick="flToggleZedit()" aria-pressed="false">${L('Modifier les cases','Edit zones')}</button>`:''}
     ${canEd?`<button id="flEdit" onclick="flToggleEdit()" aria-pressed="false">${L(' Modifier les infos',' Edit info')}</button>`:''}
   </div>
+  <div id="flZbar" class="box noprint hidden" style="margin:6px 0"><b>${L('Modifier les cases','Edit zones')}</b> · ${L('Mode « Dessiner » : glissez sur le plan pour tracer un rectangle, puis indiquez le repère. Cliquez une case existante pour la supprimer.','“Draw” mode: drag on the plan to draw a rectangle, then enter the tag. Click an existing zone to delete it.')}
+    <div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap"><button id="flZd" class="primary" onclick="flZMode(true)">${L('Dessiner','Draw')}</button><button id="flZp" onclick="flZMode(false)">${L('Déplacer le plan','Move the plan')}</button><button onclick="flZReset()">${L('Rétablir les cases d’origine','Restore original zones')}</button><button onclick="flToggleZedit()">${L('Terminer','Done')}</button></div></div>
   <div id="flBox" class="flbox"><div class="meta" style="padding:20px">${L('Chargement du flowsheet…','Loading flowsheet…')}</div><div id="flTip" class="fltip" hidden></div></div>
   <p class="meta noprint" style="margin:6px 0 0">${L('Molette / pincer : zoom · glisser : déplacer · survol : photo et rôle · clic : fiche constructeur.','Wheel / pinch: zoom · drag: pan · hover: photo and role · click: manufacturer sheet.')}</p>`;
   flLoad(FL.site).then(({svg,data})=>{
@@ -1943,10 +1971,8 @@ function renderFlow(id){
     const el=box.querySelector('svg'); box.querySelector('.meta')&&box.querySelector('.meta').remove();
     FL.svg=el; el.removeAttribute('width'); el.removeAttribute('height'); el.setAttribute('class','flsvg');
     const [x,y,w,h]=data.viewBox; FL.full={x,y,w,h};
-    const NS='http://www.w3.org/2000/svg', g=document.createElementNS(NS,'g'); g.setAttribute('id','flHot');
-    data.equipment.forEach(e=>e.rects.forEach(([rx,ry,rw,rh])=>{ const r=document.createElementNS(NS,'rect'); r.setAttribute('x',rx); r.setAttribute('y',ry); r.setAttribute('width',rw); r.setAttribute('height',rh); r.setAttribute('rx',3); r.setAttribute('class','fh'); r.dataset.tag=e.tag; g.appendChild(r); }));
-    el.appendChild(g); flMarkLinks();
-    $('flDl').innerHTML=data.equipment.map(e=>`<option value="${esc(e.tag)}">${esc(flTr(e.kind,FL_EN_KIND))}</option>`).join('');
+    flBuildHot();
+    flDlFill();
     flBind(box); flFit();
   }).catch(()=>{ const b=$('flBox'); if(b) b.innerHTML=`<div class="box danger" style="margin:12px">${L('Flowsheet introuvable (fichiers du dossier « flowsheets/ » manquants).','Flowsheet not found (missing files in the "flowsheets/" folder, ).')}</div>`; });
   window.scrollTo(0,0);
@@ -1969,11 +1995,13 @@ function flZoom(k,cx,cy){ const v=FL.vb; if(!v) return; if(cx===undefined){ cx=v
 function flPt(e){ const r=$('flBox').getBoundingClientRect(),v=FL.vb; return {x:v.x+(e.clientX-r.left)/r.width*v.w,y:v.y+(e.clientY-r.top)/r.height*v.h}; }
 /* recherche : zoom sur l'équipement et clignotement */
 function flFind(q){ q=(q||'').trim().toUpperCase(); if(!q||!FL.data) return;
-  const e=FL.data.equipment.find(x=>x.tag.toUpperCase()===q)||FL.data.equipment.find(x=>x.tag.toUpperCase().startsWith(q));
-  if(!e){ toast(L('Repère introuvable','Tag not found')); return; }
-  const [x,y,w,h]=e.rects[0], w2=380; flSetVB({x:x+w/2-w2/2,y:y+h/2-w2*(FL.vb.h/FL.vb.w)/2,w:w2,h:0});
-  document.querySelectorAll('#flHot .fh').forEach(r=>{ if(r.dataset.tag===e.tag){ r.classList.add('hit'); setTimeout(()=>r.classList.remove('hit'),3200); } });
-  const r0=document.querySelector(`#flHot .fh[data-tag="${e.tag}"]`); if(r0){ const b=r0.getBoundingClientRect(),bx=$('flBox').getBoundingClientRect(); flTipShow(e.tag,b.left-bx.left+b.width/2,b.top-bx.top+b.height,true); } }
+  const tags=flTags(), tag=tags.find(t=>t.toUpperCase()===q)||tags.find(t=>t.toUpperCase().startsWith(q));
+  const r0=tag&&[...document.querySelectorAll('#flHot .fh')].find(r=>r.dataset.tag===tag);
+  if(!r0){ toast(L('Repère introuvable','Tag not found')); return; }
+  const x=+r0.getAttribute('x'), y=+r0.getAttribute('y'), w=+r0.getAttribute('width'), h=+r0.getAttribute('height'), w2=380;
+  flSetVB({x:x+w/2-w2/2,y:y+h/2-w2*(FL.vb.h/FL.vb.w)/2,w:w2,h:0});
+  document.querySelectorAll('#flHot .fh').forEach(r=>{ if(r.dataset.tag===tag){ r.classList.add('hit'); setTimeout(()=>r.classList.remove('hit'),3200); } });
+  const b=r0.getBoundingClientRect(),bx=$('flBox').getBoundingClientRect(); flTipShow(tag,b.left-bx.left+b.width/2,b.top-bx.top+b.height,true); }
 /* ---- bulle (survol) ---- */
 function flTipHTML(tag){
   const i=flInfo(tag);
@@ -1997,13 +2025,15 @@ function flBind(box){
     if(FL.ptr.has(e.pointerId)){
       const p=FL.ptr.get(e.pointerId), dx=e.clientX-p.x, dy=e.clientY-p.y; FL.moved+=Math.abs(dx)+Math.abs(dy); p.x=e.clientX; p.y=e.clientY;
       if(FL.ptr.size===2){ const [a,b]=[...FL.ptr.values()], d=Math.hypot(a.x-b.x,a.y-b.y); if(FL.d0){ const r=box.getBoundingClientRect(); const c=flPt({clientX:(a.x+b.x)/2,clientY:(a.y+b.y)/2}); flZoom(FL.d0/d,c.x,c.y); } FL.d0=d; return; }
+      if(FL.zd&&FL.ptr.size===1&&FL.moved>6){ flDrawMove(e); return; }
       if(FL.moved>6){ const r=box.getBoundingClientRect(),v=FL.vb; flSetVB({x:v.x-dx/r.width*v.w,y:v.y-dy/r.height*v.h,w:v.w,h:v.h}); flTipHide(); return; }
     }
-    if(e.pointerType==='mouse'&&!FL.ptr.size){ const h=hot(e); if(h){ const r=box.getBoundingClientRect(); flTipShow(h.dataset.tag,e.clientX-r.left,e.clientY-r.top,false); } else if(!FL.pin) flTipHide(); }
+    if(e.pointerType==='mouse'&&!FL.ptr.size&&!FL.zedit){ const h=hot(e); if(h){ const r=box.getBoundingClientRect(); flTipShow(h.dataset.tag,e.clientX-r.left,e.clientY-r.top,false); } else if(!FL.pin) flTipHide(); }
   });
-  box.addEventListener('pointerdown',e=>{ if(e.target.closest('#flTip')) return; FL.ptr.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(FL.ptr.size===1) FL.moved=0; FL.d0=0; box.setPointerCapture&&box.setPointerCapture(e.pointerId); });
+  box.addEventListener('pointerdown',e=>{ if(e.target.closest('#flTip')) return; FL.ptr.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(FL.ptr.size===1) FL.moved=0; FL.zd=(FL.zedit&&FL.zdraw&&FL.ptr.size===1)?flPt(e):null; FL.d0=0; box.setPointerCapture&&box.setPointerCapture(e.pointerId); });
   const up=e=>{
     const was=FL.ptr.has(e.pointerId); FL.ptr.delete(e.pointerId); FL.d0=0; if(!was) return;
+    if(FL.zedit&&flZUp(e)) return;
     if(FL.moved<=6&&FL.ptr.size===0){
       const el=document.elementFromPoint(e.clientX,e.clientY), h=el&&el.closest&&el.closest('.fh');
       if(h){ const tag=h.dataset.tag;
@@ -2039,9 +2069,200 @@ function flEditor(tag){
 function flPhoto(inp){ const f=inp.files&&inp.files[0]; if(!f) return; readImg(f,640,0.72,u=>{ FL.ed.photo=u; $('flEp').innerHTML=`<img src="${u}" style="max-width:160px;border-radius:8px;display:block;margin-bottom:6px">`; }); }
 function flEdClose(){ const d=$('flEd'); if(d) d.remove(); }
 function flEdSave(){ const tag=FL.ed.tag, s=(FL.ov[FL.site]=FL.ov[FL.site]||{});
-  const e0=flEq(tag)||{}, dsc=$('flEd2').value.trim(), same=!dsc||dsc===(e0.desc||'')||dsc===flTr(e0.desc,FL_EN_DESC);
-  s[tag]={name:$('flEn').value.trim(),desc:same?'':dsc,photo:FL.ed.photo,fiche:$('flEf').value}; flSave(); flEdClose(); flMarkLinks(); toast(T('saved')); }
+  const e0=flEq(tag)||{}, dsc=$('flEd2').value.trim(), same=!dsc||dsc===(e0.desc||'')||dsc===flTr(e0.desc,FL_EN_DESC)||dsc===(e0.desc_en||'');
+  s[tag]={name:$('flEn').value.trim(),desc:same?'':dsc,photo:FL.ed.photo,fiche:$('flEf').value}; flSave(); flEdClose(); flMarkLinks(); toast(L('Équipement enregistré','Equipment saved')); }
 function flEdReset(){ const s=FL.ov[FL.site]||{}; delete s[FL.ed.tag]; flSave(); flEdClose(); flMarkLinks(); }
+
+/*
+ ===================== MESSAGES D'AJOUT DES FICHES =====================
+ fToast(type, action) : « Fiche constructeur ajoutée », « Pièce consommable modifiée »... (au lieu de « Tutoriel enregistré »).
+*/
+const F_NAMES={constructeur:['Fiche constructeur','Manufacturer sheet'],consommables:['Pièce consommable','Consumable part'],presentation:['Fiche présentation','Presentation sheet']};
+function fToast(type,act){
+  const n=F_NAMES[type]||F_NAMES.constructeur;
+  const fr={add:'ajoutée',edit:'modifiée',del:'supprimée'}[act], en={add:'added',edit:'updated',del:'deleted'}[act];
+  return lang==='en'?`${n[1]} ${en}`:`${n[0]} ${fr}`;
+}
+
+/*
+ ===================== FLOWSHEET : AJOUTER / ENLEVER DES CASES =====================
+ Réservé aux classes 3 et 4. Bouton « Modifier les cases » :
+   - mode « Dessiner » : on glisse sur le plan pour tracer un rectangle, puis on indique le repère (liste des repères existants ou nouveau repère) ;
+   - clic sur une case existante : on peut la supprimer ;
+   - « Rétablir les cases d'origine » annule toutes les modifications du site affiché.
+ Les cases d'origine (fichier flowsheets/<site>.js) ne sont jamais modifiées : les ajouts / retraits sont gardés à part (FL.zn),
+ par site, dans le navigateur, et inclus dans la sauvegarde JSON.
+*/
+const FZKEY='sibelco_flowzones_v1';
+FL.zn=(()=>{ try{ return JSON.parse(localStorage.getItem(FZKEY))||{}; }catch(e){ return {}; } })();
+FL.zedit=false; FL.zdraw=true; FL.zd=null;
+const flZ=()=>{ const z=(FL.zn[FL.site]=FL.zn[FL.site]||{}); z.add=z.add||[]; z.hide=z.hide||[]; return z; };
+const flAdded=()=>((FL.zn[FL.site]||{}).add||[]);
+const flTags=()=>[...new Set([...(FL.data?FL.data.equipment.map(e=>e.tag):[]),...flAdded().map(a=>a.tag)])];
+function flZSave(){ try{ localStorage.setItem(FZKEY,JSON.stringify(FL.zn)); }catch(e){ toast(T('storage_full')); } }
+function flDlFill(){
+  const dl=$('flDl'); if(!dl||!FL.data) return;
+  const kind=t=>{ const e=FL.data.equipment.find(x=>x.tag===t); return e?((lang==='en'&&e.kind_en)||flTr(e.kind,FL_EN_KIND)):''; };
+  dl.innerHTML=flTags().map(t=>`<option value="${esc(t)}">${esc(kind(t))}</option>`).join('');
+}
+/* (re)dessine toutes les zones cliquables : cases d'origine moins celles retirées, plus celles ajoutées */
+function flBuildHot(){
+  if(!FL.svg||!FL.data) return;
+  const NS='http://www.w3.org/2000/svg'; let g=FL.svg.querySelector('#flHot'); if(g) g.remove();
+  g=document.createElementNS(NS,'g'); g.setAttribute('id','flHot');
+  const z=FL.zn[FL.site]||{}, hide=z.hide||[];
+  const mk=(tag,k,r)=>{ const el=document.createElementNS(NS,'rect'); el.setAttribute('x',r[0]); el.setAttribute('y',r[1]); el.setAttribute('width',r[2]); el.setAttribute('height',r[3]); el.setAttribute('rx',3); el.setAttribute('class','fh'); el.dataset.tag=tag; el.dataset.k=k; g.appendChild(el); };
+  FL.data.equipment.forEach(e=>e.rects.forEach((r,i)=>{ const k=e.tag+'#'+i; if(!hide.includes(k)) mk(e.tag,k,r); }));
+  (z.add||[]).forEach(a=>mk(a.tag,a.id,a.r));
+  FL.svg.appendChild(g); flMarkLinks();
+}
+function flToggleZedit(){
+  if(!canEditTutos()){ toast(T('need_cls3')); return; }
+  FL.zedit=!FL.zedit; FL.edit=false; FL.zd=null;
+  const fe=$('flEdit'); if(fe){ fe.classList.remove('primary'); fe.setAttribute('aria-pressed','false'); }
+  $('flBox').classList.toggle('zedit',FL.zedit); $('flZ').setAttribute('aria-pressed',FL.zedit); $('flZ').classList.toggle('primary',FL.zedit);
+  $('flZbar').classList.toggle('hidden',!FL.zedit); flZMode(true); flTipHide();
+  toast(FL.zedit?L('Mode cases : dessinez ou cliquez une case','Zone mode: draw or click a zone'):L('Mode lecture','Read mode'));
+}
+function flZMode(d){ FL.zdraw=!!d; FL.zd=null; const a=$('flZd'),b=$('flZp'); if(a) a.classList.toggle('primary',FL.zdraw); if(b) b.classList.toggle('primary',!FL.zdraw); const x=$('flBox'); if(x) x.classList.toggle('zpan',!FL.zdraw); }
+function flDrawMove(e){
+  const a=FL.zd; if(!a||!FL.svg) return; const p=flPt(e); let r=$('flDraw');
+  if(!r){ r=document.createElementNS('http://www.w3.org/2000/svg','rect'); r.setAttribute('id','flDraw'); r.setAttribute('class','fdraw'); FL.svg.appendChild(r); }
+  r.setAttribute('x',Math.min(a.x,p.x)); r.setAttribute('y',Math.min(a.y,p.y)); r.setAttribute('width',Math.abs(p.x-a.x)); r.setAttribute('height',Math.abs(p.y-a.y));
+}
+/* relâchement du doigt / de la souris en mode cases : renvoie true si le geste a été traité ici */
+function flZUp(e){
+  const zd=FL.zd; FL.zd=null; const dr=$('flDraw'); if(dr) dr.remove();
+  if(FL.ptr.size) return true;
+  if(FL.moved>6){
+    if(zd&&FL.zdraw){ const p=flPt(e), min=FL.vb.w*0.004, x=Math.min(zd.x,p.x), y=Math.min(zd.y,p.y), w=Math.abs(p.x-zd.x), h=Math.abs(p.y-zd.y); if(w>min&&h>min) flZoneAsk([x,y,w,h]); }
+    return true;
+  }
+  const el=document.elementFromPoint(e.clientX,e.clientY), h=el&&el.closest&&el.closest('.fh');
+  if(h) flZoneModal(h.dataset.k,h.dataset.tag);
+  return true;
+}
+function flZmClose(){ const d=$('flZm'); if(d) d.remove(); }
+function flZoneAsk(r){
+  flZmClose(); FL.zr=r;
+  const d=document.createElement('div'); d.id='flZm'; d.className='flmodal';
+  d.innerHTML=`<div class="panel"><h3 style="margin-top:0">${L('Nouvelle case','New zone')}</h3>
+   <p class="meta">${L('À quel équipement correspond ce rectangle ?','Which equipment does this rectangle belong to?')}</p>
+   <label>${L('Repère (ex : CL4, T12…)','Tag (e.g. CL4, T12…)')}</label><input id="flZt" list="flZl" autocomplete="off" autocapitalize="characters" onkeydown="if(event.key==='Enter')flZoneAdd()"><datalist id="flZl">${flTags().sort().map(t=>`<option value="${esc(t)}">`).join('')}</datalist>
+   <p class="meta">${L('Un repère qui n’existe pas encore crée un nouvel équipement : ajoutez ensuite son nom, sa photo et sa fiche avec « Modifier les infos ».','A tag that does not exist yet creates a new item: then add its name, photo and sheet with “Edit info”.')}</p>
+   <div class="row" style="margin-top:12px;gap:8px"><button class="primary" onclick="flZoneAdd()">${L('Ajouter la case','Add zone')}</button><button onclick="flZmClose()">${L('Annuler','Cancel')}</button></div></div>`;
+  document.body.appendChild(d); setTimeout(()=>{ const i=$('flZt'); if(i) i.focus(); },50);
+}
+function flZoneAdd(){
+  let tag=($('flZt').value||'').trim(); if(!tag){ toast(L('Indiquez un repère','Enter a tag')); return; }
+  const ex=flTags().find(t=>t.toLowerCase()===tag.toLowerCase()); if(ex) tag=ex;
+  flZ().add.push({id:uid(),tag,r:FL.zr.map(v=>Math.round(v*10)/10)});
+  flZSave(); flZmClose(); flBuildHot(); flDlFill(); toast(L('Case ajoutée','Zone added'));
+}
+function flZoneModal(k,tag){
+  flZmClose();
+  const d=document.createElement('div'); d.id='flZm'; d.className='flmodal';
+  d.innerHTML=`<div class="panel"><h3 style="margin-top:0">${esc(tag)}</h3><p class="meta">${L('Case sélectionnée.','Selected zone.')}</p>
+   <div class="row" style="gap:8px;flex-wrap:wrap"><button class="danger" onclick="flZoneDel('${esc(k)}')">${L('Supprimer cette case','Delete this zone')}</button><button onclick="flZmClose();flEditor('${esc(tag)}')">${L('Modifier les infos','Edit info')}</button><button onclick="flZmClose()">${L('Fermer','Close')}</button></div></div>`;
+  document.body.appendChild(d);
+}
+function flZoneDel(k){
+  const z=flZ();
+  if(k.includes('#')){ if(!z.hide.includes(k)) z.hide.push(k); } else z.add=z.add.filter(a=>a.id!==k);
+  flZSave(); flZmClose(); flBuildHot(); flDlFill(); toast(L('Case supprimée','Zone deleted'));
+}
+function flZReset(){
+  if(!confirm(L('Rétablir toutes les cases d’origine de ce site ? Vos ajouts et suppressions seront perdus.','Restore all original zones for this site? Your additions and removals will be lost.'))) return;
+  delete FL.zn[FL.site]; flZSave(); flBuildHot(); flDlFill(); toast(L('Cases d’origine rétablies','Original zones restored'));
+}
+
+/*
+ ===================== MOTS-CLES / DEFINITIONS =====================
+ Deux modes :
+   - « Cartes »   : une carte par mot ; on la touche pour la retourner et voir la définition (idéal pour réviser) ;
+   - « Standard » : liste mot + définition ; bouton « Flouter les définitions » : on touche une définition pour la révéler.
+ Ajout / modification / suppression : classes 3 et 4. Les mots sont gardés dans le navigateur (clé GLKEY, incluse dans la sauvegarde JSON).
+ Les mots ci-dessous (GL_SEED) ne servent que d'exemples de départ : modifiez-les ou supprimez-les depuis l'appli.
+*/
+const GLKEY='sibelco_gloss_v1', GLUI='sibelco_gloss_ui_v1';
+const GL_SEED=[
+ {id:'g1',word:'Calcin',def:'Verre recyclé broyé et nettoyé, prêt à être réintroduit dans le four verrier.',word_en:'Cullet',def_en:'Recycled glass that has been crushed and cleaned, ready to be fed back into the glass furnace.'},
+ {id:'g2',word:'Trieur optique',def:'Machine qui analyse chaque particule avec une caméra et éjecte les refus avec un jet d’air.',word_en:'Optical sorter',def_en:'Machine that scans each particle with a camera and ejects rejects with an air jet.'},
+ {id:'g3',word:'Refus',def:'Matière indésirable retirée du flux de verre (céramique, pierre, porcelaine, métaux, plastiques…).',word_en:'Reject',def_en:'Unwanted material removed from the glass flow (ceramic, stone, porcelain, metals, plastics…).'},
+ {id:'g4',word:'Overband',def:'Séparateur magnétique à bande placé au-dessus d’un convoyeur pour retirer les métaux ferreux.',word_en:'Overband',def_en:'Belt magnetic separator placed above a conveyor to remove ferrous metals.'},
+ {id:'g5',word:'Granulométrie',def:'Répartition des tailles de grains d’un produit, mesurée par tamisage.',word_en:'Particle size',def_en:'Distribution of the grain sizes of a product, measured by screening.'},
+ {id:'g6',word:'Buse d’éjection',def:'Petite vanne à air comprimé qui souffle les particules à rejeter hors du flux.',word_en:'Ejection nozzle',def_en:'Small compressed-air valve that blows the particles to be rejected out of the flow.'}
+];
+const GL={items:null,mode:'cards',q:'',blur:true,rev:{},shuf:null};
+try{ const u=JSON.parse(localStorage.getItem(GLUI)); if(u){ GL.mode=u.mode==='list'?'list':'cards'; GL.blur=u.blur!==false; } }catch(e){}
+function glItems(){
+  if(GL.items) return GL.items;
+  try{ const r=localStorage.getItem(GLKEY); GL.items=r===null?GL_SEED.map(x=>({...x})):(JSON.parse(r)||[]); }catch(e){ GL.items=GL_SEED.map(x=>({...x})); }
+  return GL.items;
+}
+function glSave(){ try{ localStorage.setItem(GLKEY,JSON.stringify(GL.items)); }catch(e){ toast(T('storage_full')); } }
+function glUi(){ try{ localStorage.setItem(GLUI,JSON.stringify({mode:GL.mode,blur:GL.blur})); }catch(e){} }
+const glW=g=>(lang==='en'&&g.word_en)||g.word, glD=g=>(lang==='en'&&g.def_en)||g.def;
+function renderGloss(){
+  state.section='glossaire'; state.view='gloss'; $('filters').classList.add('hidden'); buildNav(); glItems();
+  const ed=canEditTutos();
+  $('app').innerHTML=`<div class="row noprint" style="margin:8px 0;gap:8px;flex-wrap:wrap">
+    <h2 style="margin:0">${esc(T('nav_gloss'))}</h2>
+    <input id="glQ" type="search" value="${esc(GL.q)}" placeholder="${esc(L('Chercher un mot…','Search a word…'))}" style="min-width:190px;flex:1;max-width:280px" oninput="GL.q=this.value;glRender()">
+    <button id="glMc" onclick="glMode('cards')">${L('Cartes','Cards')}</button><button id="glMl" onclick="glMode('list')">${L('Standard','Standard')}</button>
+    <button id="glBl" onclick="glBlur()" aria-pressed="false">${L('Flouter les définitions','Blur definitions')}</button>
+    <button onclick="glShuffle()">${L('Mélanger','Shuffle')}</button>
+    ${ed?`<button class="primary" onclick="glEdit('')">${L('+ Ajouter un mot','+ Add a word')}</button>`:''}</div>
+   <p class="meta noprint" id="glHint" style="margin:0 0 8px"></p><div id="glBox"></div>`;
+  glRender(); window.scrollTo(0,0);
+}
+function glRender(){
+  const b=$('glBox'); if(!b) return;
+  const q=GL.q.trim().toLowerCase(), ed=canEditTutos();
+  let l=glItems().filter(g=>!q||[g.word,g.def,g.word_en,g.def_en].join(' ').toLowerCase().includes(q));
+  if(GL.shuf) l=l.slice().sort((a,c)=>GL.shuf.indexOf(a.id)-GL.shuf.indexOf(c.id));
+  const on=(id,v)=>{ const e=$(id); if(e){ e.classList.toggle('primary',v); e.setAttribute('aria-pressed',v); } };
+  on('glMc',GL.mode==='cards'); on('glMl',GL.mode==='list'); on('glBl',GL.mode==='list'&&GL.blur);
+  const bl=$('glBl'); if(bl) bl.classList.toggle('hidden',GL.mode!=='list');
+  const h=$('glHint'); if(h) h.textContent=GL.mode==='cards'?L('Touchez une carte pour la retourner et voir la définition.','Tap a card to flip it and see the definition.'):(GL.blur?L('Touchez une définition floutée pour la révéler.','Tap a blurred definition to reveal it.'):'');
+  if(!l.length){ b.innerHTML=`<div class="box">${glItems().length?L('Aucun mot ne correspond à la recherche.','No word matches your search.'):L('Aucun mot pour le moment.','No word yet.')}</div>`; return; }
+  if(GL.mode==='cards'){
+    b.innerHTML=`<div class="grid">`+l.map(g=>`<div class="glf" tabindex="0" role="button" aria-label="${esc(glW(g))}" onclick="this.classList.toggle('flip')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('flip')}"><div class="glfi"><div class="glfa"><b>${esc(glW(g))}</b><span class="meta">${L('Toucher pour voir la définition','Tap to see the definition')}</span></div><div class="glfb"><b>${esc(glW(g))}</b><p>${esc(glD(g)).replace(/\n/g,'<br>')}</p>${ed?`<button class="small noprint" onclick="event.stopPropagation();glEdit('${g.id}')">${L('Modifier','Edit')}</button>`:''}</div></div></div>`).join('')+`</div>`;
+  } else {
+    b.innerHTML=`<div class="gllist">`+l.map(g=>`<div class="glrow"><div class="glw">${esc(glW(g))}</div><div class="gld ${GL.blur&&!GL.rev[g.id]?'blur':''}" onclick="glRev('${g.id}',this)">${esc(glD(g)).replace(/\n/g,'<br>')}</div>${ed?`<button class="small noprint" onclick="glEdit('${g.id}')" title="${esc(L('Modifier','Edit'))}">✎</button>`:'<span></span>'}</div>`).join('')+`</div>`;
+  }
+}
+function glMode(m){ GL.mode=m; glUi(); glRender(); }
+function glBlur(){ GL.blur=!GL.blur; GL.rev={}; glUi(); glRender(); }
+function glRev(id,el){ if(!GL.blur) return; GL.rev[id]=!GL.rev[id]; el.classList.toggle('blur',!GL.rev[id]); }
+function glShuffle(){ const a=glItems().map(g=>g.id); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } GL.shuf=a; GL.rev={}; glRender(); }
+function glEdit(id){
+  if(!canEditTutos()){ toast(T('need_cls3')); return; }
+  const g=glItems().find(x=>x.id===id)||{id:'',word:'',def:'',word_en:'',def_en:''};
+  const old=$('glEd'); if(old) old.remove();
+  const d=document.createElement('div'); d.id='glEd'; d.className='flmodal'; d.dataset.gid=g.id;
+  d.innerHTML=`<div class="panel"><h3 style="margin-top:0">${g.id?L('Modifier le mot','Edit word'):L('Ajouter un mot','Add a word')}</h3>
+   <label>${L('Mot / mot-clé','Word / keyword')}</label><input id="glEw" value="${esc(g.word)}">
+   <label>${L('Définition','Definition')}</label><textarea id="glEdf" rows="4">${esc(g.def)}</textarea>
+   <label>${L('Mot en anglais (facultatif)','Word in English (optional)')}</label><input id="glEwe" value="${esc(g.word_en||'')}">
+   <label>${L('Définition en anglais (facultatif)','Definition in English (optional)')}</label><textarea id="glEde" rows="3">${esc(g.def_en||'')}</textarea>
+   <div class="row" style="margin-top:12px;gap:8px"><button class="primary" onclick="glEdSave()">${T('save')}</button><button onclick="glEdClose()">${L('Annuler','Cancel')}</button>${g.id?`<button class="danger" onclick="glEdDel()">${T('delete')}</button>`:''}</div></div>`;
+  document.body.appendChild(d); setTimeout(()=>{ const i=$('glEw'); if(i) i.focus(); },50);
+}
+function glEdClose(){ const d=$('glEd'); if(d) d.remove(); }
+function glEdSave(){
+  const d=$('glEd'); if(!d) return; const id=d.dataset.gid;
+  const word=$('glEw').value.trim(), def=$('glEdf').value.trim();
+  if(!word||!def){ toast(L('Le mot et sa définition sont obligatoires','Word and definition are required')); return; }
+  const rec={id:id||uid(),word,def,word_en:$('glEwe').value.trim(),def_en:$('glEde').value.trim()}, a=glItems(), i=a.findIndex(x=>x.id===id);
+  if(i>=0) a[i]=rec; else a.unshift(rec);
+  glSave(); glEdClose(); glRender(); toast(i>=0?L('Mot modifié','Word updated'):L('Mot ajouté','Word added'));
+}
+function glEdDel(){
+  const d=$('glEd'); if(!d) return; const id=d.dataset.gid;
+  if(!confirm(L('Supprimer ce mot ?','Delete this word?'))) return;
+  GL.items=glItems().filter(x=>x.id!==id); glSave(); glEdClose(); glRender(); toast(L('Mot supprimé','Word deleted'));
+}
 
 async function boot(){
   await seedAdmin();
@@ -2342,12 +2563,12 @@ function renderFicheEditor(){
  delFiche() : supprime la fiche et son fichier.
 */
 async function saveFiche(){
-  const d=state.fd; if(!canEditFiche(d.type)){ toast(T('need_cls3')); return; } if(!d.title.trim()){ toast(T('need_title')); return; }
+  const d=state.fd; if(!canEditFiche(d.type)){ toast(T('need_cls3')); return; } if(!d.title.trim()){ toast(L('Donne un titre à la fiche','Please give the sheet a title')); return; }
   const i=fiches.findIndex(f=>f.id===d.id); if(i>=0) fiches[i]=d; else fiches.unshift(d);
   try{ if(state.fdFile) await idbPut(d.id,state.fdFile); else if(state.fdRm) await idbDel(d.id); }catch(e){ toast(L('Stockage du PDF impossible','Cannot store the PDF')); return; }
-  saveFiches(); toast(T('saved')); openFiche(d.id);
+  saveFiches(); toast(fToast(d.type,i<0?'add':'edit')); openFiche(d.id);
 }
-function delFiche(){ if(!canEditFiche(state.fd.type)){ toast(T('need_cls3')); return; } if(!confirm(T('confirm_del'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(T('deleted')); renderFiches(t); }
+function delFiche(){ if(!canEditFiche(state.fd.type)){ toast(T('need_cls3')); return; } if(!confirm(L('Supprimer définitivement cette fiche ?','Delete this sheet permanently?'))) return; const t=state.fd.type; idbDel(state.fd.id).catch(()=>{}); fiches=fiches.filter(f=>f.id!==state.fd.id); saveFiches(); toast(fToast(t,'del')); renderFiches(t); }
 
 /*
  ===================== JEU 1 : TRIEUR SIBELCO (dessiné dans un <canvas>) =====================
@@ -3529,7 +3750,7 @@ const M3_PARTS=[
 ];
 
 /* Les « grains » qui circulent : couleur, et la technologie qui repère les indésirables (det) */
-// ✏️ MODIFIABLE : les grains de verre et d'indésirables qui circulent (couleur c, fréquence w)
+//MODIFIABLE : les grains de verre et d'indésirables qui circulent (couleur c, fréquence w)
 const M3_GRAINS=[
  {c:'#cfe9f3',w:5},{c:'#47b062',w:3},{c:'#a1713b',w:3},                         // verre : blanc, vert, brun
  {c:'#6f7378',det:'vis',w:1.2},                                                   // pierre / CSP -> VIS
@@ -4062,7 +4283,7 @@ function m3Start(){
  dans la copie de secours ni dans le fichier .json (trop volumineux). Et chaque appareil a SES données : pour partager
  des tutos entre téléphones, utilisez la sauvegarde en fichier (ou un vrai serveur, non prévu ici).
  ============================================================================ */
-const BK_KEYS=[M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
+const BK_KEYS=[FLKEY,FZKEY,GLKEY,M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
 const LAST_EXPORT='sibelco_last_export';
 // petite base IndexedDB "sibelco_backup" : un seul enregistrement "snap" = copie de toutes les clés ci-dessus
 function bkDb(){ return new Promise((ok,ko)=>{ const r=indexedDB.open('sibelco_backup',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); }); }
@@ -4070,7 +4291,7 @@ async function bkPut(v){ const db=await bkDb(); return new Promise((ok,ko)=>{ co
 async function bkGet(){ const db=await bkDb(); return new Promise((ok,ko)=>{ const tx=db.transaction('kv','readonly'), rq=tx.objectStore('kv').get('snap'); tx.oncomplete=()=>ok(rq.result); tx.onerror=()=>ko(tx.error); }); }
 function bkSnapshot(){ const data={}; BK_KEYS.forEach(k=>{ try{ const v=localStorage.getItem(k); if(v!==null) data[k]=v; }catch(e){} }); return data; }
 let bkTimer=null;
-function bkSchedule(){ clearTimeout(bkTimer); bkTimer=setTimeout(bkNow,700); }       // attend 0,7 s après le dernier enregistrement
+function bkSchedule(){ clearTimeout(bkTimer); bkTimer=setTimeout(bkNow,700); }       // attend 700ms après le dernier enregistrement
 async function bkNow(){ try{ const data=bkSnapshot(); if(data[KEY]||data[UKEY]) await bkPut({ts:Date.now(),data}); }catch(e){} }
 // on "enveloppe" les fonctions d'enregistrement existantes : elles font leur travail PUIS déclenchent la copie de secours
 (function(){

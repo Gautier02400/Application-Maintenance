@@ -8,14 +8,14 @@
    ============================================================================ */
 
 // Nom du cache. IMPORTANT : à chaque fois que vous modifiez index.html (ou un autre fichier de la liste),
-// changez ce numéro (v21 -> v22...) pour que les appareils suppriment l'ancienne copie et récupèrent la nouvelle.
-const CACHE = 'tutos-maintenance-v23';
+// changez ce numéro (v24 -> v25...) pour que les appareils suppriment l'ancienne copie et récupèrent la nouvelle.
+const CACHE = 'tutos-maintenance-v25';
 
 // Fichiers de l'appli à mettre en cache dès l'installation (ils doivent tous exister dans le dossier).
 // Ajoutez ici "./fond-verre.jpg" si vous utilisez une photo de fond.
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png',
   // Flowsheets interactifs (un fichier .js par site : plan + équipements)
-  './flowsheets/saint-romain.js'];
+  './flowsheets/saint-romain.js', './flowsheets/Reims.js'];
 
 // Bibliothèques externes : pdf.js (affichage des PDF) et JSZip (lecture des PowerPoint .pptx).
 // Mises en cache "si possible" : si Internet manque pendant l'installation, ça ne bloque pas l'appli.
