@@ -830,6 +830,26 @@ svg.pen{vertical-align:-2px}
 .card .cover.fitc::before{content:"";position:absolute;inset:-14%;background:var(--ci) center/cover no-repeat;filter:blur(18px) saturate(1.15) brightness(.8);z-index:0}
 .card .cover.fitc img{object-fit:contain}
 img{image-orientation:from-image}
+
+/* ---- Cadrage des illustrations : photo entière sur fond flou (ou « Remplir » réglé par la classe .fill) ---- */
+.card .cover.hasimg::before{content:"";position:absolute;inset:-12%;background:var(--bg) center/cover no-repeat;filter:blur(16px) saturate(1.15) brightness(.92);z-index:0}
+.card .cover img{object-fit:contain;position:relative;z-index:1}
+.card .cover.fill img{object-fit:cover;object-position:var(--op,50% 50%)}
+.card .cover.fill.hasimg::before{display:none}
+.cover[class*=" c-c_"]{background:linear-gradient(135deg,#2c3e50,#4ca1af)}
+/* ---- Onglets personnalisés : grille de cases ---- */
+.cgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px;margin:12px 0}
+.cblk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);min-width:0;overflow-wrap:anywhere}
+.cblk.cbed{outline:2px dashed var(--accent);outline-offset:-5px}
+.cbctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.cbctl select{padding:4px 6px;font-size:.85rem}
+.cbh{margin:6px 0 0}
+.cbimg img{width:100%;height:auto;display:block;border-radius:8px}
+.cbimg.fill{aspect-ratio:16/9;overflow:hidden;border-radius:8px}
+.cbimg.fill img{height:100%;object-fit:cover;border-radius:0}
+.cbph{display:grid;place-items:center;min-height:110px;border:1px dashed var(--line);border-radius:8px;color:var(--muted)}
+#cbModal textarea,#cbModal input:not([type=checkbox]):not([type=file]),#cbModal select{width:100%;box-sizing:border-box}
+@media(max-width:780px){ .cgrid>.cblk{grid-column:span 12!important} }
 </style>
 </head>
 <body>
@@ -1023,8 +1043,11 @@ const LBLKEY='sibelco_labels_v1';
 let navEdit=false;   // mode « Modifier le menu » (classes 3 et 4) : flèches ▲▼ et crayon à côté de chaque onglet
 const NAVKEY='sibelco_navorder_v1';
 let NAVORD=(()=>{ try{ return (JSON.parse(localStorage.getItem(NAVKEY))||{}).order||[]; }catch(e){ return []; } })();
+/* Onglets créés par les classes 3 et 4 (bouton « + Ajouter un onglet » du mode Modifier le menu) : [{id:'c_xxx', name, blocks:[…]}]. Gardés dans NAVKEY (donc sauvegarde + donnees.json). */
+let CUST=(()=>{ try{ const a=(JSON.parse(localStorage.getItem(NAVKEY))||{}).custom; return Array.isArray(a)?a:[]; }catch(e){ return []; } })();
+const isCust=k=>typeof k==='string'&&k.startsWith('c_');
 let LBL=(()=>{ try{ return JSON.parse(localStorage.getItem(LBLKEY))||{}; }catch(e){ return {}; } })();
-const T = (k,...a)=>{ const o=LBL[k]; if(o&&o[lang]) return o[lang]; const v=I18N[lang][k]; return typeof v==='function'?v(...a):v; };
+const T = (k,...a)=>{ const o=LBL[k]; if(o&&o[lang]) return o[lang]; const v=I18N[lang][k]; if(v==null&&typeof k==='string'&&k.startsWith('cn_')){ const c=CUST.find(x=>'cn_'+x.id===k); return c?c.name:''; } return typeof v==='function'?v(...a):v; };
 
 /*
  CATEGORIES, NIVEAUX, STATUTS : les valeurs sont TOUJOURS enregistrées en français (pour rester compatibles),
@@ -1328,6 +1351,7 @@ function renderList(){
  POUR UN PICTOGRAMME DIFFERENT SUR UNE RUBRIQUE : changez simplement le dessin de la clé correspondante.
 */
 const ICO={
+ custom:'<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/>',
  bottle:'<path d="M10 2h4v4c0 1.2 2 2 2 4.5V20a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-9.5C8 8 10 7.2 10 6z"/><path d="M8 14h8"/>',
  tutos:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
  constructeur:'<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>',
@@ -1853,13 +1877,37 @@ const TPKEY='sibelco_tilepics_v1';
 let tilePics=(()=>{try{return JSON.parse(localStorage.getItem(TPKEY))||{};}catch(e){return {};}})();
 function saveTilePics(){ try{localStorage.setItem(TPKEY,JSON.stringify(tilePics));}catch(e){toast(T('storage_full'));} }
 function setTilePic(k,inp){ if(!canEditTutos()){ toast(T('need_cls3')); return; } const f=inp.files&&inp.files[0]; if(!f) return; readImg(f,720,0.75,u=>{ tilePics[k]=u; saveTilePics(); renderHome(); }); }
-function rmTilePic(k){ delete tilePics[k]; saveTilePics(); renderHome(); }
+function rmTilePic(k){ delete tilePics[k]; delete tilePics[k+'::fit']; delete tilePics[k+'::pos']; saveTilePics(); renderHome(); }
+/* CADRAGE DES PHOTOS : par défaut la photo est montrée ENTIÈRE (jamais coupée) sur un fond flou de la même photo (voir frameCovers plus bas).
+   Bouton « Cadrer » d'une tuile : choix « Photo entière » ou « Remplir le cadre » + réglage horizontal / vertical du point visible. */
 function tileHTML(k,l){
-  const pic=tilePics[k];
-  return `<div class="card tcard" onclick="go('${k}')"><div class="cover c-${k}">${pic?`<img src="${pic}" alt="" loading="lazy">`:icoSVG(k)}</div><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div>`+
-   (canEditTutos()?`<div class="row noprint tpedit" onclick="event.stopPropagation()"><label class="tpbtn">${L('Photo','Photo')}<input type="file" accept="image/*" class="hidden" onchange="setTilePic('${k}',this)"></label>${pic?`<button class="small danger" onclick="event.stopPropagation();rmTilePic('${k}')">×</button>`:''}</div>`:'')+`</div>`;
+  const pic=tilePics[k], fill=!!pic&&tilePics[k+'::fit']==='fill', pos=tilePics[k+'::pos']||'50% 50%';
+  return `<div class="card tcard" onclick="go('${k}')"><div class="cover c-${k}${fill?' fill':''}"${fill?` style="--op:${esc(pos)}"`:''}>${pic?`<img src="${esc(pic)}" alt="" loading="lazy">`:icoSVG(isCust(k)?'custom':k)}</div><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div>`+
+   (canEditTutos()?`<div class="row noprint tpedit" onclick="event.stopPropagation()"><label class="tpbtn">${L('Photo','Photo')}<input type="file" accept="image/*" class="hidden" onchange="setTilePic('${k}',this)"></label>${pic?`<button class="small" onclick="event.stopPropagation();tileFrame('${k}')">${L('Cadrer','Frame')}</button><button class="small danger" onclick="event.stopPropagation();rmTilePic('${k}')">×</button>`:''}</div>`:'')+`</div>`;
 }
-
+function tileFrame(k){
+  const pic=tilePics[k]; if(!pic) return; lbClose();
+  const fill=tilePics[k+'::fit']==='fill', p=(tilePics[k+'::pos']||'50% 50%').split(' ').map(v=>parseInt(v)||50);
+  const d=document.createElement('div'); d.id='lbModal'; d.className='flmodal';
+  d.innerHTML=`<div class="panel"><h3 style="margin-top:0">${L('Cadrage de la photo','Photo framing')}</h3>
+   <div class="tiles" style="grid-template-columns:1fr;margin:0 0 10px"><div class="card tcard" style="cursor:default"><div class="cover c-${esc(k)}${fill?' fill':''}" id="tfPrev" style="--op:${p[0]}% ${p[1]}%"><img src="${esc(pic)}" alt=""></div><h3>${esc(T(k.startsWith('c_')?'cn_'+k:(NAV.find(n=>n[0]===k)||[0,0,''])[2]))}</h3></div></div>
+   <label style="display:flex;gap:8px;align-items:center;margin:4px 0"><input type="radio" name="tfm" value="fit" ${fill?'':'checked'} onchange="tfUpd()"> ${L('Photo entière (rien n’est coupé)','Whole photo (nothing cropped)')}</label>
+   <label style="display:flex;gap:8px;align-items:center;margin:4px 0"><input type="radio" name="tfm" value="fill" ${fill?'checked':''} onchange="tfUpd()"> ${L('Remplir le cadre (photo recadrée)','Fill the frame (cropped photo)')}</label>
+   <div id="tfPos" style="${fill?'':'opacity:.4;pointer-events:none'}"><label>${L('Position horizontale','Horizontal position')}<input type="range" id="tfx" min="0" max="100" value="${p[0]}" oninput="tfUpd()" style="width:100%"></label>
+   <label>${L('Position verticale','Vertical position')}<input type="range" id="tfy" min="0" max="100" value="${p[1]}" oninput="tfUpd()" style="width:100%"></label></div>
+   <div class="row" style="margin-top:12px;gap:8px"><button class="primary" onclick="tfSave('${esc(k)}')">${T('save')}</button><button onclick="lbClose()">${L('Annuler','Cancel')}</button></div></div>`;
+  document.body.appendChild(d);
+}
+function tfUpd(){
+  const fill=document.querySelector('input[name=tfm]:checked').value==='fill', pv=$('tfPrev');
+  pv.classList.toggle('fill',fill); pv.style.setProperty('--op',$('tfx').value+'% '+$('tfy').value+'%');
+  const pp=$('tfPos'); pp.style.opacity=fill?'':'.4'; pp.style.pointerEvents=fill?'':'none';
+}
+function tfSave(k){
+  const fill=document.querySelector('input[name=tfm]:checked').value==='fill';
+  if(fill){ tilePics[k+'::fit']='fill'; tilePics[k+'::pos']=$('tfx').value+'% '+$('tfy').value+'%'; } else { delete tilePics[k+'::fit']; delete tilePics[k+'::pos']; }
+  saveTilePics(); lbClose(); renderHome();
+}
 /*
  NAV = les rubriques du menu : [clé, (inutilisé), clé de traduction]. L'ordre ici = l'ordre dans le menu.
  buildNav() redessine le menu : badge de classe, boutons épingle (garder le menu ouvert sur grand écran),
@@ -1868,6 +1916,97 @@ function tileHTML(k,l){
 /* ORDRE DES ONGLETS : réglable dans l'onglet Convertisseur (classes 3 et 4) ; navList() renvoie NAV dans l'ordre choisi (NAVORD), les onglets inconnus restent à leur place d'origine à la suite. */
 function navList(){ const pos=k=>{ const i=NAVORD.indexOf(k); return i<0?1e6+NAV.findIndex(n=>n[0]===k):i; }; return [...NAV].sort((a,b)=>pos(a[0])-pos(b[0])); }
 const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['glossaire','','nav_gloss'],['jeux','','nav_jeux'],['settings','','nav_set']];
+
+navSyncCust();
+/* ===================== ONGLETS PERSONNALISÉS ET « CASES » MODULABLES =====================
+   Menu > Modifier > « + Ajouter un onglet ». Dans la page de l'onglet, le bouton Modifier (classes 3 et 4) permet d'ajouter des CASES :
+   texte, photo, liste, lien/bouton, titre de section. Chaque case se déplace (▲ ▼), change de largeur (1/3, 1/2, 2/3, pleine) et se modifie (✎).
+   Tout est enregistré dans NAVKEY (sauvegarde automatique + « Exporter pour le site »). */
+function navSyncCust(){
+  for(let i=NAV.length-1;i>=0;i--) if(isCust(NAV[i][0])) NAV.splice(i,1);
+  let at=NAV.findIndex(n=>n[0]==='settings'); if(at<0) at=NAV.length;
+  CUST.forEach(c=>NAV.splice(at++,0,[c.id,'','cn_'+c.id]));
+}
+let custEdit=false, CBT;
+const CB_TYPES=[['text','Texte','Text'],['photo','Photo','Photo'],['list','Liste','List'],['link','Lien / bouton','Link / button'],['title','Titre de section','Section title']];
+const cbUrl=u=>{ u=(u||'').trim(); return (/^(https?:\/\/|mailto:|tel:)/i.test(u)||/^\.{0,2}\/?[\w\-\/.%]+\.(pdf|png|jpe?g|docx?|xlsx?|pptx?|html?)$/i.test(u))?u:''; };
+function custAdd(){
+  if(!canEditTutos()){ toast(T('need_cls3')); return; }
+  const name=prompt(L('Nom du nouvel onglet :','Name of the new tab:')); if(!name||!name.trim()) return;
+  const c={id:'c_'+Date.now().toString(36),name:name.trim().slice(0,40),blocks:[]};
+  CUST.push(c); navSyncCust();
+  if(NAVORD.length){ const i=NAVORD.indexOf('settings'); NAVORD.splice(i<0?NAVORD.length:i,0,c.id); }
+  navPersist(); go(c.id); custEdit=true; renderCustom(c.id); buildNav();
+}
+async function custDel(id){
+  const c=CUST.find(x=>x.id===id); if(!c) return;
+  if(!(await askOk(L('Supprimer l’onglet « '+c.name+' » et toutes ses cases ?','Delete the tab “'+c.name+'” and all its boxes?')))) return;
+  CUST=CUST.filter(x=>x.id!==id); NAVORD=NAVORD.filter(k=>k!==id); delete LBL['cn_'+id];
+  ['','::fit','::pos'].forEach(x=>delete tilePics[id+x]); saveTilePics(); cvLabelsPersist();
+  navSyncCust(); navPersist(); custEdit=false; renderHome();
+}
+function custToggle(id){ custEdit=!custEdit; renderCustom(id,true); }
+function cbSave_(){ navPersist(); }
+function renderCustom(id,keep){
+  const c=CUST.find(x=>x.id===id); if(!c){ renderHome(); return; }
+  state.section=id; state.view='custom'; $('filters').classList.add('hidden'); buildNav();
+  const ed=custEdit&&canEditTutos(), bl=c.blocks||(c.blocks=[]), y=window.scrollY;
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2 style="margin:0">${esc(T('cn_'+id))}</h2>`+
+   (canEditTutos()?`<button class="${ed?'primary':''}" onclick="custToggle('${id}')">${ed?L('Terminer','Done'):L('Modifier','Edit')}</button>`:'')+`</div>`+
+   (ed?`<div class="panel noprint"><b>${L('Ajouter une case','Add a box')}</b><div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap">${CB_TYPES.map(t=>`<button onclick="cbAdd('${id}','${t[0]}')">+ ${esc(L(t[1],t[2]))}</button>`).join('')}</div>
+     <div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap"><button class="small" onclick="lbEdit('cn_${id}')">${L('Renommer l’onglet','Rename the tab')}</button><button class="small danger" onclick="custDel('${id}')">${L('Supprimer l’onglet','Delete the tab')}</button></div>
+     <p class="meta" style="margin:8px 0 0">${L('Chaque case se déplace (▲ ▼), change de largeur et se modifie (✎). La photo de l’onglet sur l’accueil se règle avec « Photo » / « Cadrer » sous sa tuile.','Each box can be moved (▲ ▼), resized and edited (✎). The tab’s picture on the home page is set with “Photo” / “Frame” under its tile.')}</p></div>`:'')+
+   (bl.length?`<div class="cgrid">${bl.map((b,i)=>cbHTML(id,b,i,bl.length,ed)).join('')}</div>`:`<div class="empty">${canEditTutos()?L('Onglet vide. Cliquez sur « Modifier » puis ajoutez des cases.','Empty tab. Click “Edit”, then add boxes.'):L('Cet onglet est vide pour le moment.','This tab is empty for now.')}</div>`)+
+   `<p class="disclaimer">${esc(T('footer'))}</p>`;
+  window.scrollTo(0,keep?y:0);
+}
+function cbHTML(tid,b,i,n,ed){
+  const t=b.type; let h='';
+  const ttl=b.title?`<h3 style="margin:0 0 6px">${esc(b.title)}</h3>`:'';
+  if(t==='title') h=`<h2 class="cbh">${esc(b.title||'')}</h2>`;
+  else if(t==='text') h=ttl+`<p style="margin:0">${esc(b.text||'').replace(/\n/g,'<br>')}</p>`;
+  else if(t==='photo') h=(b.img?`<div class="cbimg${b.fit==='fill'?' fill':''}"><img src="${esc(b.img)}" alt="${esc(b.title||'')}" loading="lazy"></div>`:`<div class="cbph">${L('Photo à ajouter','Photo to add')}</div>`)+(b.title?`<div class="meta" style="margin-top:6px">${esc(b.title)}</div>`:'');
+  else if(t==='list'){ const li=(b.text||'').split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join(''); h=ttl+(b.ordered?`<ol style="margin:0;padding-left:20px">${li}</ol>`:`<ul style="margin:0;padding-left:20px">${li}</ul>`); }
+  else if(t==='link'){ const u=cbUrl(b.url); h=ttl+(b.text?`<p style="margin:0 0 8px">${esc(b.text).replace(/\n/g,'<br>')}</p>`:'')+(u?`<a class="btn primary" href="${esc(u)}" target="_blank" rel="noopener">${esc(b.label||u)}</a>`:`<span class="meta">${L('Adresse manquante ou invalide','Missing or invalid address')}</span>`); }
+  const ctl=ed?`<div class="cbctl noprint"><button class="small" onclick="cbMove('${tid}','${b.id}',-1)" ${i===0?'disabled':''} aria-label="${L('Monter','Up')}">▲</button><button class="small" onclick="cbMove('${tid}','${b.id}',1)" ${i===n-1?'disabled':''} aria-label="${L('Descendre','Down')}">▼</button>
+    <select onchange="cbWidth('${tid}','${b.id}',this.value)" aria-label="${L('Largeur','Width')}">${[[4,'1/3'],[6,'1/2'],[8,'2/3'],[12,L('Pleine','Full')]].map(w=>`<option value="${w[0]}" ${+(b.w||12)===w[0]?'selected':''}>${w[1]}</option>`).join('')}</select>
+    <button class="small" onclick="cbEdit('${tid}','${b.id}')">✎</button><button class="small danger" onclick="cbDel('${tid}','${b.id}')">×</button></div>`:'';
+  return `<div class="cblk${ed?' cbed':''}" style="grid-column:span ${+b.w||12}">${ctl}${h}</div>`;
+}
+function cbFind(tid,bid){ const c=CUST.find(x=>x.id===tid); return [c,c&&c.blocks.find(b=>b.id===bid)]; }
+function cbAdd(tid,type){ const c=CUST.find(x=>x.id===tid); if(!c) return; const b={id:'b'+Date.now().toString(36),type,w:(type==='title'?12:6),title:'',text:''}; c.blocks.push(b); cbEdit(tid,b.id,true); }
+function cbMove(tid,bid,d){ const c=CUST.find(x=>x.id===tid); if(!c) return; const i=c.blocks.findIndex(b=>b.id===bid), j=i+d; if(i<0||j<0||j>=c.blocks.length) return; const t=c.blocks[i]; c.blocks[i]=c.blocks[j]; c.blocks[j]=t; navPersist(); renderCustom(tid,true); }
+function cbWidth(tid,bid,w){ const [c,b]=cbFind(tid,bid); if(!b) return; b.w=+w; navPersist(); renderCustom(tid,true); }
+async function cbDel(tid,bid){ const [c,b]=cbFind(tid,bid); if(!b) return; if(!(await askOk(L('Supprimer cette case ?','Delete this box?')))) return; c.blocks=c.blocks.filter(x=>x.id!==bid); navPersist(); renderCustom(tid,true); }
+function cbClose(){ const d=$('cbModal'); if(d) d.remove(); }
+function cbCancel(tid,bid,isNew){ cbClose(); if(isNew){ const c=CUST.find(x=>x.id===tid); if(c) c.blocks=c.blocks.filter(x=>x.id!==bid); } }
+function cbPhoto(inp){ const f=inp.files&&inp.files[0]; if(!f) return; readImg(f,1100,0.72,u=>{ CBT=u; $('cb_pv').innerHTML=`<img src="${u}" style="max-width:100%;max-height:180px;border-radius:8px;display:block;margin-bottom:6px">`; }); }
+function cbEdit(tid,bid,isNew){
+  const [c,b]=cbFind(tid,bid); if(!b) return; cbClose(); CBT=undefined;
+  const t=b.type, F=(id,lab,v,ta)=>`<label>${lab}</label>`+(ta?`<textarea id="${id}" rows="6">${esc(v||'')}</textarea>`:`<input id="${id}" value="${esc(v||'')}">`);
+  let f='';
+  if(t==='title') f=F('cb_t',L('Titre','Title'),b.title);
+  else if(t==='text') f=F('cb_t',L('Titre (facultatif)','Title (optional)'),b.title)+F('cb_x',L('Texte','Text'),b.text,1);
+  else if(t==='photo') f=`<label>${L('Photo','Photo')}</label><div id="cb_pv">${b.img?`<img src="${esc(b.img)}" style="max-width:100%;max-height:180px;border-radius:8px;display:block;margin-bottom:6px">`:''}</div><input type="file" accept="image/*" onchange="cbPhoto(this)">`+F('cb_t',L('Légende (facultatif)','Caption (optional)'),b.title)+`<label>${L('Cadrage','Framing')}</label><select id="cb_f"><option value="fit" ${b.fit!=='fill'?'selected':''}>${L('Photo entière (rien n’est coupé)','Whole photo (nothing cropped)')}</option><option value="fill" ${b.fit==='fill'?'selected':''}>${L('Remplie (format 16/9, recadrée)','Filled (16/9, cropped)')}</option></select>`;
+  else if(t==='list') f=F('cb_t',L('Titre (facultatif)','Title (optional)'),b.title)+F('cb_x',L('Éléments (un par ligne)','Items (one per line)'),b.text,1)+`<label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="cb_o" ${b.ordered?'checked':''}> ${L('Liste numérotée','Numbered list')}</label>`;
+  else if(t==='link') f=F('cb_t',L('Titre (facultatif)','Title (optional)'),b.title)+F('cb_x',L('Description (facultatif)','Description (optional)'),b.text,1)+F('cb_l',L('Texte du bouton','Button text'),b.label)+F('cb_u',L('Adresse (https://… ou fichier .pdf)','Address (https://… or .pdf file)'),b.url);
+  const nm=CB_TYPES.find(x=>x[0]===t)||CB_TYPES[0];
+  const d=document.createElement('div'); d.id='cbModal'; d.className='flmodal';
+  d.innerHTML=`<div class="panel"><h3 style="margin-top:0">${esc(L(nm[1],nm[2]))}</h3>${f}<div class="row" style="margin-top:12px;gap:8px"><button class="primary" onclick="cbSave('${tid}','${bid}')">${T('save')}</button><button onclick="cbCancel('${tid}','${bid}',${!!isNew})">${L('Annuler','Cancel')}</button></div></div>`;
+  document.body.appendChild(d);
+  const first=d.querySelector('input:not([type=file]),textarea'); if(first) first.focus();
+}
+function cbSave(tid,bid){
+  const [c,b]=cbFind(tid,bid); if(!b) return; const v=id=>{ const e=$(id); return e?e.value.trim():undefined; };
+  const t=v('cb_t'), x=v('cb_x'), l=v('cb_l'), u=v('cb_u'), fi=v('cb_f');
+  if(t!==undefined) b.title=t; if(x!==undefined) b.text=x; if(l!==undefined) b.label=l; if(u!==undefined) b.url=u; if(fi!==undefined) b.fit=fi;
+  if($('cb_o')) b.ordered=$('cb_o').checked; if(CBT!==undefined) b.img=CBT;
+  cbClose(); navPersist(); renderCustom(tid,true); toast(L('Enregistré','Saved'));
+}
+/* CADRAGE AUTOMATIQUE DES ILLUSTRATIONS : chaque photo d'une carte/tuile (.cover img) reçoit en fond une version floue d'elle-même ;
+   la photo est affichée ENTIÈRE par-dessus (object-fit:contain dans le CSS). Rien n'est coupé, et le cadre est toujours plein. */
+function frameCovers(){ document.querySelectorAll('.cover img:not([data-fr])').forEach(im=>{ im.dataset.fr='1'; const p=im.parentElement, sr=im.getAttribute('src'); if(!p||!sr) return; p.classList.add('hasimg'); p.style.setProperty('--bg','url("'+sr.replace(/"/g,'%22')+'")'); }); }
+try{ new MutationObserver(frameCovers).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
 function buildNav(){
   document.body.classList.toggle('adm',isAdmin());
   $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px">${canEditTutos()?`<button class="nb ib ${navEdit?'on':''}" onclick="toggleNavEdit()" aria-pressed="${navEdit}" title="${esc(L('Modifier le menu : glisser pour changer l’ordre, toucher un nom pour le renommer','Edit the menu: drag to reorder, tap a name to rename it'))}">${navEdit?L('Terminer','Done'):L('Modifier','Edit')}</button>`:''}<button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button></div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
@@ -1905,15 +2044,16 @@ window.addEventListener('resize',()=>{ if($('side').classList.contains('open')){
  renderSection() : réaffiche la page courante (utile après un changement de langue).
  cnt(k) : nombre d'éléments affiché sur les tuiles de l'accueil.
 */
-function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else if(k==='flowsheet') renderFlow(); else if(k==='convertisseur') renderConv(); else if(k==='glossaire') renderGloss(); else renderFiches(k); }
+function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else if(k==='flowsheet') renderFlow(); else if(k==='convertisseur') renderConv(); else if(k==='glossaire') renderGloss(); else if(isCust(k)){ custEdit=false; renderCustom(k); } else renderFiches(k); }
 function renderSection(){ const v=state.view;
   if(v==='home') renderHome(); else if(v==='settings') renderSettings(); else if(v==='fiches') renderFiches(state.section);
   else if(v==='jeux') renderGame();
   else if(v==='flow') renderFlow(); else if(v==='conv') renderConv(); else if(v==='del') renderDel();
   else if(v==='gloss') renderGloss();
+  else if(v==='custom') renderCustom(state.section,true);
   else if(v==='machines') renderMachines3D();
   else if(v==='fiche') openFiche(state.fid); else if(v==='fedit') renderFicheEditor(); else renderList(); }
-function cnt(k){ if(k==='jeux') return GAMES.length; if(k==='glossaire') return glItems().length; if(k==='flowsheet') return FLOW_SITES.length; if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
+function cnt(k){ if(isCust(k)){ const c=CUST.find(x=>x.id===k); return c?(c.blocks||[]).length:0; } if(k==='jeux') return GAMES.length; if(k==='glossaire') return glItems().length; if(k==='flowsheet') return FLOW_SITES.length; if(k==='tutos') return tutos.filter(t=>!isLocked(t)).length+'/'+tutos.length; return fiches.filter(f=>f.type===k).length; }
 
 /*
  ACCUEIL : bienvenue, classe de l'utilisateur, alerte "formation obligatoire" si classe 0, et les 5 tuiles illustrées
@@ -1933,7 +2073,7 @@ function renderHome(){
    ${(c<1&&ob)?`<div class="box danger"><b>${esc(T('oblig_title'))}</b><br>${esc(T('oblig_txt'))}<div style="margin-top:8px"><button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button></div></div>`:''}
    ${settings.trained?`<div class="box" style="border-left-color:var(--ok)">${esc(T('trained_on'))} ${esc(new Date(settings.trained).toLocaleDateString(lang))}</div>`:''}
    ${progHTML(true)}
-   <div class="tiles">${navList().filter(n=>NAV.slice(1,7).some(m=>m[0]===n[0])).map(([k,i,l])=>tileHTML(k,l)).join('')}</div>
+   <div class="tiles">${navList().filter(n=>(NAV.slice(1,7).some(m=>m[0]===n[0])||isCust(n[0]))).map(([k,i,l])=>tileHTML(k,l)).join('')}</div>
    <p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
@@ -2592,7 +2732,7 @@ const CV_DEF={
  cv_del_btn:['Supprimer un flowsheet','Delete a flowsheet','Bouton « Supprimer » et titre de sa page','“Delete” button and its page title'],
  cv_off_title:['Flowsheets supprimés','Deleted flowsheets','Titre de la liste des supprimés','Deleted list title']
 };
-const cvDef=(k,l)=>CV_DEF[k]?CV_DEF[k][l==='en'?1:0]:(typeof (I18N[l]||{})[k]==='string'?I18N[l][k]:'');
+const cvDef=(k,l)=>CV_DEF[k]?CV_DEF[k][l==='en'?1:0]:(k.startsWith('cn_')?((CUST.find(c=>'cn_'+c.id===k)||{}).name||''):(typeof (I18N[l]||{})[k]==='string'?I18N[l][k]:''));
 const cvT=k=>(LBL[k]&&LBL[k][lang])||cvDef(k,lang);
 const cvH=k=>cvEd(k,esc(cvT(k)).replace(/\n/g,'<br>'));
 /* ---- modifier un texte / un nom d'onglet « sur place » (classes 3 et 4) ----
@@ -2604,7 +2744,7 @@ function cvLabelsPersist(){ try{ localStorage.setItem(LBLKEY,JSON.stringify(LBL)
 function lbEdit(k){
   if(!canEditTutos()){ toast(T('need_cls3')); return; }
   lbClose();
-  const long=k.endsWith('_help'), title=CV_DEF[k]?CV_DEF[k][lang==='en'?3:2]:L('Nom de l’onglet « ','Tab name “')+cvDef(k,'fr')+L(' »','”');
+  const long=k.endsWith('_help'), title=CV_DEF[k]?CV_DEF[k][lang==='en'?3:2]:L('Nom de l’onglet « ','Tab name “')+(k.startsWith('cn_')?T(k):cvDef(k,'fr'))+L(' »','”');
   const f=l=>{ const v=(LBL[k]&&LBL[k][l])||cvDef(k,l), id='lbm_'+l; return long?`<textarea id="${id}" rows="6">${esc(v)}</textarea>`:`<input id="${id}" value="${esc(v)}">`; };
   const d=document.createElement('div'); d.id='lbModal'; d.className='flmodal';
   d.innerHTML=`<div class="panel"><h3 style="margin-top:0">${esc(title)}</h3>
@@ -2616,7 +2756,7 @@ function lbEdit(k){
   const first=$('lbm_'+lang); if(first){ first.focus(); if(first.select&&!long) first.select(); }
 }
 function lbClose(){ const d=$('lbModal'); if(d) d.remove(); }
-function lbRefresh(){ buildNav(); if(['home','conv','del','flow','settings','gloss','jeux','fiches'].includes(state.view)){ const y=window.scrollY; renderSection(); window.scrollTo(0,y); } }
+function lbRefresh(){ buildNav(); if(['home','conv','del','flow','settings','gloss','jeux','fiches','custom'].includes(state.view)){ const y=window.scrollY; renderSection(); window.scrollTo(0,y); } }
 function lbSave(k){
   const o=LBL[k]=LBL[k]||{};
   ['fr','en'].forEach(l=>{ const el=$('lbm_'+l); if(!el) return; const v=el.value.trim(); if(v&&v!==cvDef(k,l)) o[l]=v; else delete o[l]; });
@@ -2630,11 +2770,11 @@ function toggleNavEdit(){ navEdit=!navEdit; buildNav(); }
 const GRIP='<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="6" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="18" r="1.7"/><circle cx="15" cy="18" r="1.7"/></svg>';
 function navItems(){
   const arr=navList().filter(([k])=>k!=='convertisseur'||canEditTutos()), ed=navEdit&&canEditTutos();
-  return (ed?`<p class="nbhint">${L('Glissez les onglets vers le haut ou le bas. Touchez un nom pour le renommer.','Drag the tabs up or down. Tap a name to rename it.')}</p>`:'')+arr.map(([k,i,l])=>{
+  return (ed?`<p class="nbhint">${L('Glissez les onglets vers le haut ou le bas. Touchez un nom pour le renommer. « Ajouter un onglet » en bas du menu.','Drag the tabs up or down. Tap a name to rename it.')}</p>`:'')+arr.map(([k,i,l])=>{
     const sp=k==='settings'?'<div class="sp"></div>':'';
     if(!ed) return sp+`<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`;
-    return sp+`<div class="nbrow nbedit" data-k="${k}"><span class="grip" onpointerdown="navDragStart(event)" aria-label="${esc(L('Glisser pour déplacer','Drag to move'))}">${GRIP}</span><button class="nb" onclick="lbEdit('${l}')" title="${esc(L('Renommer','Rename'))}">${esc(T(l))}</button></div>`;
-  }).join('');
+    return sp+`<div class="nbrow nbedit" data-k="${k}"><span class="grip" onpointerdown="navDragStart(event)" aria-label="${esc(L('Glisser pour déplacer','Drag to move'))}">${GRIP}</span><button class="nb" onclick="lbEdit('${l}')" title="${esc(L('Renommer','Rename'))}">${esc(T(l))}</button>${isCust(k)?`<button class="nb ib" onclick="custDel('${k}')" title="${esc(L('Supprimer cet onglet','Delete this tab'))}">×</button>`:''}</div>`;
+  }).join('')+(ed?`<button class="nb" onclick="custAdd()" style="border:1px dashed rgba(255,255,255,.5);margin-top:6px">＋ ${L('Ajouter un onglet','Add a tab')}</button>`:'');
 }
 /* glisser-déposer des onglets : la poignée suit le doigt / la souris ; au relâchement, l'ordre est enregistré (NAVORD) */
 let ND=null;
@@ -2660,7 +2800,7 @@ function navDragEnd(e){
   const keys=d.rows.map(r=>r.k); keys.splice(d.idx,0,d.row.dataset.k);
   NAVORD=keys; navPersist(); buildNav(); if(state.view==='home') renderHome();
 }
-function navPersist(){ try{ localStorage.setItem(NAVKEY,JSON.stringify({order:NAVORD})); }catch(e){ toast(T('storage_full')); } try{ bkSchedule(); }catch(e){} }
+function navPersist(){ try{ localStorage.setItem(NAVKEY,JSON.stringify({order:NAVORD,custom:CUST})); }catch(e){ toast(T('storage_full')); } try{ bkSchedule(); }catch(e){} }
 function navEditReset(){
   if(!confirm(L('Rétablir les noms et l’ordre d’origine de tous les onglets ?','Restore the original names and order of all tabs?'))) return;
   NAVORD=[]; NAV.forEach(n=>delete LBL[n[2]]); navPersist(); cvLabelsPersist(); lbRefresh();
