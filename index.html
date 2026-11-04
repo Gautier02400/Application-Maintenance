@@ -509,21 +509,23 @@ body.nav-open .menu-btn{visibility:hidden}
   body.nav-open header,body.nav-open #toolbar,body.nav-open #app{transform:translateX(200px)}
 }
 /* Mode administrateur : menu plus large et plus aéré (il contient le bouton Modifier et la poignée de déplacement des onglets) */
-body.adm #side{width:270px;padding-left:12px;padding-right:12px}
+body.adm #side{width:290px;padding-left:12px;padding-right:12px}
 body.adm #side .nb{font-size:.98rem;padding:10px 12px}
-body.adm #side .nb.ib{font-size:.9rem;padding:7px 12px;font-weight:600}
+body.adm #side .nb.ib{font-size:.9rem;padding:7px 12px}
 body.adm #side .sidehd{padding:4px 0 12px}
 body.adm #side .sidehd .cls{font-size:.76rem;padding:3px 10px}
 body.adm #side .grip{height:42px;width:38px}
-/* en-tête du menu administrateur : le badge de classe prend sa ligne, puis Modifier + cadenas côte à côte (le cadenas reste toujours visible) */
-body.adm #side .sidehd{flex-wrap:wrap;row-gap:8px}
-body.adm #side .sidehd .cls{flex:1 1 100%;white-space:normal;width:auto!important;text-align:left}
-body.adm #side .sidehd>div{display:flex;gap:6px!important;width:100%}
-body.adm #side .sidehd .nb.ib{justify-content:center}
-body.adm #side .sidehd .nb.ib:not(.pinbtn){flex:1}
-body.adm #side .sidehd .nb.pinbtn{flex:none;min-width:46px;padding:7px 10px}
-@media(min-width:781px){ body.adm.nav-open{padding-left:270px} }
-@media(max-width:780px){ body.adm.nav-open header,body.adm.nav-open #toolbar,body.adm.nav-open #app{transform:translateX(270px)} }
+/* en-tête du menu : classe + petit bouton Modifier + cadenas sur la MÊME ligne (le badge se raccourcit si besoin, le cadenas reste visible) */
+#side .sidehd{flex-wrap:nowrap}
+#side .sidehd .cls{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:auto!important}
+#side .sidehd>div{flex:none;display:flex;gap:4px!important}
+#side .sidehd .nb.ib:not(.pinbtn){font-size:.72rem;padding:3px 8px;font-weight:600;white-space:nowrap;border:1px solid rgba(255,255,255,.35);border-radius:6px}
+#side .sidehd .nb.ib.on:not(.pinbtn){background:rgba(255,255,255,.24)}
+#side .sidehd .nb.pinbtn{flex:none;padding:4px 7px}
+.cvedit{cursor:pointer;border-bottom:1px dashed var(--accent,#2d8fe0);background:rgba(45,143,224,.10);border-radius:3px;padding:0 2px}
+.cvedit:hover{background:rgba(45,143,224,.22)}
+@media(min-width:781px){ body.adm.nav-open{padding-left:290px} }
+@media(max-width:780px){ body.adm.nav-open header,body.adm.nav-open #toolbar,body.adm.nav-open #app{transform:translateX(290px)} }
 /* Barre d'outils SOUS le bandeau : boutons Nouveau / Exporter / Importer + recherche + filtres */
 #toolbar .wrap{padding-bottom:0}
 #toolbar .actions{display:flex;gap:8px;flex-wrap:wrap}
@@ -2082,7 +2084,7 @@ function renderFlow(id){
     <button onclick="flZoom(.6)" title="Zoom +">＋</button><button onclick="flZoom(1/.6)" title="Zoom −">−</button>
     <button onclick="flFit()">${L('Vue d’ensemble','Fit')}</button>
     <button id="flShow" onclick="flToggleShow()" aria-pressed="false">${L('Voir les zones','Show zones')}</button>
-    ${isAdmin()?`<button id="flAdmBtn" onclick="flAdmToggle()" aria-pressed="false">${PEN} ${L('Modifier','Edit')}</button>`:''}
+    ${isAdmin()?`<button id="flAdmBtn" onclick="flAdmToggle()" aria-pressed="false">${L('Modifier','Edit')}</button>`:''}
   </div>
   ${isAdmin()?flAdmHTML():''}
   <div id="flZbar" class="box noprint hidden" style="margin:6px 0"><b>${L('Modifier les cases','Edit zones')}</b> · ${L('Mode « Dessiner » : glissez sur le plan pour tracer un rectangle, puis indiquez le repère. Cliquez une case existante pour la supprimer.','“Draw” mode: drag on the plan to draw a rectangle, then enter the tag. Click an existing zone to delete it.')}
@@ -2106,14 +2108,14 @@ function flMarkLinks(){ document.querySelectorAll('#flHot .fh').forEach(r=>r.cla
 /* ---- panneau « Modifier » (administrateur uniquement) : tout est regroupé ici ---- */
 function flAdmHTML(){
   const s=FLOW_SITES.find(x=>x.id===FL.site)||{name:'',id:''};
-  const off=FLOW_OFF.length?`<div class="fladm-sec"><h4>${L('Flowsheets supprimés','Deleted flowsheets')}</h4>`+FLOW_OFF.map(o=>`<div class="fladm-row"><span><b>${esc(o.name)}</b> <span class="meta">(${esc(o.id)})</span></span><button onclick="cvRestore('${esc(o.id)}','flow')">${L('Rétablir','Restore')}</button></div>`).join('')+`</div>`:'';
+  const off=FLOW_OFF.length?`<div class="fladm-sec"><h4>${L('Flowsheets supprimés','Deleted flowsheets')}</h4>`+FLOW_OFF.map(o=>`<div class="fladm-row"><span><b>${esc(o.name)}</b> <span class="meta">(${esc(o.id)})</span></span><span class="row"><button onclick="flPurgeOff('${esc(o.id)}')">${L('Vider le cache','Clear cache')}</button><button onclick="cvRestore('${esc(o.id)}','flow')">${L('Rétablir','Restore')}</button></span></div>`).join('')+`<div style="margin-top:6px"><button onclick="flPurgeOff()">${L('Vider le cache des supprimés','Clear cache of deleted')}</button></div></div>`:'';
   return `<div id="flAdm" class="box noprint fladm hidden">
    <div class="fladm-head"><b>${L('Administration du flowsheet','Flowsheet administration')}</b><span class="meta">${esc(s.name)}</span></div>
    <div class="fladm-grid">
     <div class="fladm-sec"><h4>${L('Nom affiché','Display name')}</h4>
       <div class="row"><input id="flRn" value="${esc(s.name)}" maxlength="60" style="flex:1;min-width:150px" aria-label="${esc(L('Nom du flowsheet','Flowsheet name'))}" onkeydown="if(event.key==='Enter')flRename()"><button class="primary" onclick="flRename()">${L('Renommer','Rename')}</button></div></div>
     <div class="fladm-sec"><h4>${L('Contenu','Content')}</h4>
-      <div class="row"><button id="flZ" onclick="flToggleZedit()" aria-pressed="false">${L('Modifier les cases','Edit zones')}</button><button id="flEdit" onclick="flToggleEdit()" aria-pressed="false">${L('Modifier les infos','Edit info')}</button><button onclick="renderConv(true)">${esc(cvT('cv_add_btn'))}</button></div>
+      <p class="meta" style="margin:0 0 8px">${L('Cliquez un équipement sur le plan pour modifier sa photo, sa description et sa fiche.','Click an item on the plan to edit its photo, description and sheet.')}</p><div class="row"><button id="flZ" onclick="flToggleZedit()" aria-pressed="false">${L('Modifier les cases','Edit zones')}</button><button onclick="renderConv(true)">${esc(cvT('cv_add_btn'))}</button></div>
       <p class="meta" style="margin:8px 0 0">${L('Le Convertisseur permet aussi d’importer, d’exporter et de remplacer un plan.','The Converter can also import, export and replace a plan.')}</p></div>
     <div class="fladm-sec"><h4>${L('Maintenance','Maintenance')}</h4>
       <div class="row"><button onclick="flClearCache()">${L('Vider le cache','Clear cache')}</button><button class="danger" onclick="flDelete()">${L('Supprimer ce flowsheet','Delete this flowsheet')}</button></div>
@@ -2126,7 +2128,8 @@ function flAdmToggle(){
   const p=$('flAdm'); if(!p) return;
   const open=!p.classList.toggle('hidden'), b=$('flAdmBtn');
   if(b){ b.setAttribute('aria-pressed',open); b.classList.toggle('primary',open); }
-  if(!open){ if(FL.zedit) flToggleZedit(); if(FL.edit) flToggleEdit(); }
+  if(open){ if(!FL.edit&&!FL.zedit) flToggleEdit(true); }
+  else{ if(FL.zedit) flToggleZedit(); if(FL.edit) flToggleEdit(true); }
 }
 function flSetName(id,n){
   const s=FLOW_SITES.concat(FLOW_OFF).find(x=>x.id===id); if(!s) return;
@@ -2164,9 +2167,27 @@ async function flClearCache(){
     toast(L('Cache des flowsheets vidé','Flowsheet cache cleared'));
   }catch(e){ toast(L('Impossible de vider le cache','Could not clear the cache')); }
 }
+/* Vider le cache des flowsheets SUPPRIMÉS (id précis, ou tous) : le plan gardé en mémoire et la copie hors-ligne du fichier sont effacés.
+   Les cases / infos ajoutées ne sont pas touchées ; si le flowsheet est rétabli, son plan est retéléchargé (connexion nécessaire). */
+async function flPurgeOff(id){
+  if(!isAdmin()) return needAdm();
+  const list=id?FLOW_OFF.filter(x=>x.id===id):FLOW_OFF.slice();
+  if(!list.length) return toast(L('Aucun flowsheet supprimé.','No deleted flowsheet.'));
+  if(!confirm(L('Vider le cache de '+(id?'« '+list[0].name+' »':'tous les flowsheets supprimés')+' ? Le plan sera retéléchargé s’il est rétabli (connexion nécessaire). Les cases et infos ajoutées sont conservées.','Clear the cache of '+(id?'“'+list[0].name+'”':'all deleted flowsheets')+'? The plan will be downloaded again if restored (connection needed). Added zones and info are kept.'))) return;
+  try{
+    list.forEach(s=>{ delete FLOW_PACK[s.id]; if(s.js) document.querySelectorAll('script[src]').forEach(e=>{ if(e.getAttribute('src')===s.js) e.remove(); }); });
+    if(window.caches){
+      for(const k of await caches.keys()){
+        const c=await caches.open(k);
+        for(const r of await c.keys()) if(list.some(s=>s.js&&r.url.endsWith(s.js.replace(/^\./,'')))) await c.delete(r);
+      }
+    }
+    toast(L('Cache des flowsheets supprimés vidé','Cache of deleted flowsheets cleared'));
+  }catch(e){ toast(L('Impossible de vider le cache','Could not clear the cache')); }
+}
 function flDelete(){ if(!isAdmin()) return needAdm(); if(FL.site) cvDelete(FL.site,'flow'); }
 function flToggleShow(){ FL.show=!FL.show; $('flBox').classList.toggle('flshow',FL.show); $('flShow').setAttribute('aria-pressed',FL.show); $('flShow').classList.toggle('primary',FL.show); }
-function flToggleEdit(){ if(!isAdmin()) return needAdm(); FL.edit=!FL.edit; $('flEdit').setAttribute('aria-pressed',FL.edit); $('flEdit').classList.toggle('primary',FL.edit); toast(FL.edit?L('Mode modification : cliquez un équipement pour le modifier','Edit mode: click an item to edit it'):L('Mode lecture','Read mode')); flTipHide(); }
+function flToggleEdit(quiet){ if(!isAdmin()) return needAdm(); FL.edit=!FL.edit; const fe=$('flEdit'); if(fe){ fe.setAttribute('aria-pressed',FL.edit); fe.classList.toggle('primary',FL.edit); } if(quiet!==true) toast(FL.edit?L('Mode modification : cliquez un équipement pour le modifier','Edit mode: click an item to edit it'):L('Mode lecture','Read mode')); flTipHide(); }
 /* ---- vue (zoom / déplacement) : on modifie le viewBox du SVG, donc le dessin reste net à tous les zooms ---- */
 function flSetVB(v){
   const box=$('flBox'); if(!box||!FL.svg) return; const r=box.getBoundingClientRect(); const asp=r.height/Math.max(1,r.width);
@@ -2347,7 +2368,7 @@ function renderConv(focusNew){
       <button onclick="cvExport('${id}')">${L('Exporter .js','Export .js')}</button>
       ${CVE&&isAdmin()?`<button onclick="cvRename('${id}')">${L('Renommer','Rename')}</button>${s.custom?`<button onclick="cvPickReplace('${id}')">${L('Remplacer le plan','Replace plan')}</button>`:''}<button class="danger" onclick="cvDelete('${id}')">${L('Supprimer','Delete')}</button>`:''}</div>`;
   }).join('');
-  $('app').innerHTML=`<div class="row noprint" style="margin:8px 0"><h2 style="margin:0">${esc(T('nav_conv'))}</h2>${cvPen('nav_conv')}${isAdmin()?`<button class="${CVE?'primary':''}" style="margin-left:auto" onclick="cvEditToggle()" aria-pressed="${CVE}">${CVE?L('Terminer','Done'):L('Modifier','Edit')}</button>`:''}</div>
+  $('app').innerHTML=`<div class="row noprint" style="margin:8px 0"><h2 style="margin:0">${cvEd('nav_conv',esc(T('nav_conv')))}</h2>${isAdmin()?`<button class="${CVE?'primary':''}" style="margin-left:auto" onclick="cvEditToggle()" aria-pressed="${CVE}">${CVE?L('Terminer','Done'):L('Modifier','Edit')}</button>`:''}</div>
   <div id="cvMsg" class="box" style="display:none"></div>
   <div style="${CVBOX}">
     <h3 style="margin-top:0">${cvH('cv_create_title')} ${cvPen('cv_create_title')}</h3>
@@ -2370,7 +2391,7 @@ function renderConv(focusNew){
     <p class="meta">${cvH('cv_import_help')} ${cvPen('cv_import_help')}</p>
     <input id="cvPack" type="file" accept=".js" onchange="cvImport(this)">
   </div>
-  <div style="${CVBOX}"><h3 style="margin-top:0">${cvH('cv_sites_title')} ${cvPen('cv_sites_title')}</h3>${rows||`<p class="meta">${L('Aucun flowsheet.','No flowsheet.')}</p>`}${CVE&&isAdmin()?`<div style="border-top:1px solid var(--line);padding-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button onclick="lbEdit('cv_add_btn')">${PEN} ${L('Texte du bouton « Ajouter »','Text of the “Add” button')}</button><button onclick="flClearCache()">${L('Vider le cache des flowsheets','Clear flowsheet cache')}</button><button onclick="navEditReset()">${L('Rétablir noms et ordre des onglets','Restore tab names and order')}</button></div>`:''}</div></div>
+  <div style="${CVBOX}"><h3 style="margin-top:0">${cvH('cv_sites_title')} ${cvPen('cv_sites_title')}</h3>${rows||`<p class="meta">${L('Aucun flowsheet.','No flowsheet.')}</p>`}${CVE&&isAdmin()?`<div style="border-top:1px solid var(--line);padding-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button onclick="flClearCache()">${L('Vider le cache des flowsheets','Clear flowsheet cache')}</button></div>`:''}</div></div>
   ${cvOffBox()}
   <input id="cvRep" type="file" accept=".pdf,.svg,.png,.jpg,.jpeg,.webp" hidden onchange="cvReplace(this)">`;
   window.scrollTo(0,0); if(focusNew) setTimeout(()=>{ const e=$('cvFile'); if(e) e.focus(); },50);
@@ -2440,7 +2461,7 @@ function cvRestore(id,from){
 }
 function cvOffBox(from){
   if(!FLOW_OFF.length||!isAdmin()||(!from&&!CVE)) return '';
-  return `<div style="${CVBOX}"><h3 style="margin-top:0">${L('Flowsheets supprimés','Deleted flowsheets')}</h3>`+FLOW_OFF.map(s=>`<div style="border-top:1px solid var(--line);padding:8px 0;display:flex;gap:8px;align-items:center"><div style="flex:1"><b>${esc(s.name)}</b> <span class="meta">(${esc(s.id)})</span></div><button onclick="cvRestore('${esc(s.id)}'${from?`,'${from}'`:''})">${L('Rétablir','Restore')}</button></div>`).join('')+`</div>`;
+  return `<div style="${CVBOX}"><div class="row" style="margin-bottom:6px"><h3 style="margin:0;flex:1">${L('Flowsheets supprimés','Deleted flowsheets')}</h3><button onclick="flPurgeOff()">${L('Vider le cache des supprimés','Clear cache of deleted')}</button></div>`+FLOW_OFF.map(s=>`<div style="border-top:1px solid var(--line);padding:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:140px"><b>${esc(s.name)}</b> <span class="meta">(${esc(s.id)})</span></div><button onclick="flPurgeOff('${esc(s.id)}')">${L('Vider le cache','Clear cache')}</button><button onclick="cvRestore('${esc(s.id)}'${from?`,'${from}'`:''})">${L('Rétablir','Restore')}</button></div>`).join('')+`</div>`;
 }
 /* réaffiche l'onglet sans remonter en haut de page et garde le bloc « Modifier les noms… » ouvert */
 function cvRedraw(){ const y=window.scrollY, o=($('cvLb')||{}).open; renderConv(); const d=$('cvLb'); if(d&&o) d.open=true; window.scrollTo(0,y); }
@@ -2498,11 +2519,12 @@ const CV_DEF={
 };
 const cvDef=(k,l)=>CV_DEF[k]?CV_DEF[k][l==='en'?1:0]:(typeof (I18N[l]||{})[k]==='string'?I18N[l][k]:'');
 const cvT=k=>(LBL[k]&&LBL[k][lang])||cvDef(k,lang);
-const cvH=k=>esc(cvT(k)).replace(/\n/g,'<br>');
+const cvH=k=>cvEd(k,esc(cvT(k)).replace(/\n/g,'<br>'));
 /* ---- modifier un texte / un nom d'onglet « sur place » (classes 3 et 4) ----
    Une petite icône crayon à côté de chaque texte du Convertisseur, et le mode « Modifier le menu » (crayon en haut du menu) pour les onglets,
    ouvrent la même petite fenêtre : champ français + champ anglais. Vide ou identique à l'origine = texte d'origine. */
-const cvPen=k=>(CVE&&isAdmin())?`<button class="small noprint" onclick="lbEdit('${k}')" title="${esc(L('Modifier ce texte','Edit this text'))}" aria-label="${esc(L('Modifier ce texte','Edit this text'))}">${PEN}</button>`:'';
+const cvPen=k=>'';   // (plus d'icône crayon : en mode Modifier, on clique directement le texte)
+const cvEd=(k,h)=>(CVE&&isAdmin())?`<span class="cvedit" role="button" tabindex="0" onclick="lbEdit('${k}')" onkeydown="if(event.key==='Enter')lbEdit('${k}')" title="${esc(L('Cliquer pour modifier ce texte','Click to edit this text'))}">${h}</span>`:h;
 function cvLabelsPersist(){ try{ localStorage.setItem(LBLKEY,JSON.stringify(LBL)); }catch(e){ toast(T('storage_full')); } try{ bkSchedule(); }catch(e){} }
 function lbEdit(k){
   if(!canEditTutos()){ toast(T('need_cls3')); return; }
@@ -2616,6 +2638,7 @@ function flToggleZedit(){
   if(!isAdmin()){ needAdm(); return; }
   FL.zedit=!FL.zedit; FL.edit=false; FL.zd=null;
   const fe=$('flEdit'); if(fe){ fe.classList.remove('primary'); fe.setAttribute('aria-pressed','false'); }
+  const adm=$('flAdm'); if(!FL.zedit&&adm&&!adm.classList.contains('hidden')) flToggleEdit(true);   // panneau Modifier ouvert : retour au mode infos
   $('flBox').classList.toggle('zedit',FL.zedit); $('flZ').setAttribute('aria-pressed',FL.zedit); $('flZ').classList.toggle('primary',FL.zedit);
   $('flZbar').classList.toggle('hidden',!FL.zedit); flZMode(true); flTipHide();
   toast(FL.zedit?L('Mode cases : dessinez ou cliquez une case','Zone mode: draw or click a zone'):L('Mode lecture','Read mode'));
@@ -2747,7 +2770,7 @@ function glRender(){
       <div class="glfa"><b class="glword">${esc(glW(g))}</b><span class="glhint">${L('Toucher pour voir la définition','Tap to see the definition')}</span></div>
       <div class="glfb"><div class="glbk"><h4>${esc(glW(g))}</h4><p>${esc(glD(g)).replace(/\n/g,'<br>')}</p></div>${canEditTutos()?`<button class="small noprint" onclick="event.stopPropagation();glEdit('${g.id}')">${L('Modifier','Edit')}</button>`:''}</div></div></div>`).join('')+`</div>`;
   } else {
-    b.innerHTML=`<div class="gllist">`+l.map(g=>`<div class="glrow"><div class="glw">${esc(glW(g))}</div><div class="gld ${GL.blur&&!GL.rev[g.id]?'blur':''}" onclick="glRev('${g.id}',this)">${esc(glD(g)).replace(/\n/g,'<br>')}</div>${ed?`<button class="small noprint" onclick="glEdit('${g.id}')" title="${esc(L('Modifier','Edit'))}">${PEN}</button>`:'<span></span>'}</div>`).join('')+`</div>`;
+    b.innerHTML=`<div class="gllist">`+l.map(g=>`<div class="glrow"><div class="glw">${esc(glW(g))}</div><div class="gld ${GL.blur&&!GL.rev[g.id]?'blur':''}" onclick="glRev('${g.id}',this)">${esc(glD(g)).replace(/\n/g,'<br>')}</div>${ed?`<button class="small noprint" onclick="glEdit('${g.id}')" title="${esc(L('Modifier','Edit'))}">${L('Modifier','Edit')}</button>`:'<span></span>'}</div>`).join('')+`</div>`;
   }
 }
 
