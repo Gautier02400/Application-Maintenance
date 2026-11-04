@@ -920,7 +920,7 @@ const I18N = {
   storage_full:'Stockage plein ou indisponible : pensez à exporter en JSON',
   footer:'Projet réalisé par Lecertisseur Gautier, Coordinateur Tri Optiques · Sibelco Reims',
   unspecified:'Non précisée', locked_tag:'Verrouillé',
-  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_cons2:'Pièces consommables', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', nav_flow:'Flowsheet',nav_gloss:'Mots-clés / Définitions', items:'élément(s)',
+  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_cons2:'Pièces consommables', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', nav_flow:'Flowsheet',nav_conv:'Convertisseur',nav_gloss:'Mots-clés / Définitions', items:'élément(s)',
   welcome:'Bienvenue', your_class:'Votre classe :', ask_level:'Quel est votre niveau sur les trieurs optiques ?',
   confirm_cls:'Je confirme avoir le niveau de cette classe (déclaratif, à valider avec le référent).',
   oblig_title:'Formation obligatoire', oblig_txt:"Vous ne connaissez pas encore les trieurs optiques : terminez d'abord la formation pour débloquer les autres tutoriels.", oblig_go:'Commencer la formation',
@@ -960,7 +960,7 @@ const I18N = {
   storage_full:'Storage full or unavailable: please export to JSON',
   footer:'Project by Lecertisseur Gautier, Optical Sorting Coordinator · Sibelco Reims',
   unspecified:'Not specified', locked_tag:'Locked',
-  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_cons2:'Consumable parts', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', nav_flow:'Flowsheet',nav_gloss:'Keywords / Definitions', items:'item(s)',
+  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_cons2:'Consumable parts', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', nav_flow:'Flowsheet',nav_conv:'Converter',nav_gloss:'Keywords / Definitions', items:'item(s)',
   welcome:'Welcome', your_class:'Your class:', ask_level:'What is your level on optical sorters?',
   confirm_cls:'I confirm I have the level of this class (self-declared, to be validated with the referent).',
   oblig_title:'Mandatory training', oblig_txt:'You do not know optical sorters yet: complete the training first to unlock the other tutorials.', oblig_go:'Start training',
@@ -979,7 +979,12 @@ let lang = (()=>{ try{ const l=localStorage.getItem(LANG_KEY); if(l==='fr'||l===
 /*
  T('cle') = renvoie le texte de la clé dans la langue courante (et appelle la fonction si c'est une fonction).
 */
-const T = (k,...a)=>{ const v=I18N[lang][k]; return typeof v==='function'?v(...a):v; };
+/* Noms d'onglets et textes modifiés dans l'onglet Convertisseur (classes 3 et 4) : { clé : {fr:'…', en:'…'} }, prioritaires sur I18N. */
+const LBLKEY='sibelco_labels_v1';
+const NAVKEY='sibelco_navorder_v1';
+let NAVORD=(()=>{ try{ return (JSON.parse(localStorage.getItem(NAVKEY))||{}).order||[]; }catch(e){ return []; } })();
+let LBL=(()=>{ try{ return JSON.parse(localStorage.getItem(LBLKEY))||{}; }catch(e){ return {}; } })();
+const T = (k,...a)=>{ const o=LBL[k]; if(o&&o[lang]) return o[lang]; const v=I18N[lang][k]; return typeof v==='function'?v(...a):v; };
 
 /*
  CATEGORIES, NIVEAUX, STATUTS : les valeurs sont TOUJOURS enregistrées en français (pour rester compatibles),
@@ -1786,10 +1791,12 @@ function tileHTML(k,l){
  buildNav() redessine le menu : badge de classe, boutons épingle (garder le menu ouvert sur grand écran),
  les rubriques, "Déconnexion". Le bouton de la rubrique active reçoit la classe "on" (bleu clair).
 */
-const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['glossaire','','nav_gloss'],['jeux','','nav_jeux'],['settings','','nav_set']];
+/* ORDRE DES ONGLETS : réglable dans l'onglet Convertisseur (classes 3 et 4) ; navList() renvoie NAV dans l'ordre choisi (NAVORD), les onglets inconnus restent à leur place d'origine à la suite. */
+function navList(){ const pos=k=>{ const i=NAVORD.indexOf(k); return i<0?1e6+NAV.findIndex(n=>n[0]===k):i; }; return [...NAV].sort((a,b)=>pos(a[0])-pos(b[0])); }
+const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['glossaire','','nav_gloss'],['jeux','','nav_jeux'],['convertisseur','','nav_conv'],['settings','','nav_set']];
 function buildNav(){
   $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px"><button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button></div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
-   NAV.map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
+   navList().filter(([k])=>k!=='convertisseur'||canEditTutos()).map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
   document.querySelector('header').classList.toggle('big',state.section!=='tutos'); $('app').classList.toggle('flowwide',state.section==='flowsheet');
   $('actions').classList.toggle('hidden',state.section!=='tutos');
   $('btnNew').classList.toggle('hidden',!canEditTutos());
@@ -1823,11 +1830,11 @@ window.addEventListener('resize',()=>{ if($('side').classList.contains('open')){
  renderSection() : réaffiche la page courante (utile après un changement de langue).
  cnt(k) : nombre d'éléments affiché sur les tuiles de l'accueil.
 */
-function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else if(k==='flowsheet') renderFlow(); else if(k==='glossaire') renderGloss(); else renderFiches(k); }
+function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else if(k==='flowsheet') renderFlow(); else if(k==='convertisseur') renderConv(); else if(k==='glossaire') renderGloss(); else renderFiches(k); }
 function renderSection(){ const v=state.view;
   if(v==='home') renderHome(); else if(v==='settings') renderSettings(); else if(v==='fiches') renderFiches(state.section);
   else if(v==='jeux') renderGame();
-  else if(v==='flow') renderFlow();
+  else if(v==='flow') renderFlow(); else if(v==='conv') renderConv();
   else if(v==='gloss') renderGloss();
   else if(v==='machines') renderMachines3D();
   else if(v==='fiche') openFiche(state.fid); else if(v==='fedit') renderFicheEditor(); else renderList(); }
@@ -1851,7 +1858,7 @@ function renderHome(){
    ${(c<1&&ob)?`<div class="box danger"><b>${esc(T('oblig_title'))}</b><br>${esc(T('oblig_txt'))}<div style="margin-top:8px"><button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button></div></div>`:''}
    ${settings.trained?`<div class="box" style="border-left-color:var(--ok)">${esc(T('trained_on'))} ${esc(new Date(settings.trained).toLocaleDateString(lang))}</div>`:''}
    ${progHTML(true)}
-   <div class="tiles">${NAV.slice(1,7).map(([k,i,l])=>tileHTML(k,l)).join('')}</div>
+   <div class="tiles">${navList().filter(n=>NAV.slice(1,7).some(m=>m[0]===n[0])).map(([k,i,l])=>tileHTML(k,l)).join('')}</div>
    <p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
@@ -1971,6 +1978,16 @@ const FLOW_SITES=[
  {id:'saint-romain', name:'Saint-Romain-le-Puy', js:'./flowsheets/saint-romain.js'},
  {id:'Reims', name:'Reims', js:'./flowsheets/Reims.js'}
 ];
+/* Flowsheets créés ou importés avec l'onglet « Convertisseur » (gardés sur cet appareil) : ajoutés à la liste au démarrage.
+   Si un site publié a le même id, la version publiée (fichier) l'emporte. */
+const CVKEY='sibelco_flowsites_v1';
+const cvList=()=>{ try{ return JSON.parse(localStorage.getItem(CVKEY))||[]; }catch(e){ return []; } };
+cvList().forEach(s=>{ if(s&&s.id&&!FLOW_SITES.some(x=>x.id===s.id)) FLOW_SITES.push({id:s.id,name:s.name||s.id,js:'',custom:true}); });
+/* Flowsheets « supprimés » : retirés de la liste (le fichier publié n'est jamais effacé) et rangés dans FLOW_OFF pour pouvoir les rétablir. */
+const FHKEY='sibelco_flowhidden_v1';
+const fhGet=()=>{ try{ return JSON.parse(localStorage.getItem(FHKEY))||{}; }catch(e){ return {}; } };
+const FLOW_OFF=[];
+Object.keys(fhGet()).forEach(id=>{ const i=FLOW_SITES.findIndex(s=>s.id===id); if(i>=0&&fhGet()[id]) FLOW_OFF.push(...FLOW_SITES.splice(i,1)); });
 /* Les infos saisies dans l'appli (photo, description, fiche liée) sont gardées à part, par site et par équipement : FL.ov[site][tag] */
 const FLKEY='sibelco_flow_v1';
 const FL={site:null,data:null,svg:null,vb:null,full:null,ov:(()=>{try{return JSON.parse(localStorage.getItem(FLKEY))||{};}catch(e){return {};}})(),show:false,edit:false,cache:{},pin:null,ptr:new Map(),moved:0};
@@ -2002,13 +2019,16 @@ window.FLOW_PACK=window.FLOW_PACK||{};
 function flLoad(id){
   return new Promise((ok,ko)=>{
     if(FLOW_PACK[id]) return ok(FLOW_PACK[id]);
+    const cs=FLOW_SITES.find(x=>x.id===id);
+    if(cs&&cs.custom){ idbGet('flowsite:'+id).then(p=>{ if(p&&p.svg&&p.data){ FLOW_PACK[id]=p; ok(p); } else ko(); }).catch(ko); return; }
     const s=FLOW_SITES.find(x=>x.id===id), el=document.createElement('script');
     el.src=s.js; el.onload=()=>FLOW_PACK[id]?ok(FLOW_PACK[id]):ko(); el.onerror=()=>ko(); document.head.appendChild(el);
   });
 }
 function renderFlow(id){
   state.section='flowsheet'; state.view='flow'; $('filters').classList.add('hidden'); buildNav();
-  FL.site=id||FL.site||FLOW_SITES[0].id; FL.pin=null; FL.zedit=false; FL.zd=null;
+  if(!FLOW_SITES.length){ $('app').innerHTML=`<div class="row noprint" style="margin:8px 0;gap:8px"><h2 style="margin:0">${esc(T('nav_flow'))}</h2>${canEditTutos()?`<button class="primary" onclick="renderConv(true)">＋ ${esc(cvT('cv_add_btn'))}</button>`:''}</div><p class="meta">${L('Aucun flowsheet.','No flowsheet.')}</p>`; return; }
+  FL.site=id||FL.site; if(!FLOW_SITES.some(x=>x.id===FL.site)) FL.site=FLOW_SITES[0].id; FL.pin=null; FL.zedit=false; FL.zd=null;
   const canEd=canEditFiche('constructeur');
   $('app').innerHTML=`<div class="row noprint" style="margin:8px 0;gap:8px;flex-wrap:wrap">
     <h2 style="margin:0">${esc(T('nav_flow'))}</h2>
@@ -2018,6 +2038,7 @@ function renderFlow(id){
     <button onclick="flFit()">${L('Vue d’ensemble','Fit')}</button>
     <button id="flShow" onclick="flToggleShow()" aria-pressed="false">${L('Voir les zones','Show zones')}</button>
     ${canEditTutos()?`<button id="flZ" onclick="flToggleZedit()" aria-pressed="false">${L('Modifier les cases','Edit zones')}</button>`:''}
+    ${canEditTutos()?`<button onclick="renderConv(true)" title="${esc(L('Convertir un plan Excel / PDF en nouveau flowsheet','Convert an Excel / PDF plan into a new flowsheet'))}">＋ ${esc(cvT('cv_add_btn'))}</button>`:''}
     ${canEd?`<button id="flEdit" onclick="flToggleEdit()" aria-pressed="false">${L(' Modifier les infos',' Edit info')}</button>`:''}
   </div>
   <div id="flZbar" class="box noprint hidden" style="margin:6px 0"><b>${L('Modifier les cases','Edit zones')}</b> · ${L('Mode « Dessiner » : glissez sur le plan pour tracer un rectangle, puis indiquez le repère. Cliquez une case existante pour la supprimer.','“Draw” mode: drag on the plan to draw a rectangle, then enter the tag. Click an existing zone to delete it.')}
@@ -2131,6 +2152,272 @@ function flEdSave(){ const tag=FL.ed.tag, s=(FL.ov[FL.site]=FL.ov[FL.site]||{});
   const e0=flEq(tag)||{}, dsc=$('flEd2').value.trim(), same=!dsc||dsc===(e0.desc||'')||dsc===flTr(e0.desc,FL_EN_DESC)||dsc===(e0.desc_en||'');
   s[tag]={name:$('flEn').value.trim(),desc:same?'':dsc,photo:FL.ed.photo,fiche:$('flEf').value}; flSave(); flEdClose(); flMarkLinks(); toast(L('Équipement enregistré','Equipment saved')); }
 function flEdReset(){ const s=FL.ov[FL.site]||{}; delete s[FL.ed.tag]; flSave(); flEdClose(); flMarkLinks(); }
+
+/*
+ ===================== CONVERTISSEUR DE FLOWSHEET (classes 3 et 4) =====================
+ Onglet « Convertisseur » du menu + bouton « Ajouter un flowsheet » de la rubrique Flowsheet (réservés aux classes 3 et 4 : canEditTutos()).
+ Rôle : transformer un plan (PDF enregistré depuis Excel, SVG ou image) en flowsheet, SANS toucher au code.
+   1) Création : le plan est converti en SVG ; le flowsheet est gardé sur CET appareil (IndexedDB « flowsite:<id> » + liste dans
+      localStorage CVKEY) et apparaît tout de suite dans la liste des sites de la rubrique Flowsheet. On y trace ensuite les
+      équipements avec le bouton existant « Modifier les cases ».
+   2) Export : « Exporter .js » fabrique le fichier <id>.js (même format que Reims.js) en y intégrant les cases ajoutées / retirées
+      et les noms / descriptions / photos modifiés dans l'appli. C'est ce fichier qu'on publie pour TOUS les appareils :
+      dossier flowsheets/ + ligne dans FLOW_SITES + liste FILES de sw.js (l'appli affiche la ligne à copier).
+   3) Import : « Importer un .js » lit un fichier au même format (par ex. exporté depuis un autre appareil) SANS l'exécuter.
+ Un flowsheet local ne disparaît que si on le supprime ici ; s'il est ensuite publié (même id dans FLOW_SITES), la version publiée l'emporte.
+*/
+const CVBOX='background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:10px 0';
+const CV={idTouched:false,rep:null};
+const cvOk=id=>/^[A-Za-z0-9_-]{1,40}$/.test(id);
+const cvSlug=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,'-').replace(/[^A-Za-z0-9_-]/g,'').slice(0,40);
+const cvStem=n=>String(n||'').replace(/\.[^.]+$/,'');
+const cvMo=n=>(n/1048576).toFixed(1).replace('.',',')+' Mo';
+const cvR1=n=>Math.round(n*10)/10;
+function cvMsg(h,bad){ const m=$('cvMsg'); if(!m) return; m.className='box'+(bad?' danger':''); m.style.display='block'; m.innerHTML=h; m.scrollIntoView({block:'nearest'}); }
+function cvRead(f,how){ return new Promise((ok,ko)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=()=>ko(r.error); how==='text'?r.readAsText(f):how==='url'?r.readAsDataURL(f):r.readAsArrayBuffer(f); }); }
+
+/* ---- conversion d'un fichier plan -> {svg, w, h} (le plan garde ses dimensions d'origine : les cases sont dans ce repère) ---- */
+async function cvConvert(f,o){
+  const ext=(f.name.split('.').pop()||'').toLowerCase(), head='<?xml version="1.0" encoding="UTF-8"?>\n';
+  if(['xlsx','xls','xlsm'].includes(ext)) throw new Error(L('Un fichier Excel ne peut pas être converti directement (les formes du flowsheet ne sont pas lisibles de façon fiable). Dans Excel : Fichier → Enregistrer sous → PDF (paysage, « Ajuster la feuille sur 1 page »), puis choisissez ce PDF.','An Excel file cannot be converted directly (the flowsheet shapes cannot be read reliably). In Excel: File → Save as → PDF (landscape, “Fit sheet on one page”), then choose that PDF.'));
+  if(ext==='svg'){
+    let t=await cvRead(f,'text'); t=t.replace(/<metadata[\s\S]*?<\/metadata>/g,'');
+    const d=new DOMParser().parseFromString(t,'image/svg+xml').documentElement;
+    if(d.nodeName!=='svg') throw new Error(L('SVG illisible.','Unreadable SVG.'));
+    const vb=(d.getAttribute('viewBox')||'').trim().split(/[\s,]+/).map(Number); let w,h;
+    if(vb.length===4&&vb.every(isFinite)){ w=vb[2]; h=vb[3]; } else { w=parseFloat(d.getAttribute('width')); h=parseFloat(d.getAttribute('height')); }
+    if(!(w>0&&h>0)) throw new Error(L('Le SVG n’a ni viewBox ni dimensions.','The SVG has no viewBox or size.'));
+    return {svg:t,w:cvR1(w),h:cvR1(h)};
+  }
+  if(['png','jpg','jpeg','webp'].includes(ext)){
+    const url=await cvRead(f,'url');
+    const im=await new Promise((ok,ko)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=()=>ko(new Error(L('Image illisible.','Unreadable image.'))); i.src=url; });
+    const w=im.naturalWidth,h=im.naturalHeight;
+    return {svg:head+`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><image width="${w}" height="${h}" xlink:href="${url}"/></svg>\n`,w,h};
+  }
+  if(ext==='pdf'){
+    let lib; try{ lib=await loadPdfJs(); }catch(e){ throw new Error(L('pdf.js n’a pas pu être chargé : une connexion Internet est nécessaire pour convertir un PDF.','pdf.js could not be loaded: an Internet connection is needed to convert a PDF.')); }
+    const doc=await lib.getDocument({data:new Uint8Array(await cvRead(f,'buf'))}).promise;
+    const n=Math.min(Math.max(1,o.page||1),doc.numPages), page=await doc.getPage(n), vp1=page.getViewport({scale:1});
+    const W=cvR1(vp1.width),H=cvR1(vp1.height);
+    if(o.mode==='vec'){
+      const ops=await page.getOperatorList(), g=new lib.SVGGraphics(page.commonObjs,page.objs); g.embedFonts=true;
+      const el=await g.getSVG(ops,vp1); el.setAttribute('width',W); el.setAttribute('height',H); el.setAttribute('viewBox','0 0 '+W+' '+H);
+      return {svg:head+new XMLSerializer().serializeToString(el)+'\n',w:W,h:H};
+    }
+    const sc=Math.min(o.res||3,15000/Math.max(W,H)), vp=page.getViewport({scale:sc});
+    const c=document.createElement('canvas'); c.width=Math.ceil(vp.width); c.height=Math.ceil(vp.height);
+    const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+    const url=c.toDataURL('image/png');
+    return {svg:head+`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><image width="${W}" height="${H}" xlink:href="${url}"/></svg>\n`,w:W,h:H};
+  }
+  throw new Error(L('Format non pris en charge : ','Unsupported format: ')+f.name);
+}
+const cvOpts=()=>({page:+($('cvPage')||{}).value||1,mode:($('cvMode')||{}).value||'img',res:+($('cvRes')||{}).value||3});
+
+/* ---- enregistrement d'un flowsheet local (plan dans IndexedDB, nom dans la liste) ---- */
+async function cvRegister(id,name,pack){
+  const ex=FLOW_SITES.find(s=>s.id===id);
+  if(ex&&!ex.custom){ cvMsg(L('Cet identifiant est déjà utilisé par un flowsheet publié : choisissez-en un autre.','This id is already used by a published flowsheet: choose another one.'),true); return false; }
+  if(ex&&!confirm(L('Un flowsheet « '+ex.name+' » existe déjà sur cet appareil avec cet identifiant. Le remplacer (ses cases sont conservées) ?','A flowsheet “'+ex.name+'” already exists on this device with this id. Replace it (its zones are kept)?'))) return false;
+  try{ await idbPut('flowsite:'+id,pack); const l=cvList().filter(x=>x.id!==id); l.push({id,name}); localStorage.setItem(CVKEY,JSON.stringify(l)); }
+  catch(e){ toast(T('storage_full')); return false; }
+  if(ex) ex.name=name; else FLOW_SITES.push({id,name,js:'',custom:true});
+  FLOW_PACK[id]=pack; return true;
+}
+
+/* ---- page de l'onglet ---- */
+function renderConv(focusNew){
+  if(!canEditTutos()){ toast(T('need_cls3')); return; }
+  state.section='convertisseur'; state.view='conv'; $('filters').classList.add('hidden'); buildNav(); CV.idTouched=false;
+  const rows=FLOW_SITES.map(s=>{
+    const n=((FL.zn[s.id]||{}).add||[]).length, id=esc(s.id);
+    return `<div style="border-top:1px solid var(--line);padding:10px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <div style="flex:1;min-width:200px"><b>${esc(s.name)}</b> <span class="meta">(${id})</span><div class="meta">${s.custom?L('Sur cet appareil uniquement','On this device only'):L('Publié (fichier flowsheets/)','Published (flowsheets/ file)')}${n?` · ${n} ${L('case(s) ajoutée(s)','added zone(s)')}`:''}</div></div>
+      <button onclick="renderFlow('${id}')">${L('Ouvrir','Open')}</button>
+      <button onclick="cvExport('${id}')">${L('Exporter .js','Export .js')}</button>
+      ${s.custom?`<button onclick="cvPickReplace('${id}')">${L('Remplacer le plan','Replace plan')}</button>`:''}<button class="danger" onclick="cvDelete('${id}')">${L('Supprimer','Delete')}</button></div>`;
+  }).join('');
+  $('app').innerHTML=`<div class="row noprint" style="margin:8px 0"><h2 style="margin:0">${esc(T('nav_conv'))}</h2></div>
+  <div id="cvMsg" class="box" style="display:none"></div>
+  <div style="${CVBOX}">
+    <h3 style="margin-top:0">${cvH('cv_create_title')}</h3>
+    <p class="meta">${cvH('cv_create_help')}</p>
+    <label>${L('Fichier du plan','Plan file')}</label>
+    <input id="cvFile" type="file" accept=".pdf,.svg,.png,.jpg,.jpeg,.webp,.xlsx,.xls" onchange="cvFileChosen(this)">
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <div style="flex:2;min-width:180px"><label>${L('Nom du site affiché','Site name')}</label><input id="cvName" oninput="cvNameInput()" placeholder="Reims"></div>
+      <div style="flex:1;min-width:140px"><label>${L('Identifiant (nom du fichier)','Id (file name)')}</label><input id="cvId" oninput="CV.idTouched=true" placeholder="Reims"></div>
+    </div>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      <div style="flex:1;min-width:110px"><label>${L('Page du PDF','PDF page')}</label><input id="cvPage" type="number" min="1" value="1"></div>
+      <div style="flex:2;min-width:200px"><label>${L('Conversion du PDF','PDF conversion')}</label><select id="cvMode" onchange="$('cvResBox').style.display=this.value==='img'?'':'none'"><option value="img">${L('Image haute définition (fiable, recommandé)','High-definition image (reliable, recommended)')}</option><option value="vec">${L('Vectoriel (net à tout zoom, polices parfois différentes)','Vector (sharp at any zoom, fonts may differ)')}</option></select></div>
+      <div id="cvResBox" style="flex:1;min-width:140px"><label>${L('Définition','Resolution')}</label><select id="cvRes"><option value="2">×2</option><option value="3" selected>×3</option><option value="4">×4 (${L('lourd','heavy')})</option></select></div>
+    </div>
+    <div class="row" style="margin-top:12px"><button class="primary" id="cvGo" onclick="cvCreate()">${L('Convertir et créer le flowsheet','Convert and create the flowsheet')}</button></div>
+  </div>
+  <div style="${CVBOX}">
+    <h3 style="margin-top:0">${cvH('cv_import_title')}</h3>
+    <p class="meta">${cvH('cv_import_help')}</p>
+    <input id="cvPack" type="file" accept=".js" onchange="cvImport(this)">
+  </div>
+  <div style="${CVBOX}"><h3 style="margin-top:0">${cvH('cv_sites_title')}</h3>${rows||`<p class="meta">${L('Aucun flowsheet.','No flowsheet.')}</p>`}</div>
+  ${cvOffBox()}${cvLabelsBox()}
+  <input id="cvRep" type="file" accept=".pdf,.svg,.png,.jpg,.jpeg,.webp" hidden onchange="cvReplace(this)">`;
+  window.scrollTo(0,0); if(focusNew) setTimeout(()=>{ const e=$('cvFile'); if(e) e.focus(); },50);
+}
+function cvFileChosen(inp){ const f=inp.files&&inp.files[0]; if(!f) return; if(!$('cvName').value){ $('cvName').value=cvStem(f.name); } if(!CV.idTouched) $('cvId').value=cvSlug($('cvName').value); }
+function cvNameInput(){ if(!CV.idTouched) $('cvId').value=cvSlug($('cvName').value); }
+function cvBusy(b,label){ const g=$('cvGo'); if(g){ g.disabled=b; g.textContent=b?L('Conversion en cours…','Converting…'):label; } }
+
+async function cvCreate(){
+  const f=$('cvFile').files[0], name=$('cvName').value.trim(), id=$('cvId').value.trim();
+  if(!f) return cvMsg(L('Choisissez d’abord un fichier de plan.','Choose a plan file first.'),true);
+  if(!name) return cvMsg(L('Indiquez le nom du site.','Enter the site name.'),true);
+  if(!cvOk(id)) return cvMsg(L('Identifiant : lettres, chiffres, _ ou - uniquement (ex. Reims, saint-romain).','Id: letters, digits, _ or - only (e.g. Reims, saint-romain).'),true);
+  const lbl=$('cvGo').textContent; cvBusy(true);
+  try{
+    const r=await cvConvert(f,cvOpts());
+    const old=FLOW_PACK[id]&&FLOW_SITES.find(s=>s.id===id&&s.custom)?FLOW_PACK[id]:null;
+    const pack={svg:r.svg,data:{id,name,viewBox:[0,0,r.w,r.h],equipment:old?old.data.equipment:[]}};
+    if(await cvRegister(id,name,pack)){ toast(L('Flowsheet créé. Utilisez « Modifier les cases » pour tracer les équipements.','Flowsheet created. Use “Edit zones” to draw the equipment.')); renderFlow(id); return; }
+  }catch(e){ cvMsg(esc(e.message||String(e)),true); }
+  cvBusy(false,lbl);
+}
+function cvPickReplace(id){ CV.rep=id; $('cvRep').value=''; $('cvRep').click(); }
+async function cvReplace(inp){
+  const f=inp.files&&inp.files[0], id=CV.rep; if(!f||!id) return;
+  try{
+    const r=await cvConvert(f,cvOpts()), p=await flLoad(id), old=p.data.viewBox;
+    p.svg=r.svg; p.data.viewBox=[0,0,r.w,r.h]; await idbPut('flowsite:'+id,p); FLOW_PACK[id]=p;
+    const diff=Math.abs(old[2]-r.w)>2||Math.abs(old[3]-r.h)>2;
+    cvMsg(diff?L('Plan remplacé, mais ses dimensions ont changé ('+cvR1(old[2])+'×'+cvR1(old[3])+' → '+r.w+'×'+r.h+') : vérifiez la position des cases.','Plan replaced, but its size changed ('+cvR1(old[2])+'×'+cvR1(old[3])+' → '+r.w+'×'+r.h+'): check the zone positions.'):L('Plan remplacé, les cases sont conservées.','Plan replaced, zones kept.'),diff);
+  }catch(e){ cvMsg(esc(e.message||String(e)),true); }
+}
+async function cvDelete(id){
+  const s=FLOW_SITES.find(x=>x.id===id); if(!s) return;
+  if(s.custom){
+    if(!confirm(L('Supprimer le flowsheet « '+s.name+' » de cet appareil, avec ses cases et infos ajoutées ? (Pensez à l’exporter avant si besoin.)','Delete the flowsheet “'+s.name+'” from this device, with its added zones and info? (Export it first if needed.)'))) return;
+    try{ await idbDel('flowsite:'+id); }catch(e){}
+    localStorage.setItem(CVKEY,JSON.stringify(cvList().filter(x=>x.id!==id)));
+    FLOW_SITES.splice(FLOW_SITES.indexOf(s),1); delete FLOW_PACK[id]; delete FL.zn[id]; delete FL.ov[id]; flZSave(); flSave();
+  }else{
+    if(!confirm(L('Supprimer « '+s.name+' » de la liste ? Le fichier publié n’est pas effacé : vous pourrez le rétablir ici. (Pour le retirer définitivement, enlevez sa ligne de FLOW_SITES dans index.html.)','Remove “'+s.name+'” from the list? The published file is not erased: you can restore it here. (To remove it for good, delete its line from FLOW_SITES in index.html.)'))) return;
+    const h=fhGet(); h[id]=true; try{ localStorage.setItem(FHKEY,JSON.stringify(h)); }catch(e){ toast(T('storage_full')); return; }
+    FLOW_OFF.push(...FLOW_SITES.splice(FLOW_SITES.indexOf(s),1));
+  }
+  if(FL.site===id) FL.site=null;
+  try{ bkSchedule(); }catch(e){}
+  cvRedraw(); toast(L('Flowsheet supprimé','Flowsheet deleted'));
+}
+function cvRestore(id){
+  const i=FLOW_OFF.findIndex(x=>x.id===id); if(i<0) return;
+  FLOW_SITES.push(...FLOW_OFF.splice(i,1)); const h=fhGet(); h[id]=false;
+  try{ localStorage.setItem(FHKEY,JSON.stringify(h)); }catch(e){ toast(T('storage_full')); }
+  try{ bkSchedule(); }catch(e){}
+  cvRedraw(); toast(L('Flowsheet rétabli','Flowsheet restored'));
+}
+function cvOffBox(){
+  if(!FLOW_OFF.length) return '';
+  return `<div style="${CVBOX}"><h3 style="margin-top:0">${L('Flowsheets supprimés','Deleted flowsheets')}</h3>`+FLOW_OFF.map(s=>`<div style="border-top:1px solid var(--line);padding:8px 0;display:flex;gap:8px;align-items:center"><div style="flex:1"><b>${esc(s.name)}</b> <span class="meta">(${esc(s.id)})</span></div><button onclick="cvRestore('${esc(s.id)}')">${L('Rétablir','Restore')}</button></div>`).join('')+`</div>`;
+}
+/* réaffiche l'onglet sans remonter en haut de page et garde le bloc « Modifier les noms… » ouvert */
+function cvRedraw(){ const y=window.scrollY, o=($('cvLb')||{}).open; renderConv(); const d=$('cvLb'); if(d&&o) d.open=true; window.scrollTo(0,y); }
+
+/* ---- export : fabrique <id>.js (format de Reims.js) avec les cases / infos modifiées dans l'appli ---- */
+async function cvExport(id){
+  try{
+    const {svg,data}=await flLoad(id), s=FLOW_SITES.find(x=>x.id===id)||{name:id}, z=FL.zn[id]||{}, hide=z.hide||[], ov=FL.ov[id]||{};
+    const eq=data.equipment.map(e=>({...e,rects:e.rects.filter((r,i)=>!hide.includes(e.tag+'#'+i)).map(r=>[...r])}));
+    (z.add||[]).forEach(a=>{
+      let e=eq.find(x=>x.tag===a.tag);
+      if(!e){ e={tag:a.tag,name:'',kind:'',kind_en:'',desc:'',desc_en:'',model:'',photo:'',fiche:'',rects:[]}; eq.push(e); }
+      e.rects.push(a.r.map(cvR1));
+    });
+    eq.forEach(e=>{ const o=ov[e.tag]; if(!o) return; if(o.name) e.name=o.name; if(o.desc){ e.desc=o.desc; e.desc_en=''; } if(o.photo) e.photo=o.photo; });
+    const out={...data,id,name:s.name,viewBox:data.viewBox,equipment:eq};
+    const js=`/* Pack flowsheet ${s.name.replace(/\*\//g,'')} : plan SVG + liste des équipements (chargé par un simple <script>, sans serveur).\n   Zones cliquables = rects [x, y, largeur, hauteur] dans le repère du plan. Exporté depuis l'onglet Convertisseur. */\nwindow.FLOW_PACK=window.FLOW_PACK||{};\nFLOW_PACK[${JSON.stringify(id)}]={svg:${JSON.stringify(svg)}, data:${JSON.stringify(out)}};\n`;
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([js],{type:'text/javascript'})); a.download=id+'.js'; document.body.appendChild(a); a.click(); a.remove();
+    const line=`{id:'${id}', name:'${s.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}', js:'./flowsheets/${id}.js'}`;
+    cvMsg(`<b>${esc(id)}.js</b> ${L('téléchargé','downloaded')} (${cvMo(js.length)}). ${L('Pour le publier pour tous les appareils :','To publish it for every device:')}<ol style="margin:6px 0 0 18px;padding:0"><li>${L('placez-le dans le dossier','put it in the')} <code>flowsheets/</code> ${L('de l’appli','folder of the app')} ;</li><li>${L('ajoutez cette ligne dans','add this line to')} <code>FLOW_SITES</code> (index.html) : <br><code>${esc(line)}</code></li><li>${L('ajoutez','add')} <code>./flowsheets/${esc(id)}.js</code> ${L('à la liste','to the')} <code>FILES</code> ${L('de','list in')} <code>sw.js</code> ${L('et changez le numéro de version du cache','and bump the cache version')}.</li></ol><p class="meta" style="margin:8px 0 0">${(z.add||[]).length?L('Vos cases ajoutées sont déjà incluses dans ce fichier : une fois le fichier publié, utilisez « Rétablir les cases d’origine » sur ce site pour éviter les doublons.','Your added zones are already included in this file: once it is published, use “Restore original zones” on this site to avoid duplicates.'):''}</p>`);
+  }catch(e){ cvMsg(L('Export impossible : ','Export failed: ')+esc(e.message||String(e)||''),true); }
+}
+
+/* ---- import d'un .js : lecture SANS exécution (on repère svg:"..." puis data:{...} et on les décode comme du JSON) ---- */
+function cvParsePack(txt){
+  const m=/FLOW_PACK\[\s*(['"])([^'"]+)\1\s*\]\s*=\s*\{\s*svg\s*:\s*/.exec(txt); if(!m) throw new Error('format');
+  const i=m.index+m[0].length; if(txt[i]!=='"') throw new Error('format');
+  let j=i+1; while(j<txt.length){ const c=txt[j]; if(c==='\\') j+=2; else if(c==='"') break; else j++; }
+  const svg=JSON.parse(txt.slice(i,j+1));
+  const m2=/^\s*,\s*data\s*:\s*/.exec(txt.slice(j+1,j+80)); if(!m2) throw new Error('format');
+  const k=j+1+m2[0].length; let d=0,s=false,e=k;
+  for(;e<txt.length;e++){ const c=txt[e]; if(s){ if(c==='\\') e++; else if(c==='"') s=false; } else if(c==='"') s=true; else if(c==='{'||c==='[') d++; else if(c==='}'||c===']'){ d--; if(d===0) break; } }
+  const data=JSON.parse(txt.slice(k,e+1));
+  if(!data||!Array.isArray(data.viewBox)||!Array.isArray(data.equipment)) throw new Error('format');
+  return {key:m[2],svg,data};
+}
+async function cvImport(inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  try{
+    const p=cvParsePack(await cvRead(f,'text')), id=p.data.id||p.key, name=p.data.name||id;
+    if(!cvOk(id)) throw new Error(L('Identifiant du fichier invalide : ','Invalid file id: ')+id);
+    if(await cvRegister(id,name,{svg:p.svg,data:{...p.data,id,name}})){ toast(p.data.equipment.length+' '+L('équipement(s) importé(s)','item(s) imported')); renderFlow(id); }
+  }catch(e){ cvMsg(e.message==='format'?L('Format non reconnu : ce fichier doit être un pack flowsheet (FLOW_PACK[…]={svg:"…", data:{…}}), comme Reims.js.','Unrecognised format: this must be a flowsheet pack (FLOW_PACK[…]={svg:"…", data:{…}}), like Reims.js.'):esc(e.message||String(e)),true); }
+}
+
+/* ---- textes de l'onglet Convertisseur et noms des onglets : modifiables (classes 3 et 4) ----
+   Valeurs d'origine ci-dessous : [français, anglais, description du champ en français, en anglais]. Un champ laissé vide ou identique à l'origine revient au texte d'origine. */
+const CV_DEF={
+ cv_create_title:['Créer un flowsheet à partir d’un plan','Create a flowsheet from a plan','Titre de la section « Créer »','“Create” section title'],
+ cv_create_help:['Depuis Excel : Fichier → Enregistrer sous → PDF (paysage, « Ajuster la feuille sur 1 page », marges étroites), puis choisissez ce PDF. Un SVG ou une image (PNG / JPG) fonctionne aussi. Ensuite, dans la rubrique Flowsheet, « Modifier les cases » permet de tracer les équipements.','From Excel: File → Save as → PDF (landscape, “Fit sheet on one page”, narrow margins), then choose that PDF. An SVG or an image (PNG / JPG) also works. Then, in the Flowsheet section, “Edit zones” lets you draw the equipment.','Texte d’aide de la section « Créer »','“Create” section help text'],
+ cv_import_title:['Importer un fichier .js existant','Import an existing .js file','Titre de la section « Importer »','“Import” section title'],
+ cv_import_help:['Un flowsheet exporté depuis un autre appareil (même format que Reims.js). Il est ajouté à cet appareil ; le fichier n’est pas exécuté, seulement lu.','A flowsheet exported from another device (same format as Reims.js). It is added to this device; the file is only read, not executed.','Texte d’aide de la section « Importer »','“Import” section help text'],
+ cv_sites_title:['Flowsheets','Flowsheets','Titre de la liste des flowsheets','Flowsheet list title'],
+ cv_add_btn:['Ajouter un flowsheet','Add a flowsheet','Bouton de la rubrique Flowsheet','Button in the Flowsheet section']
+};
+const cvDef=(k,l)=>CV_DEF[k]?CV_DEF[k][l==='en'?1:0]:(typeof (I18N[l]||{})[k]==='string'?I18N[l][k]:'');
+const cvT=k=>(LBL[k]&&LBL[k][lang])||cvDef(k,lang);
+const cvH=k=>esc(cvT(k)).replace(/\n/g,'<br>');
+function cvLabelsBox(){
+  const row=(k,label,long)=>{
+    const f=l=>{ const v=(LBL[k]&&LBL[k][l])||cvDef(k,l), id='lb_'+k+'_'+l; return long?`<textarea id="${id}" rows="4">${esc(v)}</textarea>`:`<input id="${id}" value="${esc(v)}">`; };
+    return `<div style="border-top:1px solid var(--line);padding:8px 0"><div class="meta"><b>${esc(label)}</b></div><div class="row" style="gap:8px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><label>${L('Français','French')}</label>${f('fr')}</div><div style="flex:1;min-width:200px"><label>${L('Anglais','English')}</label>${f('en')}</div></div></div>`;
+  };
+  const nav=navList().map(([k,i,l])=>row(l,L('Onglet « ','Tab “')+cvDef(l,'fr')+L(' »','”'),false)).join('');
+  const ord=navList().map(([k,i,l],ix,arr)=>`<div style="display:flex;gap:6px;align-items:center;border-top:1px solid var(--line);padding:6px 0"><span style="flex:1">${esc(T(l))}</span><button class="small" ${ix?'':'disabled'} onclick="cvNavMove('${k}',-1)" aria-label="${L('Monter','Move up')}">▲</button><button class="small" ${ix<arr.length-1?'':'disabled'} onclick="cvNavMove('${k}',1)" aria-label="${L('Descendre','Move down')}">▼</button></div>`).join('');
+  const txt=Object.keys(CV_DEF).map(k=>row(k,CV_DEF[k][lang==='en'?3:2],k.endsWith('_help'))).join('');
+  return `<details id="cvLb" style="${CVBOX}"><summary style="cursor:pointer;font-weight:600">${L('Modifier les onglets (noms, ordre) et les textes','Edit tabs (names, order) and texts')}</summary>
+    <p class="meta">${L('Laissez un champ vide pour revenir au texte d’origine. Les changements s’appliquent à tous les comptes de cet appareil ; pour les autres appareils : Paramètres › « Exporter pour le site » (donnees.json).','Leave a field empty to restore the original text. Changes apply to every account on this device; for other devices: Settings › “Export for the site” (donnees.json).')}</p>
+    <h4 style="margin:12px 0 0">${L('Ordre des onglets du menu','Menu tab order')}</h4>${ord}
+    <div class="row" style="margin-top:8px"><button class="small" onclick="cvNavReset()">${L('Rétablir l’ordre d’origine','Restore original order')}</button></div>
+    <h4 style="margin:16px 0 0">${L('Noms des onglets du menu','Menu tab names')}</h4>${nav}
+    <h4 style="margin:16px 0 0">${L('Textes de l’onglet Convertisseur et du bouton « Ajouter »','Converter tab texts and “Add” button')}</h4>${txt}
+    <div class="row" style="margin-top:12px;gap:8px"><button class="primary" onclick="cvLabelsSave()">${L('Enregistrer','Save')}</button><button class="danger" onclick="cvLabelsReset()">${L('Tout rétablir','Restore all')}</button></div></details>`;
+}
+function cvLabelsPersist(){ try{ localStorage.setItem(LBLKEY,JSON.stringify(LBL)); }catch(e){ toast(T('storage_full')); } try{ bkSchedule(); }catch(e){} }
+function cvLabelsCollect(){
+  const keys=[...NAV.map(n=>n[2]),...Object.keys(CV_DEF)];
+  keys.forEach(k=>['fr','en'].forEach(l=>{
+    const el=$('lb_'+k+'_'+l); if(!el) return; const v=el.value.trim(), o=LBL[k]=LBL[k]||{};
+    if(v&&v!==cvDef(k,l)) o[l]=v; else delete o[l];
+    if(!Object.keys(o).length) delete LBL[k];
+  }));
+}
+function cvLabelsSave(){
+  cvLabelsCollect(); cvLabelsPersist(); buildNav(); const o=$('cvLb'); if(o) o.open=true; cvRedraw(); const d=$('cvLb'); if(d) d.open=true; toast(L('Noms et textes enregistrés','Names and texts saved'));
+}
+function cvNavPersist(){ try{ localStorage.setItem(NAVKEY,JSON.stringify({order:NAVORD})); }catch(e){ toast(T('storage_full')); } try{ bkSchedule(); }catch(e){} }
+function cvNavMove(k,d){
+  cvLabelsCollect(); cvLabelsPersist();
+  const keys=navList().map(n=>n[0]), i=keys.indexOf(k), j=i+d; if(i<0||j<0||j>=keys.length) return;
+  [keys[i],keys[j]]=[keys[j],keys[i]]; NAVORD=keys; cvNavPersist(); buildNav(); const o=$('cvLb'); if(o) o.open=true; cvRedraw(); const x=$('cvLb'); if(x) x.open=true;
+}
+function cvNavReset(){ NAVORD=[]; cvNavPersist(); buildNav(); const o=$('cvLb'); if(o) o.open=true; cvRedraw(); const x=$('cvLb'); if(x) x.open=true; }
+function cvLabelsReset(){
+  if(!confirm(L('Rétablir tous les noms d’onglets et textes d’origine ?','Restore all original tab names and texts?'))) return;
+  LBL={}; cvLabelsPersist(); renderConv(); toast(L('Noms et textes d’origine rétablis','Original names and texts restored'));
+}
 
 /*
  ===================== MESSAGES D'AJOUT DES FICHES =====================
@@ -2439,7 +2726,7 @@ function fMultiEdHTML(){
    ${fo.map((o,j)=>`<div class="fdsec"><div class="fdhead">${FD_ICO}<input value="${esc(o.name)}" placeholder="${esc(L('Nom du dossier','Folder name'))}" oninput="state.fd.folders[${j}].name=this.value"><button class="small danger" onclick="rmFFolder(${j})">${L('Supprimer le dossier','Delete folder')}</button></div>
      ${rows(o.id)||`<p class="meta" style="margin:8px 0 0">${L('Dossier vide : ajoutez des PDF ci-dessous.','Empty folder: add PDFs below.')}</p>`}${add(o.id)}</div>`).join('')}
    <div class="row" style="margin-top:12px"><button onclick="addFFolder()">+ ${L('Ajouter un dossier dans cette fiche','Add a folder in this sheet')}</button></div>
-   <label style="margin-top:12px">📂 ${L('Importer un dossier de mon ordinateur (ses PDF et sous-dossiers)','Import a folder from my computer (its PDFs and subfolders)')}</label>
+   <label style="margin-top:12px"> ${L('Importer un dossier de mon ordinateur (ses PDF et sous-dossiers)','Import a folder from my computer (its PDFs and subfolders)')}</label>
    <div class="row"><input type="file" webkitdirectory directory multiple style="max-width:340px" onchange="importFFolder(this)"></div>
    <p class="meta" style="margin:6px 0 0">${L('Vous pouvez ajouter plusieurs PDF (30 Mo max chacun), les ranger dans des dossiers et changer leur nom affiché. Sur la fiche, on choisit le PDF à ouvrir dans une liste.','You can add several PDFs (30 MB max each), sort them into folders and change their display name. On the sheet, you pick the PDF to open from a list.')}</p>`;
 }
@@ -2536,7 +2823,7 @@ async function addUser(){
   const id=$('nu_id').value.trim().toLowerCase(), name=$('nu_name').value.trim(), pw=$('nu_pw').value, cls=+$('nu_cls').value;
   if(!validId(id)||!name||pw.length<4){ toast(L('Identifiant (a-z, 0-9), nom et mot de passe (4 car. min) requis','Login (a-z, 0-9), name and password (min 4) required')); return; }
   if(users.some(u=>u.id===id)){ toast(L('Identifiant déjà utilisé','Login already used')); return; }
-  const salt=uid(); users.push({id,name,cls,salt,pw:await hash(pw,salt),chosen:true,trained:0,theme:'auto'}); saveUsers(); toast(T('saved')); renderSettings();
+  const salt=uid(); users.push({id,name,cls,salt,pw:await hash(pw,salt),chosen:true,trained:0,theme:'auto'}); saveUsers(); toast(L('Travailleur ajouté','Worker added')); renderSettings();
 }
 function setUserCls(id,v){
   const u=users.find(x=>x.id===id); if(!u) return; v=+v;
@@ -2549,12 +2836,12 @@ function setUserCls(id,v){
 async function resetPw(id){
   const u=users.find(x=>x.id===id); if(u&&u.cls>=4&&settings.cls<4) return;
   const p=prompt(L('Nouveau mot de passe (4 caractères min)','New password (min 4)'));
-  if(!u||!p||p.length<4) return; u.salt=uid(); u.pw=await hash(p,u.salt); saveUsers(); toast(T('saved'));
+  if(!u||!p||p.length<4) return; u.salt=uid(); u.pw=await hash(p,u.salt); saveUsers(); toast(L('Mot de passe modifié','Password changed'));
 }
 function delUser(id){ if(id==='aa'){ toast(L('Le compte aa ne peut pas être supprimé','The aa account cannot be deleted')); return; } const t=users.find(x=>x.id===id); if(!t||(t.cls>=4&&(settings.cls<4||users.filter(x=>x.cls>=4).length<2))) return; if(!confirm(T('confirm_del'))) return; users=users.filter(u=>u.id!==id); saveUsers(); renderSettings(); }
 async function changePw(){
   const p=$('np').value; if(p.length<4){ toast(L('4 caractères minimum','4 characters minimum')); return; }
-  settings.salt=uid(); settings.pw=await hash(p,settings.salt); saveUsers(); $('np').value=''; toast(T('saved'));
+  settings.salt=uid(); settings.pw=await hash(p,settings.salt); saveUsers(); $('np').value=''; toast(L('Mot de passe modifié','Password changed'));
 }
 
 /*
@@ -4527,7 +4814,7 @@ function m3Start(){
  dans la copie de secours ni dans le fichier .json (trop volumineux). Et chaque appareil a SES données : pour partager
  des tutos entre téléphones, utilisez la sauvegarde en fichier (ou un vrai serveur, non prévu ici).
  ============================================================================ */
-const BK_KEYS=[FLKEY,FZKEY,GLKEY,GLEKEY,M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
+const BK_KEYS=[LBLKEY,NAVKEY,FHKEY,FLKEY,FZKEY,GLKEY,GLEKEY,M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
 const LAST_EXPORT='sibelco_last_export';
 // petite base IndexedDB "sibelco_backup" : un seul enregistrement "snap" = copie de toutes les clés ci-dessus
 function bkDb(){ return new Promise((ok,ko)=>{ const r=indexedDB.open('sibelco_backup',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); }); }
@@ -4558,7 +4845,7 @@ async function askPersist(){ try{ if(navigator.storage&&navigator.storage.persis
      fusionne ce fichier avec ses données (même identifiant = la version du fichier gagne ; le reste est conservé).
    - La fusion n'a lieu que si le contenu du fichier a changé depuis la dernière fois (vos modifs locales ne sont pas écrasées à chaque ouverture).
  ============================================================================ */
-const SH_ARR=[KEY,FKEY,GLKEY], SH_OBJ=[FLKEY,FZKEY,M3_TXT_KEY,TPKEY], SH_HASH='sibelco_shared_hash';
+const SH_ARR=[KEY,FKEY,GLKEY], SH_OBJ=[LBLKEY,NAVKEY,FHKEY,FLKEY,FZKEY,M3_TXT_KEY,TPKEY], SH_HASH='sibelco_shared_hash';
 const shHash=t=>{ let h=5381; for(let i=0;i<t.length;i++) h=((h<<5)+h+t.charCodeAt(i))|0; return t.length+':'+h; };
 async function sharedSync(){
   try{
