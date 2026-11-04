@@ -9,13 +9,19 @@
 
 // Nom du cache. IMPORTANT : à chaque fois que vous modifiez index.html (ou un autre fichier de la liste),
 // changez ce numéro (v27 -> v28...) pour que les appareils suppriment l'ancienne copie et récupèrent la nouvelle.
-const CACHE = 'tutos-maintenance-v48';
+const CACHE = 'tutos-maintenance-v53';
 
 // Fichiers de l'appli à mettre en cache dès l'installation (ils doivent tous exister dans le dossier).
 // Ajoutez ici "./fond-verre.jpg" si vous utilisez une photo de fond.
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png',
+const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
+
+// Fichiers OPTIONNELS : mis en cache si présents. Si l'un d'eux a été supprimé du dépôt (flowsheet retiré, pas de tutos partagés...),
+// cela ne bloque PAS l'installation de l'appli.
+const OPTIONAL = [
   // Flowsheets interactifs (un fichier .js par site : plan + équipements)
-  './flowsheets/saint-romain.js', './flowsheets/Reims.js'];
+  './flowsheets/saint-romain.js', './flowsheets/Reims.js',
+  // Données partagées (Paramètres > Exporter pour le site, publiées sur Git)
+  './donnees.json'];
 
 // Bibliothèques externes : pdf.js (affichage des PDF) et JSZip (lecture des PowerPoint .pptx).
 // Mises en cache "si possible" : si Internet manque pendant l'installation, ça ne bloque pas l'appli.
@@ -34,7 +40,7 @@ const NETWORK_TIMEOUT_MS = 4000;
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => c.addAll(FILES).then(() => Promise.allSettled(CDN.map(u => c.add(u)))))
+      .then(c => c.addAll(FILES).then(() => Promise.allSettled(OPTIONAL.concat(CDN).map(u => c.add(u)))))
       .then(() => self.skipWaiting())
   );
 });

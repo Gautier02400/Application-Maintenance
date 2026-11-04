@@ -1201,6 +1201,26 @@ function view(t){
  La ligne unshift(TOBL) garantit que le tuto "obligatoire" TOBL existe toujours, même si l'utilisateur a importé une liste sans lui.
 */
 let tutos = load(); if(!tutos.some(t=>t.id==='tobl')) tutos.unshift(JSON.parse(JSON.stringify(TOBL)));
+
+/* askOk(message) : boîte de confirmation intégrée à l'appli (Promise -> true / false).
+   Remplace confirm() du navigateur, qui peut être bloqué (« ne plus afficher de boîtes de dialogue », appli installée...) :
+   dans ce cas confirm() répond « non » sans rien afficher et le bouton Supprimer semblait ne rien faire. */
+function askOk(msg){
+  return new Promise(ok=>{
+    const o=document.createElement('div');
+    o.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);display:grid;place-items:center;padding:16px';
+    o.innerHTML='<div role="dialog" aria-modal="true" style="background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;max-width:440px;width:100%;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.35)"><p style="margin:0 0 14px;white-space:pre-line">'+esc(msg)+'</p><div style="display:flex;justify-content:flex-end;gap:8px"><button data-r="0">'+L('Annuler','Cancel')+'</button><button class="primary" data-r="1">OK</button></div></div>';
+    const end=v=>{ o.remove(); document.removeEventListener('keydown',kd); ok(v); };
+    const kd=e=>{ if(e.key==='Escape') end(false); };
+    o.addEventListener('click',e=>{ const r=e.target.getAttribute&&e.target.getAttribute('data-r'); if(r!==null) end(r==='1'); else if(e.target===o) end(false); });
+    document.addEventListener('keydown',kd); document.body.appendChild(o); o.querySelector('[data-r="1"]').focus();
+  });
+}
+
+/* Tutos SUPPRIMÉS sur cet appareil (TDKEY) : ils ne reviennent plus quand donnees.json est fusionné (voir sharedSync plus bas). */
+const TDKEY='sibelco_tutos_deleted_v1';
+const lsArr=k=>{ try{ const a=JSON.parse(localStorage.getItem(k)); return Array.isArray(a)?a:[]; }catch(e){ return []; } };
+const lsPut=(k,a)=>{ try{ localStorage.setItem(k,JSON.stringify(a)); }catch(e){} };
 let state = {view:'home', section:'home', id:null, cat:'', draft:null, done:{}};
 
 /*
@@ -1670,11 +1690,12 @@ function saveDraft(){
   toast(T('saved')); openTuto(d.id);
 }
 function cancelEdit(){ vt().add.forEach(k=>idbDel(k).catch(()=>{})); state.vtmp={add:[],del:[]}; if(state.isNew) renderList(); else openTuto(state.draft.id); }
-function delTuto(){
+async function delTuto(){
   if(!canEditTutos()){ toast(T('need_cls3')); return; }
-  if(!confirm(T('confirm_del'))) return;
+  if(!(await askOk(T('confirm_del')))) return;
   const old=tutos.find(t=>t.id===state.draft.id); ((old&&old.steps)||[]).forEach(s=>{ if(s.video&&s.video.key) idbDel(s.video.key).catch(()=>{}); });
-  tutos=tutos.filter(t=>t.id!==state.draft.id); save(); toast(T('deleted')); renderList();
+  const did=state.draft.id, dl=lsArr(TDKEY); if(!dl.includes(did)){ dl.push(did); lsPut(TDKEY,dl); }
+  tutos=tutos.filter(t=>t.id!==did); save(); try{ bkSchedule(); }catch(e){} toast(T('deleted')); renderList();
 }
 
 /*
@@ -1684,13 +1705,22 @@ function delTuto(){
  (Les PDF / PowerPoint des fiches ne sont pas inclus dans cet export : ils restent sur l'appareil.)
 */
 /* ---------- EXPORT / IMPORT ---------- */
-function exportJSON(){
-  const blob=new Blob([JSON.stringify(tutos,null,2)],{type:'application/json'});
+/* saveJsonFile(nom, texte, message) : Chrome / Edge ordinateur -> on choisit le fichier du dépôt et on l'écrase ; sinon téléchargement du fichier avec le bon nom. */
+async function saveJsonFile(name,txt,msg){
+  try{
+    if(window.showSaveFilePicker){
+      const h=await showSaveFilePicker({suggestedName:name,id:name.replace(/\.json$/,''),types:[{description:'JSON',accept:{'application/json':['.json']}}]});
+      const w=await h.createWritable(); await w.write(txt); await w.close();
+      toast(msg); return;
+    }
+  }catch(e){ if(e&&e.name==='AbortError') return; }
+  const blob=new Blob([txt],{type:'application/json'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download='tutos-maintenance-'+new Date().toISOString().slice(0,10)+'.json';
-  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  toast(T('export_started'));
+  const a=document.createElement('a'); a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
+  toast(msg);
 }
+function exportJSON(){ return siteExport(); }   // le bouton « Exporter » produit donnees.json (tout le contenu partagé)
 function importJSON(ev){
   if(!canEditTutos()){ ev.target.value=''; toast(T('need_cls3')); return; }
   const f=ev.target.files[0]; if(!f) return;
@@ -2017,6 +2047,8 @@ async function seedAdmin(){
  Chaque SITE = 1 fichier dans le dossier "flowsheets/" : <site>.js (contient le plan et la liste des équipements).
  POUR AJOUTER UN SITE : déposez le fichier dans "flowsheets/", ajoutez une ligne dans FLOW_SITES ci-dessous,
  puis ajoutez-le dans la liste FILES de sw.js (et changez le numéro de version du cache).
+ POUR SUPPRIMER UN SITE : supprimez le fichier de "flowsheets/" sur Git (la ligne FLOW_SITES et celle de sw.js peuvent rester) ;
+ puis, sur chaque appareil, Flowsheet > Supprimer > « Vider le cache » : le site disparaît de la liste (détection automatique aussi au démarrage).
 */
 //  MODIFIABLE : liste des sites (un plan par site)
 const FLOW_SITES=[
@@ -2144,7 +2176,7 @@ function flRename(){
 }
 async function flClearCache(){
   if(!isAdmin()) return needAdm();
-  if(!confirm(L('Vider le cache des flowsheets sur cet appareil ? Les plans publiés seront retéléchargés. Les flowsheets créés ici, leurs cases et leurs infos ne sont pas effacés.','Clear the flowsheet cache on this device? Published plans will be downloaded again. Flowsheets created here, their zones and info are not erased.'))) return;
+  if(!(await askOk(L('Vider le cache des flowsheets sur cet appareil ? Les plans publiés seront retéléchargés. Les flowsheets créés ici, leurs cases et leurs infos ne sont pas effacés.','Clear the flowsheet cache on this device? Published plans will be downloaded again. Flowsheets created here, their zones and info are not erased.')))) return;
   try{
     FLOW_SITES.concat(FLOW_OFF).forEach(s=>{ if(!s.custom) delete FLOW_PACK[s.id]; });
     FL.cache={};
@@ -2156,8 +2188,9 @@ async function flClearCache(){
       }
     }
     await Promise.all(FLOW_SITES.filter(s=>!s.custom&&s.js).map(s=>fetch(s.js,{cache:'reload'}).catch(()=>{})));
-    if(state.view==='del') renderDel(); else if(state.view==='conv') cvRedraw(); else { renderFlow(FL.site); flAdmToggle(); }
-    toast(L('Cache des flowsheets vidé','Flowsheet cache cleared'));
+    const nGone=await flPruneMissing();
+    if(!nGone){ if(state.view==='del') renderDel(); else if(state.view==='conv') cvRedraw(); else { renderFlow(FL.site); flAdmToggle(); } }
+    toast(nGone?L('Cache vidé : '+nGone+' flowsheet(s) supprimé(s) du dépôt retiré(s) de la liste',nGone+' flowsheet(s) deleted from the repository removed from the list'):L('Cache des flowsheets vidé','Flowsheet cache cleared'));
   }catch(e){ toast(L('Impossible de vider le cache','Could not clear the cache')); }
 }
 /* Vider le cache des flowsheets SUPPRIMÉS (id précis, ou tous) : le plan gardé en mémoire et la copie hors-ligne du fichier sont effacés.
@@ -2166,7 +2199,7 @@ async function flPurgeOff(id){
   if(!isAdmin()) return needAdm();
   const list=id?FLOW_OFF.filter(x=>x.id===id):FLOW_OFF.slice();
   if(!list.length) return toast(L('Aucun flowsheet supprimé.','No deleted flowsheet.'));
-  if(!confirm(L('Vider le cache de '+(id?'« '+list[0].name+' »':'tous les flowsheets supprimés')+' ? Le plan sera retéléchargé s’il est rétabli (connexion nécessaire). Les cases et infos ajoutées sont conservées.','Clear the cache of '+(id?'“'+list[0].name+'”':'all deleted flowsheets')+'? The plan will be downloaded again if restored (connection needed). Added zones and info are kept.'))) return;
+  if(!(await askOk(L('Vider le cache de '+(id?'« '+list[0].name+' »':'tous les flowsheets supprimés')+' ? Le plan sera retéléchargé s’il est rétabli (connexion nécessaire). Les cases et infos ajoutées sont conservées.','Clear the cache of '+(id?'“'+list[0].name+'”':'all deleted flowsheets')+'? The plan will be downloaded again if restored (connection needed). Added zones and info are kept.')))) return;
   try{
     list.forEach(s=>{ delete FLOW_PACK[s.id]; if(s.js) document.querySelectorAll('script[src]').forEach(e=>{ if(e.getAttribute('src')===s.js) e.remove(); }); });
     if(window.caches){
@@ -2178,6 +2211,36 @@ async function flPurgeOff(id){
     toast(L('Cache des flowsheets supprimés vidé','Cache of deleted flowsheets cleared'));
   }catch(e){ toast(L('Impossible de vider le cache','Could not clear the cache')); }
 }
+/* Flowsheets dont le FICHIER a été supprimé du dépôt : on interroge le serveur (sans passer par le cache) ; si le fichier n'existe plus
+   (erreur 404/410, ou page HTML renvoyée à la place), le flowsheet disparaît de la liste et sa copie hors-ligne est effacée.
+   Hors connexion ou en cas d'erreur réseau : on ne touche à rien. Appelée au démarrage et par « Vider le cache des flowsheets ». */
+async function flPruneMissing(){
+  const pub=FLOW_SITES.concat(FLOW_OFF).filter(s=>!s.custom&&s.js), gone=[];
+  await Promise.all(pub.map(s=>fetch(s.js,{method:'HEAD',cache:'no-store'}).then(r=>{
+    const ct=(r.headers.get('content-type')||'').toLowerCase();
+    if(r.status===404||r.status===410||(r.ok&&ct.includes('text/html'))) gone.push(s);
+  }).catch(()=>{})));
+  if(!gone.length) return 0;
+  for(const s of gone){
+    delete FLOW_PACK[s.id];
+    document.querySelectorAll('script[src]').forEach(e=>{ if(e.getAttribute('src')===s.js) e.remove(); });
+    [FLOW_SITES,FLOW_OFF].forEach(a=>{ const i=a.findIndex(x=>x.id===s.id); if(i>=0) a.splice(i,1); });
+  }
+  try{
+    if(window.caches){
+      for(const k of await caches.keys()){
+        const c=await caches.open(k);
+        for(const r of await c.keys()) if(gone.some(s=>r.url.endsWith(s.js.replace(/^\./,'')))) await c.delete(r);
+      }
+    }
+  }catch(e){}
+  try{
+    if(state.section==='flowsheet'){ if(state.view==='del') renderDel(); else if(state.view==='conv') cvRedraw(); else renderFlow(FL.site); }
+    else buildNav();
+  }catch(e){}
+  return gone.length;
+}
+window.addEventListener('load',()=>setTimeout(()=>{ flPruneMissing().catch(()=>{}); },1500));
 function flDelete(){ if(!isAdmin()) return needAdm(); if(FL.site) cvDelete(FL.site,'flow'); }
 function flToggleShow(){ FL.show=!FL.show; $('flBox').classList.toggle('flshow',FL.show); $('flShow').setAttribute('aria-pressed',FL.show); $('flShow').classList.toggle('primary',FL.show); }
 function flToggleEdit(quiet){ if(!isAdmin()) return needAdm(); FL.edit=!FL.edit; const fe=$('flEdit'); if(fe){ fe.setAttribute('aria-pressed',FL.edit); fe.classList.toggle('primary',FL.edit); } if(quiet!==true) toast(FL.edit?L('Mode modification : cliquez un équipement pour le modifier','Edit mode: click an item to edit it'):L('Mode lecture','Read mode')); flTipHide(); }
@@ -2439,15 +2502,19 @@ async function cvReplace(inp){
   }catch(e){ cvMsg(esc(e.message||String(e)),true); }
 }
 async function cvDelete(id,from){
+  try{ await cvDelete0(id,from); }
+  catch(e){ console.error(e); toast(L('Suppression impossible : '+(e&&e.message||e),'Deletion failed: '+(e&&e.message||e))); }
+}
+async function cvDelete0(id,from){
   if(!isAdmin()) return needAdm();
   const s=FLOW_SITES.find(x=>x.id===id); if(!s) return;
   if(s.custom){
-    if(!confirm(L('Supprimer le flowsheet « '+s.name+' » de cet appareil, avec ses cases et infos ajoutées ? (Pensez à l’exporter avant si besoin.)','Delete the flowsheet “'+s.name+'” from this device, with its added zones and info? (Export it first if needed.)'))) return;
+    if(!(await askOk(L('Supprimer le flowsheet « '+s.name+' » de cet appareil, avec ses cases et infos ajoutées ? (Pensez à l’exporter avant si besoin.)','Delete the flowsheet “'+s.name+'” from this device, with its added zones and info? (Export it first if needed.)')))) return;
     try{ await idbDel('flowsite:'+id); }catch(e){}
     localStorage.setItem(CVKEY,JSON.stringify(cvList().filter(x=>x.id!==id)));
     FLOW_SITES.splice(FLOW_SITES.indexOf(s),1); delete FLOW_PACK[id]; delete FL.zn[id]; delete FL.ov[id]; flZSave(); flSave();
   }else{
-    if(!confirm(L('Supprimer « '+s.name+' » de la liste ? Le fichier publié n’est pas effacé : vous pourrez le rétablir ici. (Pour le retirer définitivement, enlevez sa ligne de FLOW_SITES dans index.html.)','Remove “'+s.name+'” from the list? The published file is not erased: you can restore it here. (To remove it for good, delete its line from FLOW_SITES in index.html.)'))) return;
+    if(!(await askOk(L('Supprimer « '+s.name+' » de la liste ? Le fichier publié n’est pas effacé : vous pourrez le rétablir ici. Pour le retirer chez TOUT LE MONDE : supprimez son fichier dans flowsheets/ sur Git, puis « Vider le cache ».','Remove “'+s.name+'” from the list? The published file is not erased: you can restore it here. To remove it for EVERYONE: delete its file in flowsheets/ on Git, then “Clear cache”.')))) return;
     const h=fhGet(); h[id]=true; try{ localStorage.setItem(FHKEY,JSON.stringify(h)); }catch(e){ toast(T('storage_full')); return; }
     FLOW_OFF.push(...FLOW_SITES.splice(FLOW_SITES.indexOf(s),1));
   }
@@ -3600,6 +3667,30 @@ const GAMES=[
  {k:'order',ico:'order',fr:'Dans l’ordre',en:'Put in order',
   dfr:'Remettez dans le bon ordre les étapes de 3 procédures (consignation, nettoyage…).',den:'Put the steps of 3 procedures in the right order (lockout, cleaning…).',run:'ordStart()',best:()=>g2Best('order')}
 ];
+/* ---------- IMAGES DE PRÉSENTATION DES JEUX ----------
+ Chaque tuile du menu « Jeux » peut avoir sa photo (bouton « Image » visible des classes 3 et 4). Gardées sous GIKEY { jeu : image }
+ (une valeur '' = image retirée). Elles partent dans donnees.json avec tout le reste (Paramètres > Exporter pour le site). */
+const GIKEY='sibelco_game_imgs_v1';
+let G_IMG_K='';
+const gLocal=()=>{ try{ const r=JSON.parse(localStorage.getItem(GIKEY)); if(r&&typeof r==='object'&&!Array.isArray(r)) return r; }catch(e){} return {}; };
+const gImg=k=>gLocal()[k]||'';
+function gPickImg(k){ if(!canEditTutos()){ toast(T('need_cls3')); return; } G_IMG_K=k; const i=$('gimgIn'); i.value=''; i.click(); }
+function gImgChosen(inp){
+  const f=inp.files&&inp.files[0], k=G_IMG_K; if(!f||!k) return;
+  readImg(f,720,0.75,u=>{
+    const l=gLocal(); l[k]=u;
+    try{ localStorage.setItem(GIKEY,JSON.stringify(l)); }catch(e){ toast(T('storage_full')); return; }
+    try{ bkSchedule(); }catch(e){}
+    renderGame(); toast(L('Image ajoutée','Image added'));
+  });
+}
+function gRmImg(k){
+  if(!canEditTutos()){ toast(T('need_cls3')); return; }
+  const l=gLocal(); l[k]='';
+  try{ localStorage.setItem(GIKEY,JSON.stringify(l)); }catch(e){ toast(T('storage_full')); return; }
+  try{ bkSchedule(); }catch(e){}
+  renderGame(); toast(L('Image retirée','Image removed'));
+}
 /* Menu « Jeux » : une tuile illustrée par jeu */
 /*
  renderGame() : menu des jeux, une tuile illustrée par jeu.   gFrame() : cadre commun d'une page de jeu.
@@ -3608,7 +3699,8 @@ function renderGame(){
   state.section='jeux'; state.view='jeux'; $('filters').classList.add('hidden'); buildNav();
   $('app').innerHTML=`<div class="row" style="margin:12px 0 4px"><h2 style="margin:0">${esc(T('nav_jeux'))}</h2></div>
    <p class="meta" style="margin:0 0 6px">${L('Jouez pour réviser les bons gestes tout en vous amusant.','Play to revise good practice while having fun.')}</p>
-   <div class="tiles gametiles">${GAMES.map(g=>`<div class="card tcard" onclick="${g.run}"><div class="cover c-${g.k}">${icoSVG(g.ico)}</div><h3>${esc(L(g.fr,g.en))}</h3><div class="meta" style="display:block">${esc(L(g.dfr,g.den))}</div><div class="meta"><span>${L('Record','Best')} : ${g.best()}</span></div></div>`).join('')}</div>
+   <div class="tiles gametiles">${GAMES.map(g=>`<div class="card tcard" onclick="${g.run}"><div class="cover c-${g.k}">${gImg(g.k)?`<img src="${gImg(g.k)}" alt="" loading="lazy">`:icoSVG(g.ico)}</div><h3>${esc(L(g.fr,g.en))}</h3><div class="meta" style="display:block">${esc(L(g.dfr,g.den))}</div><div class="meta"><span>${L('Record','Best')} : ${g.best()}</span></div>${canEditTutos()?`<div class="noprint" style="display:flex;gap:6px;margin-top:6px" onclick="event.stopPropagation()"><button class="small" onclick="gPickImg('${g.k}')">📷 Image</button>${gImg(g.k)?`<button class="small danger" onclick="gRmImg('${g.k}')">${L('Retirer','Remove')}</button>`:''}</div>`:''}</div>`).join('')}</div>
+   ${canEditTutos()?`<input id="gimgIn" type="file" accept="image/*" class="hidden" onchange="gImgChosen(this)">`:''}
    <p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
@@ -4995,7 +5087,7 @@ function m3Start(){
  dans la copie de secours ni dans le fichier .json (trop volumineux). Et chaque appareil a SES données : pour partager
  des tutos entre téléphones, utilisez la sauvegarde en fichier (ou un vrai serveur, non prévu ici).
  ============================================================================ */
-const BK_KEYS=[LBLKEY,NAVKEY,FHKEY,FNKEY,FLKEY,FZKEY,GLKEY,GLEKEY,M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
+const BK_KEYS=[GIKEY,TDKEY,CVKEY,TPKEY,LBLKEY,NAVKEY,FHKEY,FNKEY,FLKEY,FZKEY,GLKEY,GLEKEY,M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
 const LAST_EXPORT='sibelco_last_export';
 // petite base IndexedDB "sibelco_backup" : un seul enregistrement "snap" = copie de toutes les clés ci-dessus
 function bkDb(){ return new Promise((ok,ko)=>{ const r=indexedDB.open('sibelco_backup',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); }); }
@@ -5026,7 +5118,7 @@ async function askPersist(){ try{ if(navigator.storage&&navigator.storage.persis
      fusionne ce fichier avec ses données (même identifiant = la version du fichier gagne ; le reste est conservé).
    - La fusion n'a lieu que si le contenu du fichier a changé depuis la dernière fois (vos modifs locales ne sont pas écrasées à chaque ouverture).
  ============================================================================ */
-const SH_ARR=[KEY,FKEY,GLKEY], SH_OBJ=[LBLKEY,NAVKEY,FHKEY,FNKEY,FLKEY,FZKEY,M3_TXT_KEY,TPKEY], SH_HASH='sibelco_shared_hash';
+const SH_ARR=[KEY,FKEY,GLKEY,CVKEY], SH_OBJ=[LBLKEY,NAVKEY,FHKEY,FNKEY,FLKEY,FZKEY,M3_TXT_KEY,TPKEY,GIKEY], SH_HASH='sibelco_shared_hash', SH_IDS='sibelco_shared_ids_v1';
 const shHash=t=>{ let h=5381; for(let i=0;i<t.length;i++) h=((h<<5)+h+t.charCodeAt(i))|0; return t.length+':'+h; };
 async function sharedSync(){
   try{
@@ -5034,19 +5126,29 @@ async function sharedSync(){
     const txt=await r.text(), h=shHash(txt);
     if(localStorage.getItem(SH_HASH)===h) return false;
     const d=JSON.parse(txt); if(!d||d.app!=='sibelco-tutos'||!d.data||typeof d.data!=='object') return false;
+    let prev={}; try{ prev=JSON.parse(localStorage.getItem(SH_IDS))||{}; }catch(e){}
+    const now={}, del=lsArr(TDKEY);
     SH_ARR.forEach(k=>{
       if(typeof d.data[k]!=='string') return;
       const fa=JSON.parse(d.data[k]); if(!Array.isArray(fa)) return;
+      const ids=fa.filter(it=>it&&it.id!==undefined).map(it=>it.id); now[k]=ids;
       let la=null; try{ la=JSON.parse(localStorage.getItem(k)); }catch(e){}
-      if(!Array.isArray(la)){ localStorage.setItem(k,JSON.stringify(fa)); return; }
-      fa.forEach(it=>{ const i=it&&it.id!==undefined?la.findIndex(x=>x&&x.id===it.id):-1; if(i>=0) la[i]=it; else la.push(it); });
+      if(!Array.isArray(la)) la=[];
+      // supprimé dans le fichier (il y était la fois d'avant, il n'y est plus) -> retiré aussi de cet appareil
+      la=la.filter(x=>!(x&&x.id!=='tobl'&&(prev[k]||[]).includes(x.id)&&!ids.includes(x.id)));
+      fa.forEach(it=>{
+        if(k===KEY&&it&&del.includes(it.id)) return;           // tuto supprimé ici : il ne revient pas
+        const i=it&&it.id!==undefined?la.findIndex(x=>x&&x.id===it.id):-1; if(i>=0) la[i]=it; else la.push(it);
+      });
       localStorage.setItem(k,JSON.stringify(la));
     });
+    localStorage.setItem(SH_IDS,JSON.stringify(Object.assign(prev,now)));
+    lsPut(TDKEY,del.filter(id=>(now[KEY]||[]).includes(id)));
     SH_OBJ.forEach(k=>{
       if(typeof d.data[k]!=='string') return;
       const fo=JSON.parse(d.data[k]); if(!fo||typeof fo!=='object'||Array.isArray(fo)) return;
       let lo={}; try{ lo=JSON.parse(localStorage.getItem(k))||{}; }catch(e){}
-      localStorage.setItem(k,JSON.stringify(Object.assign(lo,fo)));
+      localStorage.setItem(k,JSON.stringify(k===FHKEY?fo:Object.assign(lo,fo)));   // FHKEY (flowsheets supprimés) : la liste du fichier fait foi
     });
     localStorage.setItem(SH_HASH,h);
     location.reload(); return true;
@@ -5054,10 +5156,10 @@ async function sharedSync(){
 }
 function siteExport(){
   const data={}; [...SH_ARR,...SH_OBJ].forEach(k=>{ try{ const v=localStorage.getItem(k); if(v!==null) data[k]=v; }catch(e){} });
-  const blob=new Blob([JSON.stringify({app:'sibelco-tutos',version:2,date:new Date().toISOString(),data},null,1)],{type:'application/json'});
-  const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='donnees.json';
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
-  toast(L('donnees.json téléchargé : remplacez-le dans le dépôt puis faites le commit','donnees.json downloaded: replace it in the repo then commit'));
+  const txt=JSON.stringify({app:'sibelco-tutos',version:2,date:new Date().toISOString(),data},null,1);
+  try{ localStorage.setItem(SH_HASH,shHash(txt)); }catch(e){}      // cet appareil a déjà ce contenu : pas de re-fusion de son propre fichier
+  try{ localStorage.setItem(LAST_EXPORT,String(Date.now())); }catch(e){}
+  return saveJsonFile('donnees.json',txt,L('donnees.json enregistré : remplacez celui du dossier du projet, puis git add / commit / push.','donnees.json saved: replace the one in the project folder, then git add / commit / push.'));
 }
 async function safeBoot(){
   let restored=false;
