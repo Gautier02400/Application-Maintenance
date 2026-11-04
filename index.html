@@ -358,6 +358,18 @@ header.big .menu-btn{font-size:1rem;padding:5px 8px}
 #side .nb.ib{width:auto;padding:5px 7px;display:inline-flex;align-items:center}
 #side .nb.ib svg{width:1.15em;height:1.15em}
 #side .nb.pinbtn.on{background:rgba(255,255,255,.24)}
+#side .nbrow{display:flex;align-items:center;gap:2px}
+#side .nbrow>.nb:first-child{flex:1;min-width:0}
+#side .nbrow>.nb.ib{flex:none;justify-content:center;min-width:26px}
+#side .nbrow .nb:disabled{opacity:.3;cursor:default}
+#side .nbedit{position:relative;border-radius:7px}
+#side .nbedit>.nb{flex:1;min-width:0}
+#side .grip{flex:none;display:inline-flex;align-items:center;justify-content:center;width:34px;height:36px;cursor:grab;touch-action:none;color:rgba(255,255,255,.75);user-select:none;-webkit-user-select:none}
+#side .nbedit.dragging{z-index:5;background:rgba(45,143,224,.5);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+#side .nbedit.dragging .grip{cursor:grabbing}
+#side .nbedit.dropbefore{box-shadow:0 -2px 0 0 #fff}
+#side .nbedit.dropafter{box-shadow:0 2px 0 0 #fff}
+#side .nbhint{margin:0;padding:4px 10px 8px;font-size:.76rem;color:rgba(255,255,255,.75)}
 #side .sidehd .cls{font-size:.68rem;white-space:nowrap;padding:2px 8px}
 #side .sidehd{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:2px 0 8px}
 @media(max-width:780px){#side .pinbtn{display:none!important}}
@@ -496,6 +508,22 @@ body.nav-open .menu-btn{visibility:hidden}
   header,#toolbar,#app{transition:transform .2s}
   body.nav-open header,body.nav-open #toolbar,body.nav-open #app{transform:translateX(200px)}
 }
+/* Mode administrateur : menu plus large et plus aéré (il contient le bouton Modifier et la poignée de déplacement des onglets) */
+body.adm #side{width:270px;padding-left:12px;padding-right:12px}
+body.adm #side .nb{font-size:.98rem;padding:10px 12px}
+body.adm #side .nb.ib{font-size:.9rem;padding:7px 12px;font-weight:600}
+body.adm #side .sidehd{padding:4px 0 12px}
+body.adm #side .sidehd .cls{font-size:.76rem;padding:3px 10px}
+body.adm #side .grip{height:42px;width:38px}
+/* en-tête du menu administrateur : le badge de classe prend sa ligne, puis Modifier + cadenas côte à côte (le cadenas reste toujours visible) */
+body.adm #side .sidehd{flex-wrap:wrap;row-gap:8px}
+body.adm #side .sidehd .cls{flex:1 1 100%;white-space:normal;width:auto!important;text-align:left}
+body.adm #side .sidehd>div{display:flex;gap:6px!important;width:100%}
+body.adm #side .sidehd .nb.ib{justify-content:center}
+body.adm #side .sidehd .nb.ib:not(.pinbtn){flex:1}
+body.adm #side .sidehd .nb.pinbtn{flex:none;min-width:46px;padding:7px 10px}
+@media(min-width:781px){ body.adm.nav-open{padding-left:270px} }
+@media(max-width:780px){ body.adm.nav-open header,body.adm.nav-open #toolbar,body.adm.nav-open #app{transform:translateX(270px)} }
 /* Barre d'outils SOUS le bandeau : boutons Nouveau / Exporter / Importer + recherche + filtres */
 #toolbar .wrap{padding-bottom:0}
 #toolbar .actions{display:flex;gap:8px;flex-wrap:wrap}
@@ -753,6 +781,14 @@ details.fdsec[open]>summary::after{transform:rotate(90deg)}
 .glescore{font-size:2.8rem;font-weight:800;color:var(--accent);text-align:center;margin:4px 0}
 .glemiss{border-left:4px solid #d33;padding:6px 10px;margin:6px 0;background:rgba(211,51,51,.07);border-radius:6px;font-size:.92rem}
 @media(max-width:640px){.glrow{grid-template-columns:1fr auto}.glrow .glw{grid-column:1/-1}}
+.fladm{margin:6px 0;padding:14px 16px}
+.fladm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.fladm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.fladm-sec{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.fladm-sec h4{margin:0 0 8px;font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;opacity:.75}
+.fladm-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:4px 0}
+.stok{color:var(--ok)}.stko{color:var(--danger-line)}
+svg.pen{vertical-align:-2px}
 /* ===== FLOWSHEET : modification des cases ===== */
 .flbox.zedit{cursor:crosshair}
 .flbox.zedit.zpan{cursor:grab}
@@ -903,7 +939,7 @@ const I18N = {
   safety:'Sécurité', tools:'Matériel / outils', progress:'Progression',
   step_done:'Étape réalisée', no_steps:'Aucune étape.',
   prog:(d,n,p)=>`${d}/${n} étapes (${p}%)`, finished:'Tutoriel terminé !',
-  my_valid:'✔ Mes validés', done_on:'Réalisé le', redo:'Refaire ce tuto', validated_toast:'Tutoriel validé ! Il est classé dans « Mes validés ».',
+  my_valid:'Mes validés', done_on:'Réalisé le', redo:'Refaire ce tuto', validated_toast:'Tutoriel validé ! Il est classé dans « Mes validés ».',
   new_title:'Nouveau tutoriel', edit_title:'Modifier le tutoriel',
   cancel:'← Annuler', delete:'Supprimer', save:'Enregistrer',
   f_title:'Titre', ph_title:"Ex : Remplacement d'une buse d'éjection",
@@ -943,7 +979,7 @@ const I18N = {
   safety:'Safety', tools:'Tools / equipment', progress:'Progress',
   step_done:'Step completed', no_steps:'No steps.',
   prog:(d,n,p)=>`${d}/${n} steps (${p}%)`, finished:'Tutorial completed!',
-  my_valid:'✔ My validated', done_on:'Done on', redo:'Redo this tutorial', validated_toast:'Tutorial validated! It is now in “My validated”.',
+  my_valid:'My validated', done_on:'Done on', redo:'Redo this tutorial', validated_toast:'Tutorial validated! It is now in “My validated”.',
   new_title:'New tutorial', edit_title:'Edit tutorial',
   cancel:'← Cancel', delete:'Delete', save:'Save',
   f_title:'Title', ph_title:'E.g. Replacing an ejection nozzle',
@@ -981,6 +1017,7 @@ let lang = (()=>{ try{ const l=localStorage.getItem(LANG_KEY); if(l==='fr'||l===
 */
 /* Noms d'onglets et textes modifiés dans l'onglet Convertisseur (classes 3 et 4) : { clé : {fr:'…', en:'…'} }, prioritaires sur I18N. */
 const LBLKEY='sibelco_labels_v1';
+let navEdit=false;   // mode « Modifier le menu » (classes 3 et 4) : flèches ▲▼ et crayon à côté de chaque onglet
 const NAVKEY='sibelco_navorder_v1';
 let NAVORD=(()=>{ try{ return (JSON.parse(localStorage.getItem(NAVKEY))||{}).order||[]; }catch(e){ return []; } })();
 let LBL=(()=>{ try{ return JSON.parse(localStorage.getItem(LBLKEY))||{}; }catch(e){ return {}; } })();
@@ -1033,7 +1070,7 @@ const TOBL={id:'tobl',mandatory:true,title:'FORMATION OBLIGATOIRE – Les bases 
 /*
  SEED = les tutoriels fournis au premier lancement (copiés dans le localStorage). Ensuite chacun les modifie à sa guise.
 */
-// ✏️ MODIFIABLE : tutoriels d'exemple : titre, machine, étapes... (une entrée = un tuto)
+// MODIFIABLE : tutoriels d'exemple : titre, machine, étapes... (une entrée = un tuto)
 const SEED = [
  {id:'t1',title:'Consignation avant intervention (LOTO)',machine:'Tous trieurs',category:'Sécurité',level:'Obligatoire',duration:15,
   tools:['Cadenas personnel','Étiquettes de consignation','Fiche de consignation du site'],
@@ -1287,6 +1324,7 @@ const ICO={
  coverOf(t) = quelle image utiliser sur la carte : 1) la couverture choisie, sinon 2) la première photo
               d'étape, sinon rien (=> on affiche le pictogramme).
 */
+const PEN='<svg class="pen" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>';
 const icoSVG=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]||ICO.bottle}</svg>`;
 const PH_SVG=icoSVG('bottle');
 const coverOf=t=>t.cover||((t.steps||[]).find(s=>s.img)||{}).img||'';
@@ -1299,7 +1337,7 @@ function cardHTML(t){
   return `<div class="card tcard ${isLocked(t)?'locked':''}" onclick="openTuto('${t.id}')">
     <div class="cover">${cv?`<img src="${cv}" alt="" loading="lazy">`:PH_SVG}</div>
     <div class="row" style="justify-content:space-between"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span></div>
-    ${isDone(t.id)?`<div><span class="tag valide">✔ ${esc(T('done_on'))} ${esc(fmtDate(doneDate(t.id)))}</span></div>`:''}
+    ${isDone(t.id)?`<div><span class="tag valide">${esc(T('done_on'))} ${esc(fmtDate(doneDate(t.id)))}</span></div>`:''}
     ${rewardTxt(t)?`<div><span class="tag">${esc(rewardTxt(t))}</span></div>`:''}
     <h3>${isLocked(t)?`<span class="tag">${esc(T('locked_tag'))}</span> `:''}${esc(t.title)}</h3>
     <div class="meta"><span>${esc(machineL(t.machine))}</span><span>${esc(t.duration)} ${T('min')}</span><span>${esc(levelL(t.level))}</span><span>${T('steps_n',(t.steps||[]).length)}</span></div>
@@ -1357,7 +1395,7 @@ function openTuto(id,at){
       ${(t.tools&&t.tools.length)?`<div class="box" style="background:transparent;color:var(--text);border:1px solid var(--line);border-left:4px solid var(--accent)"><b>${esc(T('tools'))}</b><ul>${t.tools.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
     </div>
     <div class="panel noprint">
-      ${isDone(id)?`<div class="row" style="justify-content:space-between;margin-bottom:10px"><span class="tag valide">✔ ${esc(T('done_on'))} ${esc(fmtDate(doneDate(id)))}</span><button class="small" onclick="redoTuto('${id}')">↺ ${esc(T('redo'))}</button></div>`:''}
+      ${isDone(id)?`<div class="row" style="justify-content:space-between;margin-bottom:10px"><span class="tag valide">${esc(T('done_on'))} ${esc(fmtDate(doneDate(id)))}</span><button class="small" onclick="redoTuto('${id}')">${esc(T('redo'))}</button></div>`:''}
       <div class="row" style="justify-content:space-between"><b>${esc(T('progress'))}</b><span id="pct" class="meta"></span></div>
       <div class="progress"><div id="bar"></div></div>
       <div id="gbox"></div>
@@ -1388,17 +1426,17 @@ function renderGStep(id){
   const dots=S.map((_,k)=>`<button class="gdot ${d[k]?'done':''} ${k===i?'cur':''}" ${k>ft?'disabled':''} onclick="gGo('${id}',${k})" aria-label="${esc(T('step'))} ${k+1}">${d[k]&&k!==i?'✓':k+1}</button>`).join('');
   const q=hasQ?`<div class="gq"><b>${esc(s.q)}</b>${s.opts.map((o,k)=>`<label class="opt ${ok&&k===good?'good':''}"><input type="radio" name="gq" value="${k}" ${ok?'disabled':''} ${ok&&k===good?'checked':''}> ${esc(o)}</label>`).join('')}<div id="gbad" class="bad hidden">${L('Ce n’est pas la bonne réponse : relisez l’étape puis réessayez.','Not the right answer: re-read the step and try again.')}</div></div>`:'';
   const next= ok ? (i<n-1?`<button class="primary" onclick="gGo('${id}',${i+1})">${L('Étape suivante','Next step')} →</button>`:'')
-                 : `<button class="primary" onclick="gValidate('${id}',${i})">${hasQ?L('Valider ma réponse','Check my answer'):L('J’ai réalisé cette étape','I did this step')} ✔</button>`;
+                 : `<button class="primary" onclick="gValidate('${id}',${i})">${hasQ?L('Valider ma réponse','Check my answer'):L('J’ai réalisé cette étape','I did this step')}</button>`;
   box.innerHTML=`<div class="gnav">${dots}</div>
    <div class="gstep">
-     <div class="row"><div class="num">${i+1}</div><b>${esc(T('step'))} ${i+1} / ${n}</b>${ok?`<span class="tag valide">✔ ${esc(T('step_done'))}</span>`:''}</div>
+     <div class="row"><div class="num">${i+1}</div><b>${esc(T('step'))} ${i+1} / ${n}</b>${ok?`<span class="tag valide">${esc(T('step_done'))}</span>`:''}</div>
      <div class="gtxt">${esc(s.text).replace(/\n/g,'<br>')}</div>
      ${s.warn?`<div class="box danger">${esc(s.warn)}</div>`:''}
      ${mediaHTML(s)}
      ${q}
      <div class="row" style="justify-content:space-between;margin-top:12px"><button onclick="gGo('${id}',${i-1})" ${i===0?'disabled':''}>← ${L('Précédent','Previous')}</button>${next}</div>
    </div>
-   ${fin?`<div class="box" style="border-left-color:var(--ok)"><b>✔ ${esc(T('finished'))}</b>${state.msg[id]?`<br>${esc(state.msg[id])}`:''}</div>`:''}`;
+   ${fin?`<div class="box" style="border-left-color:var(--ok)"><b>${esc(T('finished'))}</b>${state.msg[id]?`<br>${esc(state.msg[id])}`:''}</div>`:''}`;
   if(s.video&&s.video.key) idbGet(s.video.key).then(blob=>{
     const v=$('gvid'); if(!v) return;
     if(blob){ if(gUrl) URL.revokeObjectURL(gUrl); gUrl=URL.createObjectURL(blob); v.src=gUrl; }
@@ -1528,7 +1566,7 @@ function renderStepsEditor(){
      <label>${L('Vidéo : fichier (40 Mo max, gardé sur cet appareil)','Video: file (40 MB max, kept on this device)')}</label>
      <div class="row">
        <input type="file" accept="video/*" style="max-width:320px" onchange="addVideo(${i},this)">
-       ${s.video?`<span class="meta">🎬 ${esc(s.video.name)}</span><button class="small danger" onclick="rmVideo(${i})">${esc(T('remove'))}</button>`:''}
+       ${s.video?`<span class="meta">${esc(s.video.name)}</span><button class="small danger" onclick="rmVideo(${i})">${esc(T('remove'))}</button>`:''}
      </div>
      <label>${L('ou lien vidéo (YouTube ou fichier .mp4 en ligne)','or video link (YouTube or online .mp4 file)')}</label>
      <input value="${esc(s.vurl||'')}" oninput="state.draft.steps[${i}].vurl=this.value.trim()" placeholder="https://…">
@@ -1684,7 +1722,7 @@ function importJSON(ev){
 */
 /* ---------- CLASSES / PARAMÈTRES / MENU ---------- */
 const SKEY='sibelco_settings_v1', FKEY='sibelco_fiches_v1';
-// ✏️ MODIFIABLE : les 5 classes d'utilisateurs et leur description
+// MODIFIABLE : les 5 classes d'utilisateurs et leur description
 const CLS=[
  {fr:'Classe 0 – Découverte',en:'Class 0 – Beginner',dfr:'Ne connaît pas les trieurs optiques : formation obligatoire avant les autres tutos.',den:'New to optical sorters: mandatory training before the other tutorials.'},
  {fr:'Classe 1 – Opérateur',en:'Class 1 – Operator',dfr:'Connaît les trieurs : accès aux tutos Facile / Moyen.',den:'Knows the sorters: access to Easy / Medium tutorials.'},
@@ -1697,7 +1735,7 @@ const clsL=n=>CLS[n][lang], clsD=n=>CLS[n]['d'+lang];
    La classe de la pastille survolée est surlignée. */
 function clsTipHTML(cur){
   return `<div class="cttl">${L('Les classes et leurs droits','Classes and their rights')}</div>`+
-   CLS.map((c,i)=>`<div class="ctr ${i===cur?'me':''}"><span class="cls cls${i}">${esc(clsL(i))}</span>${i===cur?`<b class="you">◄ ${L('celle-ci','this one')}</b>`:''}<div class="d">${esc(clsD(i))}</div></div>`).join('');
+   CLS.map((c,i)=>`<div class="ctr ${i===cur?'me':''}"><span class="cls cls${i}">${esc(clsL(i))}</span>${i===cur?`<b class="you">← ${L('celle-ci','this one')}</b>`:''}<div class="d">${esc(clsD(i))}</div></div>`).join('');
 }
 function showClsTip(el){
   let t=document.getElementById('clstip');
@@ -1721,6 +1759,9 @@ const needCls=t=>(t.mandatory||t.category==='Sécurité')?0:(t.level==='Avancé'
 const isLocked=t=>settings.cls<needCls(t);
 // Création / modification / suppression / import de tutoriels : réservés aux classes 3 (Référent) et 4 (Administrateur)
 const canEditTutos=()=>!!(settings&&settings.cls>=3);
+// Administration des flowsheets (renommer, vider le cache, supprimer, modifier) : réservée à la classe 4 (Administrateur)
+const isAdmin=()=>!!(settings&&settings.cls>=4);
+const needAdm=()=>toast(L('Réservé à l’administrateur.','Reserved for the administrator.'));
 // Tutos validés PAR L'UTILISATEUR (toutes les étapes cochées) : mémorisés dans son compte (settings.doneTutos = {idTuto: date})
 const doneDate=id=>(settings&&settings.doneTutos&&settings.doneTutos[id])||0;
 const isDone=id=>!!doneDate(id);
@@ -1750,20 +1791,20 @@ const rewardOf=t=>t.reward||(t.mandatory?{mode:'class',cls:1}:{mode:'none'});
 function rewardTxt(t){
   if(isDone(t.id)) return '';
   const r=normReward(rewardOf(t));
-  if(r.mode==='pct'&&settings.cls<MAXAUTO) return '🎯 +'+r.pct+' % '+L('vers la classe suivante','toward the next class');
-  if(r.mode==='class'&&settings.cls<r.cls) return '🎓 '+L('Débloque : ','Unlocks: ')+clsL(r.cls);
+  if(r.mode==='pct'&&settings.cls<MAXAUTO) return '+'+r.pct+' % '+L('vers la classe suivante','toward the next class');
+  if(r.mode==='class'&&settings.cls<r.cls) return ''+L('Débloque : ','Unlocks: ')+clsL(r.cls);
   return '';
 }
 function giveReward(t,first){
   const r=normReward(rewardOf(t)); let msg='';
   if(r.mode==='class'){
-    if(settings.cls<r.cls){ settings.cls=r.cls; settings.pct=0; saveSettings(); msg='🎉 '+L('Classe débloquée : ','Class unlocked: ')+clsL(settings.cls); }
+    if(settings.cls<r.cls){ settings.cls=r.cls; settings.pct=0; saveSettings(); msg=''+L('Classe débloquée : ','Class unlocked: ')+clsL(settings.cls); }
   }else if(r.mode==='pct'&&first&&settings.cls<MAXAUTO){
     const before=settings.cls; let v=(settings.pct||0)+r.pct;
     while(v>=100&&settings.cls<MAXAUTO){ v-=100; settings.cls++; }
     settings.pct=settings.cls>=MAXAUTO?0:v; saveSettings();
-    msg= settings.cls>before ? '🎉 '+L('Classe débloquée : ','Class unlocked: ')+clsL(settings.cls)
-                             : '🎯 +'+r.pct+' % '+L('vers ','toward ')+clsL(settings.cls+1)+' ('+Math.round(settings.pct)+' %)';
+    msg= settings.cls>before ? ''+L('Classe débloquée : ','Class unlocked: ')+clsL(settings.cls)
+                             : '+'+r.pct+' % '+L('vers ','toward ')+clsL(settings.cls+1)+' ('+Math.round(settings.pct)+' %)';
   }
   return msg;
 }
@@ -1774,7 +1815,7 @@ function progHTML(wrap){
   return `<div class="${wrap?'panel':''}"><div class="row" style="justify-content:space-between"><b>${L('Progression vers','Progress toward')} ${esc(clsL(c+1))}</b><span class="meta">${p} %</span></div><div class="progress"><div style="width:${p}%"></div></div><p class="meta" style="margin:4px 0 0">${L('Chaque tuto réalisé qui donne des points vous rapproche de la classe suivante.','Each completed tutorial that gives points brings you closer to the next class.')}</p></div>`;
 }
 /* ===================== PHOTOS DES TUILES D'ACCUEIL =====================
- Les classes 3 et 4 peuvent mettre une photo sur chaque tuile de l'accueil (bouton 📷). Gardées dans le navigateur (clé sibelco_tilepics_v1). */
+ Les classes 3 et 4 peuvent mettre une photo sur chaque tuile de l'accueil (bouton ). Gardées dans le navigateur (clé sibelco_tilepics_v1). */
 const TPKEY='sibelco_tilepics_v1';
 let tilePics=(()=>{try{return JSON.parse(localStorage.getItem(TPKEY))||{};}catch(e){return {};}})();
 function saveTilePics(){ try{localStorage.setItem(TPKEY,JSON.stringify(tilePics));}catch(e){toast(T('storage_full'));} }
@@ -1783,7 +1824,7 @@ function rmTilePic(k){ delete tilePics[k]; saveTilePics(); renderHome(); }
 function tileHTML(k,l){
   const pic=tilePics[k];
   return `<div class="card tcard" onclick="go('${k}')"><div class="cover c-${k}">${pic?`<img src="${pic}" alt="" loading="lazy">`:icoSVG(k)}</div><h3>${esc(T(l))}</h3><div class="meta">${cnt(k)} ${esc(T('items'))}</div>`+
-   (canEditTutos()?`<div class="row noprint tpedit" onclick="event.stopPropagation()"><label class="tpbtn">📷 ${L('Photo','Photo')}<input type="file" accept="image/*" class="hidden" onchange="setTilePic('${k}',this)"></label>${pic?`<button class="small danger" onclick="event.stopPropagation();rmTilePic('${k}')">✕</button>`:''}</div>`:'')+`</div>`;
+   (canEditTutos()?`<div class="row noprint tpedit" onclick="event.stopPropagation()"><label class="tpbtn">${L('Photo','Photo')}<input type="file" accept="image/*" class="hidden" onchange="setTilePic('${k}',this)"></label>${pic?`<button class="small danger" onclick="event.stopPropagation();rmTilePic('${k}')">×</button>`:''}</div>`:'')+`</div>`;
 }
 
 /*
@@ -1795,8 +1836,9 @@ function tileHTML(k,l){
 function navList(){ const pos=k=>{ const i=NAVORD.indexOf(k); return i<0?1e6+NAV.findIndex(n=>n[0]===k):i; }; return [...NAV].sort((a,b)=>pos(a[0])-pos(b[0])); }
 const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['glossaire','','nav_gloss'],['jeux','','nav_jeux'],['convertisseur','','nav_conv'],['settings','','nav_set']];
 function buildNav(){
-  $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px"><button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button></div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
-   navList().filter(([k])=>k!=='convertisseur'||canEditTutos()).map(([k,i,l])=>`${k==='settings'?'<div class="sp"></div>':''}<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`).join('')+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
+  document.body.classList.toggle('adm',isAdmin());
+  $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px">${canEditTutos()?`<button class="nb ib ${navEdit?'on':''}" onclick="toggleNavEdit()" aria-pressed="${navEdit}" title="${esc(L('Modifier le menu : glisser pour changer l’ordre, toucher un nom pour le renommer','Edit the menu: drag to reorder, tap a name to rename it'))}">${navEdit?L('Terminer','Done'):L('Modifier','Edit')}</button>`:''}<button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button></div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
+   navItems()+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
   document.querySelector('header').classList.toggle('big',state.section!=='tutos'); $('app').classList.toggle('flowwide',state.section==='flowsheet');
   $('actions').classList.toggle('hidden',state.section!=='tutos');
   $('btnNew').classList.toggle('hidden',!canEditTutos());
@@ -1988,6 +2030,10 @@ const FHKEY='sibelco_flowhidden_v1';
 const fhGet=()=>{ try{ return JSON.parse(localStorage.getItem(FHKEY))||{}; }catch(e){ return {}; } };
 const FLOW_OFF=[];
 Object.keys(fhGet()).forEach(id=>{ const i=FLOW_SITES.findIndex(s=>s.id===id); if(i>=0&&fhGet()[id]) FLOW_OFF.push(...FLOW_SITES.splice(i,1)); });
+/* Noms des flowsheets modifiés par l'administrateur : {id: nom}. Appliqués au démarrage à tous les sites (publiés, locaux, supprimés). */
+const FNKEY='sibelco_flowname_v1';
+const fnGet=()=>{ try{ return JSON.parse(localStorage.getItem(FNKEY))||{}; }catch(e){ return {}; } };
+FLOW_SITES.concat(FLOW_OFF).forEach(s=>{ const n=fnGet()[s.id]; if(n) s.name=n; });
 /* Les infos saisies dans l'appli (photo, description, fiche liée) sont gardées à part, par site et par équipement : FL.ov[site][tag] */
 const FLKEY='sibelco_flow_v1';
 const FL={site:null,data:null,svg:null,vb:null,full:null,ov:(()=>{try{return JSON.parse(localStorage.getItem(FLKEY))||{};}catch(e){return {};}})(),show:false,edit:false,cache:{},pin:null,ptr:new Map(),moved:0};
@@ -2027,9 +2073,8 @@ function flLoad(id){
 }
 function renderFlow(id){
   state.section='flowsheet'; state.view='flow'; $('filters').classList.add('hidden'); buildNav();
-  if(!FLOW_SITES.length){ $('app').innerHTML=`<div class="row noprint" style="margin:8px 0;gap:8px"><h2 style="margin:0">${esc(T('nav_flow'))}</h2>${canEditTutos()?`<button class="primary" onclick="renderConv(true)">＋ ${esc(cvT('cv_add_btn'))}</button>`:''}</div><p class="meta">${L('Aucun flowsheet.','No flowsheet.')}</p>`; return; }
+  if(!FLOW_SITES.length){ $('app').innerHTML=`<div class="row noprint" style="margin:8px 0;gap:8px"><h2 style="margin:0">${esc(T('nav_flow'))}</h2>${isAdmin()?`<button class="primary" onclick="renderConv(true)">＋ ${esc(cvT('cv_add_btn'))}</button>`:''}</div><p class="meta">${L('Aucun flowsheet.','No flowsheet.')}</p>${isAdmin()?cvOffBox('flow'):''}`; return; }
   FL.site=id||FL.site; if(!FLOW_SITES.some(x=>x.id===FL.site)) FL.site=FLOW_SITES[0].id; FL.pin=null; FL.zedit=false; FL.zd=null;
-  const canEd=canEditFiche('constructeur');
   $('app').innerHTML=`<div class="row noprint" style="margin:8px 0;gap:8px;flex-wrap:wrap">
     <h2 style="margin:0">${esc(T('nav_flow'))}</h2>
     <select id="flSite" style="width:auto" title="${esc(L('Choisir le site','Choose the site'))}" aria-label="${esc(L('Site','Site'))}" onchange="renderFlow(this.value)">${FLOW_SITES.map(s=>`<option value="${s.id}" ${s.id===FL.site?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
@@ -2037,10 +2082,9 @@ function renderFlow(id){
     <button onclick="flZoom(.6)" title="Zoom +">＋</button><button onclick="flZoom(1/.6)" title="Zoom −">−</button>
     <button onclick="flFit()">${L('Vue d’ensemble','Fit')}</button>
     <button id="flShow" onclick="flToggleShow()" aria-pressed="false">${L('Voir les zones','Show zones')}</button>
-    ${canEditTutos()?`<button id="flZ" onclick="flToggleZedit()" aria-pressed="false">${L('Modifier les cases','Edit zones')}</button>`:''}
-    ${canEditTutos()?`<button onclick="renderConv(true)" title="${esc(L('Convertir un plan Excel / PDF en nouveau flowsheet','Convert an Excel / PDF plan into a new flowsheet'))}">＋ ${esc(cvT('cv_add_btn'))}</button>`:''}
-    ${canEd?`<button id="flEdit" onclick="flToggleEdit()" aria-pressed="false">${L(' Modifier les infos',' Edit info')}</button>`:''}
+    ${isAdmin()?`<button id="flAdmBtn" onclick="flAdmToggle()" aria-pressed="false">${PEN} ${L('Modifier','Edit')}</button>`:''}
   </div>
+  ${isAdmin()?flAdmHTML():''}
   <div id="flZbar" class="box noprint hidden" style="margin:6px 0"><b>${L('Modifier les cases','Edit zones')}</b> · ${L('Mode « Dessiner » : glissez sur le plan pour tracer un rectangle, puis indiquez le repère. Cliquez une case existante pour la supprimer.','“Draw” mode: drag on the plan to draw a rectangle, then enter the tag. Click an existing zone to delete it.')}
     <div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap"><button id="flZd" class="primary" onclick="flZMode(true)">${L('Dessiner','Draw')}</button><button id="flZp" onclick="flZMode(false)">${L('Déplacer le plan','Move the plan')}</button><button onclick="flZReset()">${L('Rétablir les cases d’origine','Restore original zones')}</button><button onclick="flToggleZedit()">${L('Terminer','Done')}</button></div></div>
   <div id="flBox" class="flbox"><div class="meta" style="padding:20px">${L('Chargement du flowsheet…','Loading flowsheet…')}</div><div id="flTip" class="fltip" hidden></div></div>
@@ -2059,8 +2103,70 @@ function renderFlow(id){
 }
 /* les zones qui ont une fiche liée sont repérées (liseré vert quand "Voir les zones" est actif) */
 function flMarkLinks(){ document.querySelectorAll('#flHot .fh').forEach(r=>r.classList.toggle('ln',!!flFiche(r.dataset.tag))); }
+/* ---- panneau « Modifier » (administrateur uniquement) : tout est regroupé ici ---- */
+function flAdmHTML(){
+  const s=FLOW_SITES.find(x=>x.id===FL.site)||{name:'',id:''};
+  const off=FLOW_OFF.length?`<div class="fladm-sec"><h4>${L('Flowsheets supprimés','Deleted flowsheets')}</h4>`+FLOW_OFF.map(o=>`<div class="fladm-row"><span><b>${esc(o.name)}</b> <span class="meta">(${esc(o.id)})</span></span><button onclick="cvRestore('${esc(o.id)}','flow')">${L('Rétablir','Restore')}</button></div>`).join('')+`</div>`:'';
+  return `<div id="flAdm" class="box noprint fladm hidden">
+   <div class="fladm-head"><b>${L('Administration du flowsheet','Flowsheet administration')}</b><span class="meta">${esc(s.name)}</span></div>
+   <div class="fladm-grid">
+    <div class="fladm-sec"><h4>${L('Nom affiché','Display name')}</h4>
+      <div class="row"><input id="flRn" value="${esc(s.name)}" maxlength="60" style="flex:1;min-width:150px" aria-label="${esc(L('Nom du flowsheet','Flowsheet name'))}" onkeydown="if(event.key==='Enter')flRename()"><button class="primary" onclick="flRename()">${L('Renommer','Rename')}</button></div></div>
+    <div class="fladm-sec"><h4>${L('Contenu','Content')}</h4>
+      <div class="row"><button id="flZ" onclick="flToggleZedit()" aria-pressed="false">${L('Modifier les cases','Edit zones')}</button><button id="flEdit" onclick="flToggleEdit()" aria-pressed="false">${L('Modifier les infos','Edit info')}</button><button onclick="renderConv(true)">${esc(cvT('cv_add_btn'))}</button></div>
+      <p class="meta" style="margin:8px 0 0">${L('Le Convertisseur permet aussi d’importer, d’exporter et de remplacer un plan.','The Converter can also import, export and replace a plan.')}</p></div>
+    <div class="fladm-sec"><h4>${L('Maintenance','Maintenance')}</h4>
+      <div class="row"><button onclick="flClearCache()">${L('Vider le cache','Clear cache')}</button><button class="danger" onclick="flDelete()">${L('Supprimer ce flowsheet','Delete this flowsheet')}</button></div>
+      <p class="meta" style="margin:8px 0 0">${L('Vider le cache force le retéléchargement des plans publiés. Les flowsheets créés sur cet appareil, leurs cases et leurs infos ne sont pas touchés.','Clearing the cache forces published plans to be downloaded again. Flowsheets created on this device, their zones and info are not affected.')}</p></div>
+    ${off}
+   </div></div>`;
+}
+function flAdmToggle(){
+  if(!isAdmin()) return needAdm();
+  const p=$('flAdm'); if(!p) return;
+  const open=!p.classList.toggle('hidden'), b=$('flAdmBtn');
+  if(b){ b.setAttribute('aria-pressed',open); b.classList.toggle('primary',open); }
+  if(!open){ if(FL.zedit) flToggleZedit(); if(FL.edit) flToggleEdit(); }
+}
+function flSetName(id,n){
+  const s=FLOW_SITES.concat(FLOW_OFF).find(x=>x.id===id); if(!s) return;
+  s.name=n;
+  try{
+    const m=fnGet(); m[id]=n; localStorage.setItem(FNKEY,JSON.stringify(m));
+    const l=cvList(), x=l.find(y=>y.id===id); if(x){ x.name=n; localStorage.setItem(CVKEY,JSON.stringify(l)); }
+  }catch(e){ toast(T('storage_full')); }
+  try{ bkSchedule(); }catch(e){}
+}
+function flRename(){
+  if(!isAdmin()) return needAdm();
+  const id=FL.site, s=FLOW_SITES.find(x=>x.id===id), inp=$('flRn'); if(!s||!inp) return;
+  const n=inp.value.trim().replace(/\s+/g,' ');
+  if(!n) return toast(L('Indiquez un nom.','Enter a name.'));
+  if(n===s.name) return;
+  flSetName(id,n);
+  renderFlow(id); flAdmToggle(); toast(L('Flowsheet renommé','Flowsheet renamed'));
+}
+async function flClearCache(){
+  if(!isAdmin()) return needAdm();
+  if(!confirm(L('Vider le cache des flowsheets sur cet appareil ? Les plans publiés seront retéléchargés. Les flowsheets créés ici, leurs cases et leurs infos ne sont pas effacés.','Clear the flowsheet cache on this device? Published plans will be downloaded again. Flowsheets created here, their zones and info are not erased.'))) return;
+  try{
+    FLOW_SITES.concat(FLOW_OFF).forEach(s=>{ if(!s.custom) delete FLOW_PACK[s.id]; });
+    FL.cache={};
+    document.querySelectorAll('script[src*="flowsheets/"]').forEach(e=>e.remove());
+    if(window.caches){
+      for(const k of await caches.keys()){
+        const c=await caches.open(k);
+        for(const r of await c.keys()) if(/\/flowsheets\//.test(r.url)) await c.delete(r);
+      }
+    }
+    await Promise.all(FLOW_SITES.filter(s=>!s.custom&&s.js).map(s=>fetch(s.js,{cache:'reload'}).catch(()=>{})));
+    if(state.view==='conv') cvRedraw(); else { renderFlow(FL.site); flAdmToggle(); }
+    toast(L('Cache des flowsheets vidé','Flowsheet cache cleared'));
+  }catch(e){ toast(L('Impossible de vider le cache','Could not clear the cache')); }
+}
+function flDelete(){ if(!isAdmin()) return needAdm(); if(FL.site) cvDelete(FL.site,'flow'); }
 function flToggleShow(){ FL.show=!FL.show; $('flBox').classList.toggle('flshow',FL.show); $('flShow').setAttribute('aria-pressed',FL.show); $('flShow').classList.toggle('primary',FL.show); }
-function flToggleEdit(){ FL.edit=!FL.edit; $('flEdit').setAttribute('aria-pressed',FL.edit); $('flEdit').classList.toggle('primary',FL.edit); toast(FL.edit?L('Mode modification : cliquez un équipement pour le modifier','Edit mode: click an item to edit it'):L('Mode lecture','Read mode')); flTipHide(); }
+function flToggleEdit(){ if(!isAdmin()) return needAdm(); FL.edit=!FL.edit; $('flEdit').setAttribute('aria-pressed',FL.edit); $('flEdit').classList.toggle('primary',FL.edit); toast(FL.edit?L('Mode modification : cliquez un équipement pour le modifier','Edit mode: click an item to edit it'):L('Mode lecture','Read mode')); flTipHide(); }
 /* ---- vue (zoom / déplacement) : on modifie le viewBox du SVG, donc le dessin reste net à tous les zooms ---- */
 function flSetVB(v){
   const box=$('flBox'); if(!box||!FL.svg) return; const r=box.getBoundingClientRect(); const asp=r.height/Math.max(1,r.width);
@@ -2088,10 +2194,10 @@ function flTipHTML(tag){
   const ph=i.photo?`<img src="${i.photo}" alt="">`:`<div class="flph">${icoSVG('flowsheet')}<span>${L('Photo à ajouter','Photo to add')}</span></div>`;
   return `${ph}<div class="flt"><b>${esc(i.tag)}</b>${i.name!==i.tag?` · ${esc(i.name)}`:''}<div class="meta">${esc(i.kind)}${i.model?' · '+esc(i.model):''}</div>
    <p>${esc(i.desc)}</p>
-   <div class="flgo ${i.linked?'ok':''}">${FL.edit?L('✏️ Clic : modifier les infos',' Click: edit info'):i.linked?L('Clic : ouvrir la fiche constructeur → ','Click: open manufacturer sheet → ')+esc(i.fiche.title):L('Aucune fiche constructeur liée','No manufacturer sheet linked')}</div></div>`;
+   <div class="flgo ${i.linked?'ok':''}">${FL.edit?L('Clic : modifier les infos','Click: edit info'):i.linked?L('Clic : ouvrir la fiche constructeur → ','Click: open manufacturer sheet → ')+esc(i.fiche.title):L('Aucune fiche constructeur liée','No manufacturer sheet linked')}</div></div>`;
 }
 function flTipShow(tag,px,py,pinned){
-  const t=$('flTip'),box=$('flBox'); if(!t) return; t.innerHTML=flTipHTML(tag)+(pinned?`<div class="row" style="padding:0 10px 10px;gap:6px">${(flInfo(tag).linked&&!FL.edit)?`<button class="primary" onclick="flOpen('${tag}')">${L('Ouvrir la fiche','Open sheet')}</button>`:''}${canEditFiche('constructeur')?`<button onclick="flEditor('${tag}')">${L('Modifier','Edit')}</button>`:''}<button onclick="flTipHide()">✕</button></div>`:'');
+  const t=$('flTip'),box=$('flBox'); if(!t) return; t.innerHTML=flTipHTML(tag)+(pinned?`<div class="row" style="padding:0 10px 10px;gap:6px">${(flInfo(tag).linked&&!FL.edit)?`<button class="primary" onclick="flOpen('${tag}')">${L('Ouvrir la fiche','Open sheet')}</button>`:''}${canEditFiche('constructeur')?`<button onclick="flEditor('${tag}')">${L('Modifier','Edit')}</button>`:''}<button onclick="flTipHide()">×</button></div>`:'');
   t.hidden=false; t.classList.toggle('pin',!!pinned);
   const bw=box.clientWidth,bh=box.clientHeight,tw=t.offsetWidth,th=t.offsetHeight;
   let x=px+16,y=py+16; if(x+tw>bw-6) x=px-tw-16; if(y+th>bh-6) y=py-th-16; t.style.left=Math.max(6,x)+'px'; t.style.top=Math.max(6,y)+'px';
@@ -2166,6 +2272,7 @@ function flEdReset(){ const s=FL.ov[FL.site]||{}; delete s[FL.ed.tag]; flSave();
    3) Import : « Importer un .js » lit un fichier au même format (par ex. exporté depuis un autre appareil) SANS l'exécuter.
  Un flowsheet local ne disparaît que si on le supprime ici ; s'il est ensuite publié (même id dans FLOW_SITES), la version publiée l'emporte.
 */
+let CVE=false;   // mode « Modifier » du Convertisseur (administrateur)
 const CVBOX='background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:10px 0';
 const CV={idTouched:false,rep:null};
 const cvOk=id=>/^[A-Za-z0-9_-]{1,40}$/.test(id);
@@ -2230,6 +2337,7 @@ async function cvRegister(id,name,pack){
 /* ---- page de l'onglet ---- */
 function renderConv(focusNew){
   if(!canEditTutos()){ toast(T('need_cls3')); return; }
+  if(state.section!=='convertisseur'||focusNew) CVE=false;
   state.section='convertisseur'; state.view='conv'; $('filters').classList.add('hidden'); buildNav(); CV.idTouched=false;
   const rows=FLOW_SITES.map(s=>{
     const n=((FL.zn[s.id]||{}).add||[]).length, id=esc(s.id);
@@ -2237,13 +2345,13 @@ function renderConv(focusNew){
       <div style="flex:1;min-width:200px"><b>${esc(s.name)}</b> <span class="meta">(${id})</span><div class="meta">${s.custom?L('Sur cet appareil uniquement','On this device only'):L('Publié (fichier flowsheets/)','Published (flowsheets/ file)')}${n?` · ${n} ${L('case(s) ajoutée(s)','added zone(s)')}`:''}</div></div>
       <button onclick="renderFlow('${id}')">${L('Ouvrir','Open')}</button>
       <button onclick="cvExport('${id}')">${L('Exporter .js','Export .js')}</button>
-      ${s.custom?`<button onclick="cvPickReplace('${id}')">${L('Remplacer le plan','Replace plan')}</button>`:''}<button class="danger" onclick="cvDelete('${id}')">${L('Supprimer','Delete')}</button></div>`;
+      ${CVE&&isAdmin()?`<button onclick="cvRename('${id}')">${L('Renommer','Rename')}</button>${s.custom?`<button onclick="cvPickReplace('${id}')">${L('Remplacer le plan','Replace plan')}</button>`:''}<button class="danger" onclick="cvDelete('${id}')">${L('Supprimer','Delete')}</button>`:''}</div>`;
   }).join('');
-  $('app').innerHTML=`<div class="row noprint" style="margin:8px 0"><h2 style="margin:0">${esc(T('nav_conv'))}</h2></div>
+  $('app').innerHTML=`<div class="row noprint" style="margin:8px 0"><h2 style="margin:0">${esc(T('nav_conv'))}</h2>${cvPen('nav_conv')}${isAdmin()?`<button class="${CVE?'primary':''}" style="margin-left:auto" onclick="cvEditToggle()" aria-pressed="${CVE}">${CVE?L('Terminer','Done'):L('Modifier','Edit')}</button>`:''}</div>
   <div id="cvMsg" class="box" style="display:none"></div>
   <div style="${CVBOX}">
-    <h3 style="margin-top:0">${cvH('cv_create_title')}</h3>
-    <p class="meta">${cvH('cv_create_help')}</p>
+    <h3 style="margin-top:0">${cvH('cv_create_title')} ${cvPen('cv_create_title')}</h3>
+    <p class="meta">${cvH('cv_create_help')} ${cvPen('cv_create_help')}</p>
     <label>${L('Fichier du plan','Plan file')}</label>
     <input id="cvFile" type="file" accept=".pdf,.svg,.png,.jpg,.jpeg,.webp,.xlsx,.xls" onchange="cvFileChosen(this)">
     <div class="row" style="gap:8px;flex-wrap:wrap">
@@ -2258,12 +2366,12 @@ function renderConv(focusNew){
     <div class="row" style="margin-top:12px"><button class="primary" id="cvGo" onclick="cvCreate()">${L('Convertir et créer le flowsheet','Convert and create the flowsheet')}</button></div>
   </div>
   <div style="${CVBOX}">
-    <h3 style="margin-top:0">${cvH('cv_import_title')}</h3>
-    <p class="meta">${cvH('cv_import_help')}</p>
+    <h3 style="margin-top:0">${cvH('cv_import_title')} ${cvPen('cv_import_title')}</h3>
+    <p class="meta">${cvH('cv_import_help')} ${cvPen('cv_import_help')}</p>
     <input id="cvPack" type="file" accept=".js" onchange="cvImport(this)">
   </div>
-  <div style="${CVBOX}"><h3 style="margin-top:0">${cvH('cv_sites_title')}</h3>${rows||`<p class="meta">${L('Aucun flowsheet.','No flowsheet.')}</p>`}</div>
-  ${cvOffBox()}${cvLabelsBox()}
+  <div style="${CVBOX}"><h3 style="margin-top:0">${cvH('cv_sites_title')} ${cvPen('cv_sites_title')}</h3>${rows||`<p class="meta">${L('Aucun flowsheet.','No flowsheet.')}</p>`}${CVE&&isAdmin()?`<div style="border-top:1px solid var(--line);padding-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button onclick="lbEdit('cv_add_btn')">${PEN} ${L('Texte du bouton « Ajouter »','Text of the “Add” button')}</button><button onclick="flClearCache()">${L('Vider le cache des flowsheets','Clear flowsheet cache')}</button><button onclick="navEditReset()">${L('Rétablir noms et ordre des onglets','Restore tab names and order')}</button></div>`:''}</div></div>
+  ${cvOffBox()}
   <input id="cvRep" type="file" accept=".pdf,.svg,.png,.jpg,.jpeg,.webp" hidden onchange="cvReplace(this)">`;
   window.scrollTo(0,0); if(focusNew) setTimeout(()=>{ const e=$('cvFile'); if(e) e.focus(); },50);
 }
@@ -2285,6 +2393,14 @@ async function cvCreate(){
   }catch(e){ cvMsg(esc(e.message||String(e)),true); }
   cvBusy(false,lbl);
 }
+function cvEditToggle(){ if(!isAdmin()) return needAdm(); CVE=!CVE; cvRedraw(); }
+function cvRename(id){
+  if(!isAdmin()) return needAdm();
+  const s=FLOW_SITES.find(x=>x.id===id); if(!s) return;
+  const n=(prompt(L('Nouveau nom du flowsheet :','New flowsheet name:'),s.name)||'').trim().replace(/\s+/g,' ');
+  if(!n||n===s.name) return;
+  flSetName(id,n); cvRedraw(); toast(L('Flowsheet renommé','Flowsheet renamed'));
+}
 function cvPickReplace(id){ CV.rep=id; $('cvRep').value=''; $('cvRep').click(); }
 async function cvReplace(inp){
   const f=inp.files&&inp.files[0], id=CV.rep; if(!f||!id) return;
@@ -2295,7 +2411,8 @@ async function cvReplace(inp){
     cvMsg(diff?L('Plan remplacé, mais ses dimensions ont changé ('+cvR1(old[2])+'×'+cvR1(old[3])+' → '+r.w+'×'+r.h+') : vérifiez la position des cases.','Plan replaced, but its size changed ('+cvR1(old[2])+'×'+cvR1(old[3])+' → '+r.w+'×'+r.h+'): check the zone positions.'):L('Plan remplacé, les cases sont conservées.','Plan replaced, zones kept.'),diff);
   }catch(e){ cvMsg(esc(e.message||String(e)),true); }
 }
-async function cvDelete(id){
+async function cvDelete(id,from){
+  if(!isAdmin()) return needAdm();
   const s=FLOW_SITES.find(x=>x.id===id); if(!s) return;
   if(s.custom){
     if(!confirm(L('Supprimer le flowsheet « '+s.name+' » de cet appareil, avec ses cases et infos ajoutées ? (Pensez à l’exporter avant si besoin.)','Delete the flowsheet “'+s.name+'” from this device, with its added zones and info? (Export it first if needed.)'))) return;
@@ -2309,18 +2426,21 @@ async function cvDelete(id){
   }
   if(FL.site===id) FL.site=null;
   try{ bkSchedule(); }catch(e){}
-  cvRedraw(); toast(L('Flowsheet supprimé','Flowsheet deleted'));
+  if(from==='flow'){ FL.site=null; renderFlow(); } else cvRedraw();
+  toast(L('Flowsheet supprimé','Flowsheet deleted'));
 }
-function cvRestore(id){
+function cvRestore(id,from){
+  if(!isAdmin()) return needAdm();
   const i=FLOW_OFF.findIndex(x=>x.id===id); if(i<0) return;
   FLOW_SITES.push(...FLOW_OFF.splice(i,1)); const h=fhGet(); h[id]=false;
   try{ localStorage.setItem(FHKEY,JSON.stringify(h)); }catch(e){ toast(T('storage_full')); }
   try{ bkSchedule(); }catch(e){}
-  cvRedraw(); toast(L('Flowsheet rétabli','Flowsheet restored'));
+  if(from==='flow') renderFlow(id); else cvRedraw();
+  toast(L('Flowsheet rétabli','Flowsheet restored'));
 }
-function cvOffBox(){
-  if(!FLOW_OFF.length) return '';
-  return `<div style="${CVBOX}"><h3 style="margin-top:0">${L('Flowsheets supprimés','Deleted flowsheets')}</h3>`+FLOW_OFF.map(s=>`<div style="border-top:1px solid var(--line);padding:8px 0;display:flex;gap:8px;align-items:center"><div style="flex:1"><b>${esc(s.name)}</b> <span class="meta">(${esc(s.id)})</span></div><button onclick="cvRestore('${esc(s.id)}')">${L('Rétablir','Restore')}</button></div>`).join('')+`</div>`;
+function cvOffBox(from){
+  if(!FLOW_OFF.length||!isAdmin()||(!from&&!CVE)) return '';
+  return `<div style="${CVBOX}"><h3 style="margin-top:0">${L('Flowsheets supprimés','Deleted flowsheets')}</h3>`+FLOW_OFF.map(s=>`<div style="border-top:1px solid var(--line);padding:8px 0;display:flex;gap:8px;align-items:center"><div style="flex:1"><b>${esc(s.name)}</b> <span class="meta">(${esc(s.id)})</span></div><button onclick="cvRestore('${esc(s.id)}'${from?`,'${from}'`:''})">${L('Rétablir','Restore')}</button></div>`).join('')+`</div>`;
 }
 /* réaffiche l'onglet sans remonter en haut de page et garde le bloc « Modifier les noms… » ouvert */
 function cvRedraw(){ const y=window.scrollY, o=($('cvLb')||{}).open; renderConv(); const d=$('cvLb'); if(d&&o) d.open=true; window.scrollTo(0,y); }
@@ -2379,44 +2499,74 @@ const CV_DEF={
 const cvDef=(k,l)=>CV_DEF[k]?CV_DEF[k][l==='en'?1:0]:(typeof (I18N[l]||{})[k]==='string'?I18N[l][k]:'');
 const cvT=k=>(LBL[k]&&LBL[k][lang])||cvDef(k,lang);
 const cvH=k=>esc(cvT(k)).replace(/\n/g,'<br>');
-function cvLabelsBox(){
-  const row=(k,label,long)=>{
-    const f=l=>{ const v=(LBL[k]&&LBL[k][l])||cvDef(k,l), id='lb_'+k+'_'+l; return long?`<textarea id="${id}" rows="4">${esc(v)}</textarea>`:`<input id="${id}" value="${esc(v)}">`; };
-    return `<div style="border-top:1px solid var(--line);padding:8px 0"><div class="meta"><b>${esc(label)}</b></div><div class="row" style="gap:8px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><label>${L('Français','French')}</label>${f('fr')}</div><div style="flex:1;min-width:200px"><label>${L('Anglais','English')}</label>${f('en')}</div></div></div>`;
-  };
-  const nav=navList().map(([k,i,l])=>row(l,L('Onglet « ','Tab “')+cvDef(l,'fr')+L(' »','”'),false)).join('');
-  const ord=navList().map(([k,i,l],ix,arr)=>`<div style="display:flex;gap:6px;align-items:center;border-top:1px solid var(--line);padding:6px 0"><span style="flex:1">${esc(T(l))}</span><button class="small" ${ix?'':'disabled'} onclick="cvNavMove('${k}',-1)" aria-label="${L('Monter','Move up')}">▲</button><button class="small" ${ix<arr.length-1?'':'disabled'} onclick="cvNavMove('${k}',1)" aria-label="${L('Descendre','Move down')}">▼</button></div>`).join('');
-  const txt=Object.keys(CV_DEF).map(k=>row(k,CV_DEF[k][lang==='en'?3:2],k.endsWith('_help'))).join('');
-  return `<details id="cvLb" style="${CVBOX}"><summary style="cursor:pointer;font-weight:600">${L('Modifier les onglets (noms, ordre) et les textes','Edit tabs (names, order) and texts')}</summary>
-    <p class="meta">${L('Laissez un champ vide pour revenir au texte d’origine. Les changements s’appliquent à tous les comptes de cet appareil ; pour les autres appareils : Paramètres › « Exporter pour le site » (donnees.json).','Leave a field empty to restore the original text. Changes apply to every account on this device; for other devices: Settings › “Export for the site” (donnees.json).')}</p>
-    <h4 style="margin:12px 0 0">${L('Ordre des onglets du menu','Menu tab order')}</h4>${ord}
-    <div class="row" style="margin-top:8px"><button class="small" onclick="cvNavReset()">${L('Rétablir l’ordre d’origine','Restore original order')}</button></div>
-    <h4 style="margin:16px 0 0">${L('Noms des onglets du menu','Menu tab names')}</h4>${nav}
-    <h4 style="margin:16px 0 0">${L('Textes de l’onglet Convertisseur et du bouton « Ajouter »','Converter tab texts and “Add” button')}</h4>${txt}
-    <div class="row" style="margin-top:12px;gap:8px"><button class="primary" onclick="cvLabelsSave()">${L('Enregistrer','Save')}</button><button class="danger" onclick="cvLabelsReset()">${L('Tout rétablir','Restore all')}</button></div></details>`;
-}
+/* ---- modifier un texte / un nom d'onglet « sur place » (classes 3 et 4) ----
+   Une petite icône crayon à côté de chaque texte du Convertisseur, et le mode « Modifier le menu » (crayon en haut du menu) pour les onglets,
+   ouvrent la même petite fenêtre : champ français + champ anglais. Vide ou identique à l'origine = texte d'origine. */
+const cvPen=k=>(CVE&&isAdmin())?`<button class="small noprint" onclick="lbEdit('${k}')" title="${esc(L('Modifier ce texte','Edit this text'))}" aria-label="${esc(L('Modifier ce texte','Edit this text'))}">${PEN}</button>`:'';
 function cvLabelsPersist(){ try{ localStorage.setItem(LBLKEY,JSON.stringify(LBL)); }catch(e){ toast(T('storage_full')); } try{ bkSchedule(); }catch(e){} }
-function cvLabelsCollect(){
-  const keys=[...NAV.map(n=>n[2]),...Object.keys(CV_DEF)];
-  keys.forEach(k=>['fr','en'].forEach(l=>{
-    const el=$('lb_'+k+'_'+l); if(!el) return; const v=el.value.trim(), o=LBL[k]=LBL[k]||{};
-    if(v&&v!==cvDef(k,l)) o[l]=v; else delete o[l];
-    if(!Object.keys(o).length) delete LBL[k];
-  }));
+function lbEdit(k){
+  if(!canEditTutos()){ toast(T('need_cls3')); return; }
+  lbClose();
+  const long=k.endsWith('_help'), title=CV_DEF[k]?CV_DEF[k][lang==='en'?3:2]:L('Nom de l’onglet « ','Tab name “')+cvDef(k,'fr')+L(' »','”');
+  const f=l=>{ const v=(LBL[k]&&LBL[k][l])||cvDef(k,l), id='lbm_'+l; return long?`<textarea id="${id}" rows="6">${esc(v)}</textarea>`:`<input id="${id}" value="${esc(v)}">`; };
+  const d=document.createElement('div'); d.id='lbModal'; d.className='flmodal';
+  d.innerHTML=`<div class="panel"><h3 style="margin-top:0">${esc(title)}</h3>
+    <label>${L('Français','French')}</label>${f('fr')}
+    <label>${L('Anglais','English')}</label>${f('en')}
+    <p class="meta">${L('Laissez vide pour revenir au texte d’origine.','Leave empty to restore the original text.')}</p>
+    <div class="row" style="margin-top:12px;gap:8px"><button class="primary" onclick="lbSave('${k}')">${T('save')}</button><button onclick="lbClose()">${L('Annuler','Cancel')}</button><button onclick="lbReset('${k}')">${L('Texte d’origine','Original text')}</button></div></div>`;
+  document.body.appendChild(d);
+  const first=$('lbm_'+lang); if(first){ first.focus(); if(first.select&&!long) first.select(); }
 }
-function cvLabelsSave(){
-  cvLabelsCollect(); cvLabelsPersist(); buildNav(); const o=$('cvLb'); if(o) o.open=true; cvRedraw(); const d=$('cvLb'); if(d) d.open=true; toast(L('Noms et textes enregistrés','Names and texts saved'));
+function lbClose(){ const d=$('lbModal'); if(d) d.remove(); }
+function lbRefresh(){ buildNav(); if(['home','conv','flow','settings','gloss','jeux','fiches'].includes(state.view)){ const y=window.scrollY; renderSection(); window.scrollTo(0,y); } }
+function lbSave(k){
+  const o=LBL[k]=LBL[k]||{};
+  ['fr','en'].forEach(l=>{ const el=$('lbm_'+l); if(!el) return; const v=el.value.trim(); if(v&&v!==cvDef(k,l)) o[l]=v; else delete o[l]; });
+  if(!Object.keys(o).length) delete LBL[k];
+  cvLabelsPersist(); lbClose(); lbRefresh(); toast(L('Enregistré','Saved'));
 }
-function cvNavPersist(){ try{ localStorage.setItem(NAVKEY,JSON.stringify({order:NAVORD})); }catch(e){ toast(T('storage_full')); } try{ bkSchedule(); }catch(e){} }
-function cvNavMove(k,d){
-  cvLabelsCollect(); cvLabelsPersist();
-  const keys=navList().map(n=>n[0]), i=keys.indexOf(k), j=i+d; if(i<0||j<0||j>=keys.length) return;
-  [keys[i],keys[j]]=[keys[j],keys[i]]; NAVORD=keys; cvNavPersist(); buildNav(); const o=$('cvLb'); if(o) o.open=true; cvRedraw(); const x=$('cvLb'); if(x) x.open=true;
+function lbReset(k){ delete LBL[k]; cvLabelsPersist(); lbClose(); lbRefresh(); }
+
+/* ---- menu : mode « Modifier le menu » (crayon en haut du menu) : ▲ ▼ = ordre, crayon = nom de l'onglet ---- */
+function toggleNavEdit(){ navEdit=!navEdit; buildNav(); }
+const GRIP='<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="6" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="18" r="1.7"/><circle cx="15" cy="18" r="1.7"/></svg>';
+function navItems(){
+  const arr=navList().filter(([k])=>k!=='convertisseur'||canEditTutos()), ed=navEdit&&canEditTutos();
+  return (ed?`<p class="nbhint">${L('Glissez les onglets vers le haut ou le bas. Touchez un nom pour le renommer.','Drag the tabs up or down. Tap a name to rename it.')}</p>`:'')+arr.map(([k,i,l])=>{
+    const sp=k==='settings'?'<div class="sp"></div>':'';
+    if(!ed) return sp+`<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`;
+    return sp+`<div class="nbrow nbedit" data-k="${k}"><span class="grip" onpointerdown="navDragStart(event)" aria-label="${esc(L('Glisser pour déplacer','Drag to move'))}">${GRIP}</span><button class="nb" onclick="lbEdit('${l}')" title="${esc(L('Renommer','Rename'))}">${esc(T(l))}</button></div>`;
+  }).join('');
 }
-function cvNavReset(){ NAVORD=[]; cvNavPersist(); buildNav(); const o=$('cvLb'); if(o) o.open=true; cvRedraw(); const x=$('cvLb'); if(x) x.open=true; }
-function cvLabelsReset(){
-  if(!confirm(L('Rétablir tous les noms d’onglets et textes d’origine ?','Restore all original tab names and texts?'))) return;
-  LBL={}; cvLabelsPersist(); renderConv(); toast(L('Noms et textes d’origine rétablis','Original names and texts restored'));
+/* glisser-déposer des onglets : la poignée suit le doigt / la souris ; au relâchement, l'ordre est enregistré (NAVORD) */
+let ND=null;
+function navDragStart(e){
+  e.preventDefault();
+  const g=e.currentTarget, row=g.closest('.nbrow'); if(!row) return;
+  const rows=[...document.querySelectorAll('#side .nbedit')].filter(r=>r!==row).map(el=>{ const b=el.getBoundingClientRect(); return {el,k:el.dataset.k,mid:b.top+b.height/2}; });
+  ND={row,g,y0:e.clientY,rows,idx:null,id:e.pointerId};
+  try{ g.setPointerCapture(e.pointerId); }catch(_){}
+  row.classList.add('dragging');
+  g.onpointermove=navDragMove; g.onpointerup=navDragEnd; g.onpointercancel=navDragEnd;
+}
+function navDragMove(e){
+  if(!ND) return;
+  ND.row.style.transform='translateY('+(e.clientY-ND.y0)+'px)';
+  let idx=0; ND.rows.forEach(r=>{ if(e.clientY>r.mid) idx++; }); ND.idx=idx;
+  ND.rows.forEach((r,i)=>{ r.el.classList.toggle('dropbefore',i===idx); r.el.classList.toggle('dropafter',idx===ND.rows.length&&i===ND.rows.length-1); });
+}
+function navDragEnd(e){
+  if(!ND) return; const d=ND; ND=null;
+  try{ d.g.releasePointerCapture(d.id); }catch(_){}
+  if(d.idx===null){ buildNav(); return; }
+  const keys=d.rows.map(r=>r.k); keys.splice(d.idx,0,d.row.dataset.k);
+  NAVORD=keys; navPersist(); buildNav(); if(state.view==='home') renderHome();
+}
+function navPersist(){ try{ localStorage.setItem(NAVKEY,JSON.stringify({order:NAVORD})); }catch(e){ toast(T('storage_full')); } try{ bkSchedule(); }catch(e){} }
+function navEditReset(){
+  if(!confirm(L('Rétablir les noms et l’ordre d’origine de tous les onglets ?','Restore the original names and order of all tabs?'))) return;
+  NAVORD=[]; NAV.forEach(n=>delete LBL[n[2]]); navPersist(); cvLabelsPersist(); lbRefresh();
 }
 
 /*
@@ -2463,7 +2613,7 @@ function flBuildHot(){
   FL.svg.appendChild(g); flMarkLinks();
 }
 function flToggleZedit(){
-  if(!canEditTutos()){ toast(T('need_cls3')); return; }
+  if(!isAdmin()){ needAdm(); return; }
   FL.zedit=!FL.zedit; FL.edit=false; FL.zd=null;
   const fe=$('flEdit'); if(fe){ fe.classList.remove('primary'); fe.setAttribute('aria-pressed','false'); }
   $('flBox').classList.toggle('zedit',FL.zedit); $('flZ').setAttribute('aria-pressed',FL.zedit); $('flZ').classList.toggle('primary',FL.zedit);
@@ -2597,7 +2747,7 @@ function glRender(){
       <div class="glfa"><b class="glword">${esc(glW(g))}</b><span class="glhint">${L('Toucher pour voir la définition','Tap to see the definition')}</span></div>
       <div class="glfb"><div class="glbk"><h4>${esc(glW(g))}</h4><p>${esc(glD(g)).replace(/\n/g,'<br>')}</p></div>${canEditTutos()?`<button class="small noprint" onclick="event.stopPropagation();glEdit('${g.id}')">${L('Modifier','Edit')}</button>`:''}</div></div></div>`).join('')+`</div>`;
   } else {
-    b.innerHTML=`<div class="gllist">`+l.map(g=>`<div class="glrow"><div class="glw">${esc(glW(g))}</div><div class="gld ${GL.blur&&!GL.rev[g.id]?'blur':''}" onclick="glRev('${g.id}',this)">${esc(glD(g)).replace(/\n/g,'<br>')}</div>${ed?`<button class="small noprint" onclick="glEdit('${g.id}')" title="${esc(L('Modifier','Edit'))}">✎</button>`:'<span></span>'}</div>`).join('')+`</div>`;
+    b.innerHTML=`<div class="gllist">`+l.map(g=>`<div class="glrow"><div class="glw">${esc(glW(g))}</div><div class="gld ${GL.blur&&!GL.rev[g.id]?'blur':''}" onclick="glRev('${g.id}',this)">${esc(glD(g)).replace(/\n/g,'<br>')}</div>${ed?`<button class="small noprint" onclick="glEdit('${g.id}')" title="${esc(L('Modifier','Edit'))}">${PEN}</button>`:'<span></span>'}</div>`).join('')+`</div>`;
   }
 }
 
@@ -2607,7 +2757,7 @@ function glEvalRender(){
   const head=r=>`<div class="glband"><span style="display:flex;align-items:center;gap:10px"><img class="glogo" src="icon-192.png" alt=""><b>${L('Évaluation · mots-clés','Evaluation · keywords')}</b></span><span>${r||''}</span></div>`;
   if(!e){
     const words=glItems().filter(g=>glW(g)&&glD(g)).length, can=words>=2, n=Math.min(GLE.n,words);
-    const reward=settings.cls<MAXAUTO?`🎯 ${L('Score ≥','Score ≥')} ${GLE.pass} % → <b>+${GLE.pct} %</b> ${L('vers','toward')} ${esc(clsL(settings.cls+1))} <span class="meta">(${L('1 fois par jour','once a day')})</span>`:`<span class="meta">${L('Vous avez la classe maximale accessible par les tutos : l’évaluation sert d’entraînement.','You have the highest class reachable through tutorials: the evaluation is for practice.')}</span>`;
+    const reward=settings.cls<MAXAUTO?`${L('Score ≥','Score ≥')} ${GLE.pass} % → <b>+${GLE.pct} %</b> ${L('vers','toward')} ${esc(clsL(settings.cls+1))} <span class="meta">(${L('1 fois par jour','once a day')})</span>`:`<span class="meta">${L('Vous avez la classe maximale accessible par les tutos : l’évaluation sert d’entraînement.','You have the highest class reachable through tutorials: the evaluation is for practice.')}</span>`;
     b.innerHTML=`<div class="gle">${head('')}<div class="glbody">
       <p style="margin-top:0">${L('On vous montre une définition : retrouvez le bon mot parmi les propositions.','You are shown a definition: find the right word among the options.')}</p>
       <p><b>${can?n:0}</b> ${L('questions','questions')} · ${reward}</p>
@@ -2640,7 +2790,7 @@ function glEvalRender(){
     <p class="meta" style="margin:10px 0 6px">${L('Quel mot correspond à cette définition ?','Which word matches this definition?')}</p>
     <p class="gleq">${esc(glD(g)).replace(/\n/g,'<br>')}</p>
     ${q.opts.map(id=>{ const o=glById(id); if(!o) return ''; const c=e.ans?(id===q.id?'ok':(id===e.ans?'ko':'')):''; return `<button class="gleo ${c}" ${e.ans?'disabled':''} onclick="glAnswer('${id}')">${esc(glW(o))}</button>`; }).join('')}
-    ${e.ans?`<p style="margin:10px 0 0">${e.ans===q.id?'✅ '+L('Bonne réponse !','Correct!'):'❌ '+L('La bonne réponse était : ','The right answer was: ')+'<b>'+esc(glW(g))+'</b>'}</p><div class="row" style="margin-top:10px"><button class="primary" onclick="glNext()">${last?L('Voir le résultat','See the result'):L('Question suivante','Next question')}</button></div>`:''}
+    ${e.ans?`<p style="margin:10px 0 0">${e.ans===q.id?''+L('Bonne réponse !','Correct!'):''+L('La bonne réponse était : ','The right answer was: ')+'<b>'+esc(glW(g))+'</b>'}</p><div class="row" style="margin-top:10px"><button class="primary" onclick="glNext()">${last?L('Voir le résultat','See the result'):L('Question suivante','Next question')}</button></div>`:''}
   </div></div>`;
 }
 function glEvalStart(){
@@ -2659,15 +2809,15 @@ function glNext(){
 }
 /* gain de pourcentage vers la classe suivante (même mécanique que les tutos : à 100 % on passe à la classe suivante, le surplus est reporté) */
 function glEvalReward(score){
-  if(score<GLE.pass) return '❌ '+L('Score insuffisant : il faut au moins '+GLE.pass+' % pour gagner des points.','Score too low: at least '+GLE.pass+' % is needed to earn points.');
-  if(settings.cls>=MAXAUTO) return 'ℹ️ '+L('Classe maximale atteinte par les tutos : pas de points à gagner.','Highest tutorial class reached: no points to earn.');
+  if(score<GLE.pass) return ''+L('Score insuffisant : il faut au moins '+GLE.pass+' % pour gagner des points.','Score too low: at least '+GLE.pass+' % is needed to earn points.');
+  if(settings.cls>=MAXAUTO) return 'ℹ '+L('Classe maximale atteinte par les tutos : pas de points à gagner.','Highest tutorial class reached: no points to earn.');
   const today=glToday();
-  if(settings.glDay===today) return 'ℹ️ '+L('Vous avez déjà gagné des points aujourd’hui : revenez demain pour en gagner de nouveau.','You already earned points today: come back tomorrow to earn more.');
+  if(settings.glDay===today) return 'ℹ '+L('Vous avez déjà gagné des points aujourd’hui : revenez demain pour en gagner de nouveau.','You already earned points today: come back tomorrow to earn more.');
   const before=settings.cls; let v=(settings.pct||0)+GLE.pct;
   while(v>=100&&settings.cls<MAXAUTO){ v-=100; settings.cls++; }
   settings.pct=settings.cls>=MAXAUTO?0:v; settings.glDay=today; saveSettings(); buildNav();
-  return settings.cls>before?'🎉 '+L('Classe débloquée : ','Class unlocked: ')+clsL(settings.cls)
-                            :'🎯 +'+GLE.pct+' % '+L('vers ','toward ')+clsL(settings.cls+1)+' ('+Math.round(settings.pct)+' %)';
+  return settings.cls>before?''+L('Classe débloquée : ','Class unlocked: ')+clsL(settings.cls)
+                            :'+'+GLE.pct+' % '+L('vers ','toward ')+clsL(settings.cls+1)+' ('+Math.round(settings.pct)+' %)';
 }
 function glMode(m){ GL.mode=m; if(m==='eval') GL.ev=null; glUi(); glRender(); }
 function glBlur(){ GL.blur=!GL.blur; GL.rev={}; glUi(); glRender(); }
@@ -3120,7 +3270,7 @@ const GBINS=[
  {fr:'Brun',en:'Brown',col:'#8a5a2b'},
  {fr:'Refus',en:'Reject',col:'#c0392b'}
 ];
-// ✏️ MODIFIABLE : pièces qui tombent dans le jeu Trieur (bin = bac de destination)
+// MODIFIABLE : pièces qui tombent dans le jeu Trieur (bin = bac de destination)
 const GITEMS=[
  {bin:0,shape:'bottle',col:'#2e9e4f',fr:'Verre vert',en:'Green glass'},
  {bin:1,shape:'bottle',col:'#bfe6f2',fr:'Verre blanc',en:'Clear glass'},
@@ -3164,8 +3314,8 @@ function gBoard(){
   const rows=users.map(u=>{ const r=all[u.id]||{}; let b=r.best||0; try{ b=Math.max(b,+localStorage.getItem('sibelco_game_best_'+u.id)||0); }catch(e){}
     return {id:u.id,name:u.name||u.id,best:b,sorted:r.sorted||0,games:r.games||0,date:r.date||0}; })
     .filter(r=>r.best>0).sort((a,b)=>b.best-a.best||b.sorted-a.sorted||a.date-b.date);
-  const medal=i=>i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
-  box.innerHTML=`<div class="panel"><h2 style="margin-top:0">🏆 ${L('Classement général','Overall ranking')}</h2>`+
+  const medal=i=>(i+1);
+  box.innerHTML=`<div class="panel"><h2 style="margin-top:0">${L('Classement général','Overall ranking')}</h2>`+
    (rows.length?`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.9rem">
     <thead><tr style="text-align:left;color:var(--muted,inherit);font-size:.75rem"><th style="padding:6px 4px">#</th><th style="padding:6px 4px">${L('Opérateur','Operator')}</th><th style="padding:6px 4px;text-align:right">${L('Meilleur score','Best score')}</th><th style="padding:6px 4px;text-align:right">${L('Pièces','Items')}</th><th style="padding:6px 4px;text-align:right">${L('Parties','Games')}</th></tr></thead><tbody>`+
     rows.map((r,i)=>`<tr style="border-top:1px solid var(--line);${r.id===settings.id?'font-weight:700;background:rgba(45,143,224,.15)':''}"><td style="padding:8px 4px;white-space:nowrap">${medal(i)}</td><td style="padding:8px 4px">${esc(r.name)}${r.id===settings.id?' ('+L('vous','you')+')':''}</td><td style="padding:8px 4px;text-align:right">${r.best}</td><td style="padding:8px 4px;text-align:right">${r.sorted||'–'}</td><td style="padding:8px 4px;text-align:right">${r.games||'–'}</td></tr>`).join('')+
@@ -3193,7 +3343,7 @@ function gMsg(t,col){ const m=$('gmsg'); if(m){ m.textContent=t||''; m.style.col
 function gHud(g){
   const sc=$('gsc'), li=$('gli'), be=$('gbest'); if(!sc) return;
   sc.innerHTML=`<b>Score</b> ${g.score} · ${L('Niv.','Lv.')} ${gLevel(g)}`+(g.combo>1?` · x${g.combo}`:'');
-  li.innerHTML=`<span style="color:#e04b4b;letter-spacing:2px">${'♥'.repeat(Math.max(0,g.lives))}${'♡'.repeat(Math.max(0,3-g.lives))}</span>`;
+  li.innerHTML=`<span style="color:#e04b4b;letter-spacing:2px">${'●'.repeat(Math.max(0,g.lives))}${'○'.repeat(Math.max(0,3-g.lives))}</span>`;
   be.textContent=L('Record','Best')+' '+gBest();
 }
 /*
@@ -3255,7 +3405,7 @@ function gUpdate(g,dt){
 }
 function gFail(g,it,msg){
   g.lives--; g.combo=0;
-  g.fx.push({x:it.x,y:Math.min(it.y,GLINE-10),life:.6,max:.6,txt:'✗',col:'#e04b4b'});
+  g.fx.push({x:it.x,y:Math.min(it.y,GLINE-10),life:.6,max:.6,txt:'×',col:'#e04b4b'});
   gMsg(msg,'var(--danger-line)'); gHud(g);
   if(g.lives<=0) gOver(g);
 }
@@ -3393,8 +3543,8 @@ function g2Board(game,boxId){
   const t=g2All()[game]||{};
   const rows=users.map(u=>({id:u.id,name:u.name||u.id,best:(t[u.id]||{}).best||0,games:(t[u.id]||{}).games||0}))
     .filter(r=>r.best>0).sort((a,b)=>b.best-a.best||a.games-b.games);
-  const medal=i=>i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
-  box.innerHTML=`<div class="panel"><h2 style="margin-top:0">🏆 ${L('Classement','Ranking')}</h2>`+
+  const medal=i=>(i+1);
+  box.innerHTML=`<div class="panel"><h2 style="margin-top:0">${L('Classement','Ranking')}</h2>`+
    (rows.length?`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.9rem"><thead><tr style="text-align:left;color:var(--muted);font-size:.75rem"><th style="padding:6px 4px">#</th><th style="padding:6px 4px">${L('Joueur','Player')}</th><th style="padding:6px 4px;text-align:right">${L('Meilleur score','Best score')}</th><th style="padding:6px 4px;text-align:right">${L('Parties','Games')}</th></tr></thead><tbody>`+
     rows.map((r,i)=>`<tr style="border-top:1px solid var(--line);${r.id===settings.id?'font-weight:700;background:rgba(45,143,224,.15)':''}"><td style="padding:8px 4px">${medal(i)}</td><td style="padding:8px 4px">${esc(r.name)}${r.id===settings.id?' ('+L('vous','you')+')':''}</td><td style="padding:8px 4px;text-align:right">${r.best}</td><td style="padding:8px 4px;text-align:right">${r.games}</td></tr>`).join('')+
     `</tbody></table></div>`:`<div class="empty">${L('Aucun score pour le moment. Soyez le premier !','No score yet. Be the first!')}</div>`)+
@@ -3427,7 +3577,7 @@ function renderGame(){
   state.section='jeux'; state.view='jeux'; $('filters').classList.add('hidden'); buildNav();
   $('app').innerHTML=`<div class="row" style="margin:12px 0 4px"><h2 style="margin:0">${esc(T('nav_jeux'))}</h2></div>
    <p class="meta" style="margin:0 0 6px">${L('Jouez pour réviser les bons gestes tout en vous amusant.','Play to revise good practice while having fun.')}</p>
-   <div class="tiles gametiles">${GAMES.map(g=>`<div class="card tcard" onclick="${g.run}"><div class="cover c-${g.k}">${icoSVG(g.ico)}</div><h3>${esc(L(g.fr,g.en))}</h3><div class="meta" style="display:block">${esc(L(g.dfr,g.den))}</div><div class="meta"><span>🏆 ${L('Record','Best')} : ${g.best()}</span></div></div>`).join('')}</div>
+   <div class="tiles gametiles">${GAMES.map(g=>`<div class="card tcard" onclick="${g.run}"><div class="cover c-${g.k}">${icoSVG(g.ico)}</div><h3>${esc(L(g.fr,g.en))}</h3><div class="meta" style="display:block">${esc(L(g.dfr,g.den))}</div><div class="meta"><span>${L('Record','Best')} : ${g.best()}</span></div></div>`).join('')}</div>
    <p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
@@ -3447,7 +3597,7 @@ function gFrame(titleFr,titleEn,inner){
  POUR AJOUTER UNE QUESTION : copier une entrée existante, changer les textes et le numéro de bonne réponse.
  Chaque partie tire 10 questions au hasard ; le score dépend de la rapidité de réponse (chronomètre).
 */
-// ✏️ MODIFIABLE : questions du quiz : q = question, o = 4 réponses, a = numéro de la bonne (0 à 3), e = explication
+// MODIFIABLE : questions du quiz : q = question, o = 4 réponses, a = numéro de la bonne (0 à 3), e = explication
 const QUIZ=[
  {q:['Avant de nettoyer les vitres de la zone optique, que faut-il faire en premier ?','Before cleaning the optical-area windows, what must you do first?'],
   o:[['Souffler à l’air comprimé','Blow with compressed air'],['Consigner la machine','Lock out the machine'],['Retirer les protections machine en marche','Remove guards while running'],['Appeler le fournisseur','Call the supplier']],a:1,
@@ -3514,7 +3664,7 @@ const QUIZ=[
 /*
  VF : même idée mais a = true (affirmation vraie) ou false (fausse).
 */
-// ✏️ MODIFIABLE : affirmations vrai/faux : a = true si vraie, e = explication
+// MODIFIABLE : affirmations vrai/faux : a = true si vraie, e = explication
 const VF=[
  {q:['On peut intervenir sur la zone optique sans consigner si c’est rapide.','You may work in the optical area without lockout if it is quick.'],a:false,e:['Aucune intervention sans consignation, même courte.','No intervention without lockout, however short.']},
  {q:['L’air comprimé peut rester sous pression même machine arrêtée.','Compressed air can stay pressurised even when the machine is stopped.'],a:true,e:['C’est de l’énergie stockée : purgez et contrôlez le manomètre.','It is stored energy: bleed it and check the gauge.']},
@@ -3555,7 +3705,7 @@ function quizStart(kind){
 function quizShow(){                       // affiche la question courante et lance le chrono
   const me=Q, box=$('qz'); if(!me||!box) return;
   const q=me.qs[me.i]; me.locked=false; me.left=me.total;
-  box.innerHTML=`<div class="row" style="justify-content:space-between"><b>${L('Question','Question')} ${me.i+1}/${me.qs.length}</b><span class="meta">Score ${me.score}${me.streak>1?' · 🔥 x'+me.streak:''}</span></div>
+  box.innerHTML=`<div class="row" style="justify-content:space-between"><b>${L('Question','Question')} ${me.i+1}/${me.qs.length}</b><span class="meta">Score ${me.score}${me.streak>1?' · '+L('série','streak')+' x'+me.streak:''}</span></div>
    <div class="qbar"><div id="qbar" style="width:100%"></div></div>
    <p style="font-size:1.05rem;font-weight:600;margin:10px 0">${esc(L(q.q[0],q.q[1]))}</p>
    <div id="qopts">${q.o.map((o,i)=>`<button class="qopt" onclick="quizAnswer(${i})">${esc(L(o.t[0],o.t[1]))}</button>`).join('')}</div><div id="qfb"></div>`;
@@ -3585,7 +3735,7 @@ function quizEnd(){                        // écran de résultat + enregistreme
   const nb=g2Record(me.kind,me.score), n=me.qs.length, r=me.ok/n;
   const msg=r>=.9?L('Excellent, vous maîtrisez !','Excellent, you know your stuff!'):r>=.6?L('Bien joué, continuez à réviser.','Well done, keep revising.'):L('À revoir : relisez les tutos et rejouez !','Needs work: reread the tutorials and play again!');
   $('qz').innerHTML=`<div style="text-align:center;padding:10px 0"><div style="font-size:2.4rem;font-weight:800">${me.score} pts</div>
-   <p>${me.ok}/${n} ${L('bonnes réponses','correct answers')}${nb?' · 🏆 '+L('Nouveau record !','New best!'):''}</p><p class="meta">${msg}</p>
+   <p>${me.ok}/${n} ${L('bonnes réponses','correct answers')}${nb?' · '+L('Nouveau record !','New best!'):''}</p><p class="meta">${msg}</p>
    <div class="row" style="justify-content:center"><button class="primary" onclick="quizStart('${me.kind}')">${L('Rejouer','Play again')}</button><button onclick="renderGame()">${L('Autres jeux','Other games')}</button></div></div>`;
   g2Board(me.kind,'g2lb');
 }
@@ -3593,24 +3743,24 @@ function quizEnd(){                        // écran de résultat + enregistreme
 /* ---------- RELIER : relier chaque objet (composant, équipement) à son expression (rôle) ---------- */
 /*
  ===================== RELIER =====================
- LNK = les paires du jeu : [emoji, [objet FR, objet EN], [expression FR, expression EN]].
+ LNK = les paires du jeu : [icône (laisser vide), [objet FR, objet EN], [expression FR, expression EN]].
  À chaque partie, 6 paires sont tirées au hasard parmi celles-ci. Le joueur touche un OBJET puis l'EXPRESSION qui lui correspond
  (ou l'inverse) : un trait de couleur les relie. Toucher un élément déjà relié efface son lien. Quand tout est relié : bouton « Valider ».
  POUR CHANGER / AJOUTER / RETIRER UNE PAIRE : modifier, copier ou supprimer une ligne (gardez l'expression COURTE : environ 50 caractères).
  Pour changer le nombre de paires par partie : modifier LNK_N.
 */
-// ✏️ MODIFIABLE : paires à relier (objet <-> rôle)
+// MODIFIABLE : paires à relier (objet <-> rôle)
 const LNK=[
- ['📷',['Caméra','Camera'],['Voit la couleur et les défauts du verre','Sees the glass colour and defects']],
- ['💡',['Éclairage','Lighting'],['Éclaire le verre pour une image nette','Lights the glass for a sharp image']],
- ['💨',['Buse d’éjection','Ejection nozzle'],['Souffle l’indésirable hors du flux','Blows the reject out of the stream']],
- ['⚡',['Électrovanne','Solenoid valve'],['Commande l’air envoyé à la buse','Controls the air sent to the nozzle']],
- ['🖥️',['Écran de commande','Control screen'],['Affiche les alarmes et les réglages','Shows alarms and settings']],
- ['🔍',['Vitre optique','Optical window'],['À nettoyer pour éviter les fausses détections','Clean it to avoid false detections']],
- ['🔒',['Cadenas LOTO','LOTO padlock'],['Empêche tout redémarrage pendant l’intervention','Prevents any restart during the job']],
- ['🎚️',['Manomètre','Pressure gauge'],['Air à 0 bar avant tout démontage','Air at 0 bar before any dismantling']],
- ['🧤',['Gants','Gloves'],['À porter pour manipuler le verre coupant','Wear them to handle sharp glass']],
- ['🥽',['Lunettes de protection','Safety glasses'],['Protègent les yeux des éclats de verre','Protect the eyes from glass splinters']]
+ ['',['Caméra','Camera'],['Voit la couleur et les défauts du verre','Sees the glass colour and defects']],
+ ['',['Éclairage','Lighting'],['Éclaire le verre pour une image nette','Lights the glass for a sharp image']],
+ ['',['Buse d’éjection','Ejection nozzle'],['Souffle l’indésirable hors du flux','Blows the reject out of the stream']],
+ ['',['Électrovanne','Solenoid valve'],['Commande l’air envoyé à la buse','Controls the air sent to the nozzle']],
+ ['',['Écran de commande','Control screen'],['Affiche les alarmes et les réglages','Shows alarms and settings']],
+ ['',['Vitre optique','Optical window'],['À nettoyer pour éviter les fausses détections','Clean it to avoid false detections']],
+ ['',['Cadenas LOTO','LOTO padlock'],['Empêche tout redémarrage pendant l’intervention','Prevents any restart during the job']],
+ ['',['Manomètre','Pressure gauge'],['Air à 0 bar avant tout démontage','Air at 0 bar before any dismantling']],
+ ['',['Gants','Gloves'],['À porter pour manipuler le verre coupant','Wear them to handle sharp glass']],
+ ['',['Lunettes de protection','Safety glasses'],['Protègent les yeux des éclats de verre','Protect the eyes from glass splinters']]
 ];
 const LNK_N=6;
 const LNK_COL=['#2d8fe0','#e8943a','#9a6be0','#2fb59a','#e0638a','#c9a400'];   // couleur du trait de chaque lien
@@ -3632,7 +3782,7 @@ function lnkDraw(){
     const lc=g.links[k]!==undefined, rc=rOf[k]!==undefined;
     const lcol=lc?LNK_COL[k%6]:'', rcol=rc?LNK_COL[rOf[k]%6]:'';
     const res=(i,linked)=>{ if(!g.over||!linked) return ''; return g.ok[i]?' ok':' ko'; };
-    h+=`<button class="lkit${g.sel&&g.sel.s==='l'&&g.sel.i===k?' sel':''}${res(k,lc)}" data-s="l" data-i="${k}" ${lc&&!g.over?`style="border-color:${lcol}"`:''} onclick="lnkTap('l',${k})" ${g.over?'disabled':''}><span class="me">${a[0]}</span><span>${esc(L(a[1][0],a[1][1]))}</span></button>`;
+    h+=`<button class="lkit${g.sel&&g.sel.s==='l'&&g.sel.i===k?' sel':''}${res(k,lc)}" data-s="l" data-i="${k}" ${lc&&!g.over?`style="border-color:${lcol}"`:''} onclick="lnkTap('l',${k})" ${g.over?'disabled':''}>${a[0]?`<span class="me">${a[0]}</span>`:''}<span>${esc(L(a[1][0],a[1][1]))}</span></button>`;
     h+=`<button class="lkit${g.sel&&g.sel.s==='r'&&g.sel.i===k?' sel':''}${g.over&&rc?(g.ok[rOf[k]]?' ok':' ko'):''}" data-s="r" data-i="${k}" ${rc&&!g.over?`style="border-color:${rcol}"`:''} onclick="lnkTap('r',${k})" ${g.over?'disabled':''}><span>${esc(L(b[2][0],b[2][1]))}</span></button>`;
   });
   box.innerHTML=h;
@@ -3670,9 +3820,9 @@ function lnkCheck(){
   g.left.forEach((pi,k)=>{ const ok=g.right[g.links[k]]===pi; g.ok[k]=ok; if(ok) good++; });
   const sec=Math.round((g.tend-g.t0)/1000), pts=Math.max(0,Math.round(good*70+Math.max(0,80-sec)*(good/LNK_N)));   // 500 pts max : 70 par bonne paire + bonus de vitesse
   const nb=g2Record('link',pts);
-  const wrong=g.left.map((pi,k)=>g.ok[k]?'':`<li><b>${LNK[pi][0]} ${esc(L(LNK[pi][1][0],LNK[pi][1][1]))}</b> → ${esc(L(LNK[pi][2][0],LNK[pi][2][1]))}</li>`).join('');
+  const wrong=g.left.map((pi,k)=>g.ok[k]?'':`<li><b>${esc(L(LNK[pi][1][0],LNK[pi][1][1]))}</b> → ${esc(L(LNK[pi][2][0],LNK[pi][2][1]))}</li>`).join('');
   lnkDraw(); $('lkact').innerHTML='';
-  $('lkfb').innerHTML=`<div class="box" style="border-left-color:${good===LNK_N?'var(--ok)':'var(--danger-line)'};background:${good===LNK_N?'rgba(26,138,74,.14)':'rgba(192,57,43,.10)'};color:var(--text);margin-top:12px"><b>${good===LNK_N?L('Bravo !','Well done!'):L('Résultat','Result')} ${pts} pts</b>${nb?' · 🏆 '+L('Nouveau record !','New best!'):''}<br>${good}/${LNK_N} ${L('liens corrects','correct links')} · ${sec} s
+  $('lkfb').innerHTML=`<div class="box" style="border-left-color:${good===LNK_N?'var(--ok)':'var(--danger-line)'};background:${good===LNK_N?'rgba(26,138,74,.14)':'rgba(192,57,43,.10)'};color:var(--text);margin-top:12px"><b>${good===LNK_N?L('Bravo !','Well done!'):L('Résultat','Result')} ${pts} pts</b>${nb?' · '+L('Nouveau record !','New best!'):''}<br>${good}/${LNK_N} ${L('liens corrects','correct links')} · ${sec} s
    ${wrong?`<div style="margin-top:8px"><b>${L('À retenir :','To remember:')}</b><ul style="margin:4px 0 0;padding-left:20px">${wrong}</ul></div>`:''}
    <div style="margin-top:8px"><button class="primary" onclick="lnkStart()">${L('Rejouer','Play again')}</button> <button onclick="renderGame()">${L('Autres jeux','Other games')}</button></div></div>`;
   g2Board('link','g2lb');
@@ -3686,7 +3836,7 @@ window.addEventListener('resize',()=>{ if(LK&&$('lksvg')) lnkLines(); });
  ORD : t = titre de la procédure [fr,en] ; s = liste des étapes dans le BON ordre [[fr,en],...].
  Le jeu les mélange et le joueur doit les toucher dans l'ordre correct. POUR AJOUTER UNE PROCEDURE : copier une entrée.
 */
-// ✏️ MODIFIABLE : procédures à remettre dans l'ordre
+// MODIFIABLE : procédures à remettre dans l'ordre
 const ORD=[
  {t:['Consignation (LOTO)','Lockout / tagout'],s:[
   ['Prévenir le poste de conduite et arrêter l’alimentation en verre','Warn the control room and stop the glass feed'],
@@ -3754,7 +3904,7 @@ function ordNext(){ O.r++; ordRound(); }
 function ordEnd(){
   const nb=g2Record('order',O.total);
   $('ordbox').innerHTML=`<div style="text-align:center;padding:10px 0"><div style="font-size:2.4rem;font-weight:800">${O.total} pts</div>
-   <p class="meta">${nb?'🏆 '+L('Nouveau record !','New best!')+' · ':''}${L('Maximum possible : 300 pts','Maximum possible: 300 pts')}</p>
+   <p class="meta">${nb?''+L('Nouveau record !','New best!')+' · ':''}${L('Maximum possible : 300 pts','Maximum possible: 300 pts')}</p>
    <div class="row" style="justify-content:center"><button class="primary" onclick="ordStart()">${L('Rejouer','Play again')}</button><button onclick="renderGame()">${L('Autres jeux','Other games')}</button></div></div>`;
   g2Board('order','g2lb');
 }
@@ -3801,7 +3951,7 @@ function ordEnd(){
 
  >>> POUR MODIFIER : changez uniquement les chiffres de LOGO_CFG ci-dessous (le reste n'a pas besoin d'être touché). <<<
 ===================================================================================== */
-// ✏️ MODIFIABLE : réglages du globe 3D : changez seulement les chiffres (le commentaire à droite dit quoi mettre)
+// MODIFIABLE : réglages du globe 3D : changez seulement les chiffres (le commentaire à droite dit quoi mettre)
 const LOGO_CFG = {
   size    : 0.25,   // taille du globe dans son cadre (0.20 = petit, 0.35 = très grand ; au-delà l'anneau est coupé)
   idle    : 0.007,  // vitesse de rotation quand on ne touche pas (0 = immobile, 0.02 = rapide)
@@ -3824,10 +3974,10 @@ const LOGO_CFG = {
    - CLAVIER                  : flèches = tourner, Entrée/Espace = éclat
  Pour changer les couleurs : voir LOGO_COL (bleu foncé -> bleu clair) et RING_COL.            */
 /* Couleurs du globe (rouge,vert,bleu de 0 à 255). Pour un autre bleu, changez ces 6 chiffres. */
-// ✏️ MODIFIABLE : couleurs du globe [rouge, vert, bleu] de 0 à 255
+// MODIFIABLE : couleurs du globe [rouge, vert, bleu] de 0 à 255
 const LOGO_COL = { dark:[5,48,126], light:[118,204,250] };
 /* Couleurs de l'anneau (même principe) */
-// ✏️ MODIFIABLE : couleurs de l'anneau [rouge, vert, bleu] de 0 à 255
+// MODIFIABLE : couleurs de l'anneau [rouge, vert, bleu] de 0 à 255
 const RING_COL = { dark:[8,42,104], light:[38,122,212] };
 const LOGO_GEO = (()=>{
   const nrm = v => { const l=Math.hypot(v[0],v[1],v[2])||1; return [v[0]/l,v[1]/l,v[2]/l]; };
@@ -4024,7 +4174,7 @@ new MutationObserver(mountLogos).observe($('app'),{childList:true});
 /* Agrandir le logo : clic sur le logo du bandeau (Ctrl/Maj+clic ouvre quand même le site Sibelco) */
 /* EXPLICATION SUPPLÉMENTAIRE : FENETRE "LOGO AGRANDI"
  Au clic simple sur le logo du bandeau : on bloque le lien (preventDefault) et on crée une fenêtre plein écran (#logoov)
- contenant un .logo3d.big que mountLogos() transforme en globe. Elle se ferme par ✕, clic à côté ou touche Échap.
+ contenant un .logo3d.big que mountLogos() transforme en globe. Elle se ferme par ×, clic à côté ou touche Échap.
  Avec Ctrl / Cmd / Maj ou clic du milieu, la fonction rend la main : le lien Sibelco France s'ouvre normalement.
  Le bouton "sibelco.com" dans la fenêtre ouvre le même site dans un nouvel onglet. */
 function openLogoViewer(e){
@@ -4033,7 +4183,7 @@ function openLogoViewer(e){
   if($('logoov')) return false;
   const o=document.createElement('div'); o.id='logoov'; o.className='logoov noprint';
   o.innerHTML=`<div class="logoov-card" role="dialog" aria-modal="true" aria-label="Logo Sibelco 3D">
-    <button class="logoov-x" aria-label="${L('Fermer','Close')}">✕</button>
+    <button class="logoov-x" aria-label="${L('Fermer','Close')}">×</button>
     <div class="logo3d big"></div><div class="wordmark">SIBELCO</div>
     <p class="meta" style="text-align:center;margin:6px 0 12px">${L('Faites tourner le logo avec la souris ou le doigt','Spin the logo with your mouse or finger')}</p>
     <a class="btn primary" href="https://www.sibelco.com/en/country/france" target="_blank" rel="noopener">sibelco.com ↗</a></div>`;
@@ -4077,7 +4227,7 @@ function isStandalone(){ return (window.matchMedia&&matchMedia('(display-mode: s
 function instUpdate(){
   const b=$('bInstall'); if(!b) return;
   const st=isStandalone(), lbl=st?L('Désinstaller','Uninstall'):L('Installer','Install');
-  b.innerHTML='<span aria-hidden="true">'+(st?'✕':'⤓')+'</span><span class="instlbl"> '+lbl+'</span>';
+  b.innerHTML='<span aria-hidden="true">'+(st?'×':'↓')+'</span><span class="instlbl"> '+lbl+'</span>';
   b.title=lbl; b.setAttribute('aria-label',lbl);
   b.classList.toggle('primary',!st);
   b.classList.remove('hidden');
@@ -4174,7 +4324,7 @@ if('serviceWorker' in navigator){
       b.onclick=()=>{ const show=inp.type==='password'; inp.type=show?'text':'password'; b.innerHTML=show?EYEOFF:EYE;
         b.setAttribute('aria-label',show?L('Masquer le mot de passe','Hide password'):L('Afficher le mot de passe','Show password')); };
       w.appendChild(b);
-      const c=document.createElement('div'); c.className='meta capswarn hidden'; c.textContent='⇪ '+L('Verrouillage majuscules activé','Caps Lock is on'); w.after(c);
+      const c=document.createElement('div'); c.className='meta capswarn hidden'; c.textContent=''+L('Verrouillage majuscules activé','Caps Lock is on'); w.after(c);
       inp.addEventListener('keydown',ev=>{ if(ev.getModifierState) c.classList.toggle('hidden',!ev.getModifierState('CapsLock')); });
     });
     const f=$('li')||$('si'); if(f&&!/Mobi|Android/i.test(navigator.userAgent)) f.focus();
@@ -4214,7 +4364,7 @@ document.addEventListener('pointerdown',e=>{
 */
 
 /* Les 3 marques : id, nom affiché, couleur de la pastille */
-// ✏️ MODIFIABLE : les marques de trieurs : id, nom affiché, couleur de la pastille
+// MODIFIABLE : les marques de trieurs : id, nom affiché, couleur de la pastille
 const M3_BRANDS=[
   {id:'redwave', name:'Redwave',               col:'#d7261e'},
   {id:'binder',  name:'Binder+Co · Clarity',   col:'#1f7ac8'},
@@ -4228,11 +4378,11 @@ const M3_BRANDS=[
  -> un menu « Modèle » apparaît et les technologies absentes du modèle choisi sont grisées.
  Codes : vis (visible), uv (ultraviolet), nir (proche infrarouge), ind (capteurs inductifs).
 */
-// ✏️ MODIFIABLE : les modèles réels de chaque marque (voir l'exemple dans le commentaire au-dessus)
+// MODIFIABLE : les modèles réels de chaque marque (voir l'exemple dans le commentaire au-dessus)
 const M3_MODELS={ redwave:[], binder:[], steinert:[] };
 
 /* Les 4 technologies : couleur du faisceau / de la pastille */
-// ✏️ MODIFIABLE : couleur de chaque technologie
+// MODIFIABLE : couleur de chaque technologie
 const M3_TECH={ vis:'#f2b705', uv:'#9b5cff', nir:'#ff6a3d', ind:'#0fb5a0' };
 
 /*
@@ -4240,7 +4390,7 @@ const M3_TECH={ vis:'#f2b705', uv:'#9b5cff', nir:'#ff6a3d', ind:'#0fb5a0' };
    fr/en = titre ; sfr/sen = sous-titre ; pfr/pen = les paragraphes ; tech = true pour les 4 technologies ;
    dfr/den = « ce que ça détecte » (pastilles). Textes des technologies : d'après l'affiche Sibelco.
 */
-// ✏️ MODIFIABLE : les 8 repères de la machine : textes d'origine FR/EN (modifiables aussi dans l'appli)
+// MODIFIABLE : les 8 repères de la machine : textes d'origine FR/EN (modifiables aussi dans l'appli)
 const M3_PARTS=[
  {id:'feed',n:1,fr:'Alimentation',en:'Feeding',
   sfr:'Étalement du calcin en nappe fine',sen:'Spreading the cullet into a thin layer',
@@ -4507,7 +4657,7 @@ function m3Card(){
 function renderMachines3D(){
   state.section='presentation'; state.view='machines'; $('filters').classList.add('hidden'); buildNav();
   const ms=M3_MODELS[M3S.brand]||[];
-  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="m3Stop();renderFiches('presentation')">${esc(T('back'))}</button>${m3CanEdit()?`<span class="row"><button onclick="m3EditToggle()" class="${M3S.edit?'primary':''}">${esc(M3S.edit?L('✔ Terminer la modification','✔ Finish editing'):L(' Modifier les textes',' Edit texts'))}</button>${M3S.edit?`<button onclick="m3EditReset()">${esc(L('Rétablir les textes d’origine','Restore original texts'))}</button>`:''}</span>`:''}</div>
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="m3Stop();renderFiches('presentation')">${esc(T('back'))}</button>${m3CanEdit()?`<span class="row"><button onclick="m3EditToggle()" class="${M3S.edit?'primary':''}">${esc(M3S.edit?L('Terminer la modification','Finish editing'):L('Modifier les textes','Edit texts'))}</button>${M3S.edit?`<button onclick="m3EditReset()">${esc(L('Rétablir les textes d’origine','Restore original texts'))}</button>`:''}</span>`:''}</div>
    ${M3S.edit&&m3CanEdit()?`<p class="meta noprint" style="display:block;margin:0 0 8px">${esc(L('Mode modification : cliquez sur un texte entouré en pointillés, écrivez, puis cliquez à côté : c’est enregistré tout seul. Pour modifier l’explication d’un repère (à droite), cliquez d’abord sur ce repère.','Edit mode: click a dotted text, type, then click elsewhere: it is saved automatically. To edit a marker’s explanation (right side), click that marker first.'))}</p>`:''}
    <div class="panel m3"><h2 style="margin-top:0"${m3Ed('title','Titre de la page')}>${esc(m3Txt('title'))}</h2>
     <p class="meta" style="margin:0 0 10px;display:block"${m3Ed('intro','Texte d’introduction (au-dessus de la machine)')}>${esc(m3Txt('intro'))}</p>
@@ -4568,7 +4718,7 @@ function m3UI(){
    <ul class="m3pts"${m3Ed('part.'+p.id+'.p')}>${m3PartTxt(p,'p').map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
    ${p.dfr?`<div class="m3det"><b>${esc(L('Détecte','Detects'))}</b>${m3tr(p.dfr,p.den).map(t=>`<span class="tag" style="border-color:${tc};color:${tc}">${esc(t)}</span>`).join('')}</div>`:''}
    ${tc?`<div class="m3avail ${off?'no':''}">${off?esc(L('Cette technologie n’est pas présente sur le modèle choisi.','This technology is not fitted on the selected model.')):esc(L('Présente sur Redwave, Binder+Co et Steinert, selon le modèle.','Available on Redwave, Binder+Co and Steinert, depending on the model.'))}</div>`:''}
-   <div class="row noprint" style="margin-top:14px;justify-content:space-between"><button onclick="m3Step(-1)">◀ ${esc(L('Précédent','Previous'))}</button><button onclick="m3Select('${p.id}')">${esc(L('Fermer','Close'))}</button><button class="primary" onclick="m3Step(1)">${esc(L('Suivant','Next'))} ▶</button></div>`;
+   <div class="row noprint" style="margin-top:14px;justify-content:space-between"><button onclick="m3Step(-1)">← ${esc(L('Précédent','Previous'))}</button><button onclick="m3Select('${p.id}')">${esc(L('Fermer','Close'))}</button><button class="primary" onclick="m3Step(1)">${esc(L('Suivant','Next'))} →</button></div>`;
 }
 
 /* ---------- le moteur de rendu ---------- */
@@ -4814,7 +4964,7 @@ function m3Start(){
  dans la copie de secours ni dans le fichier .json (trop volumineux). Et chaque appareil a SES données : pour partager
  des tutos entre téléphones, utilisez la sauvegarde en fichier (ou un vrai serveur, non prévu ici).
  ============================================================================ */
-const BK_KEYS=[LBLKEY,NAVKEY,FHKEY,FLKEY,FZKEY,GLKEY,GLEKEY,M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
+const BK_KEYS=[LBLKEY,NAVKEY,FHKEY,FNKEY,FLKEY,FZKEY,GLKEY,GLEKEY,M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_seed_aa_v2','sibelco_last_export'];  // données à protéger
 const LAST_EXPORT='sibelco_last_export';
 // petite base IndexedDB "sibelco_backup" : un seul enregistrement "snap" = copie de toutes les clés ci-dessus
 function bkDb(){ return new Promise((ok,ko)=>{ const r=indexedDB.open('sibelco_backup',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); }); }
@@ -4845,7 +4995,7 @@ async function askPersist(){ try{ if(navigator.storage&&navigator.storage.persis
      fusionne ce fichier avec ses données (même identifiant = la version du fichier gagne ; le reste est conservé).
    - La fusion n'a lieu que si le contenu du fichier a changé depuis la dernière fois (vos modifs locales ne sont pas écrasées à chaque ouverture).
  ============================================================================ */
-const SH_ARR=[KEY,FKEY,GLKEY], SH_OBJ=[LBLKEY,NAVKEY,FHKEY,FLKEY,FZKEY,M3_TXT_KEY,TPKEY], SH_HASH='sibelco_shared_hash';
+const SH_ARR=[KEY,FKEY,GLKEY], SH_OBJ=[LBLKEY,NAVKEY,FHKEY,FNKEY,FLKEY,FZKEY,M3_TXT_KEY,TPKEY], SH_HASH='sibelco_shared_hash';
 const shHash=t=>{ let h=5381; for(let i=0;i<t.length;i++) h=((h<<5)+h+t.charCodeAt(i))|0; return t.length+':'+h; };
 async function sharedSync(){
   try{
@@ -4930,9 +5080,9 @@ const fmtD=t=>t?new Date(+t).toLocaleString(lang,{dateStyle:'short',timeStyle:'s
       try{ const es=await navigator.storage.estimate(); use=(es.usage/1048576).toFixed(1)+' Mo / '+(es.quota/1048576/1024).toFixed(1)+' Go'; }catch(e){}
       try{ snap=await bkGet(); }catch(e){}
       const el=$('safest'); if(!el) return;
-      el.innerHTML=`<div>${per?'✅':'⚠️'} ${L('Protection du navigateur','Browser protection')} : <b>${per?L('activée (non effaçable automatiquement)','on (not auto-erased)'):L('non accordée','not granted')}</b>${per?'':` <button class="small" onclick="askPersist().then(()=>renderSettings())">${L('Activer','Enable')}</button>`}</div>
-        <div>${snap?'✅':'⚠️'} ${L('Copie de secours automatique','Automatic safety copy')} : <b>${snap?fmtD(snap.ts):L('aucune pour l’instant','none yet')}</b></div>
-        <div>${localStorage.getItem(LAST_EXPORT)?'✅':'⚠️'} ${L('Dernière sauvegarde en fichier','Last backup file')} : <b>${fmtD(localStorage.getItem(LAST_EXPORT))}</b></div>
+      el.innerHTML=`<div>${per?'<b class="stok">OK</b>':'<b class="stko">!</b>'} ${L('Protection du navigateur','Browser protection')} : <b>${per?L('activée (non effaçable automatiquement)','on (not auto-erased)'):L('non accordée','not granted')}</b>${per?'':` <button class="small" onclick="askPersist().then(()=>renderSettings())">${L('Activer','Enable')}</button>`}</div>
+        <div>${snap?'<b class="stok">OK</b>':'<b class="stko">!</b>'} ${L('Copie de secours automatique','Automatic safety copy')} : <b>${snap?fmtD(snap.ts):L('aucune pour l’instant','none yet')}</b></div>
+        <div>${localStorage.getItem(LAST_EXPORT)?'<b class="stok">OK</b>':'<b class="stko">!</b>'} ${L('Dernière sauvegarde en fichier','Last backup file')} : <b>${fmtD(localStorage.getItem(LAST_EXPORT))}</b></div>
         ${use?`<div>${L('Espace utilisé','Space used')} : ${use}</div>`:''}`;
     })();
   };
