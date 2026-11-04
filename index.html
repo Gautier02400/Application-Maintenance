@@ -783,12 +783,13 @@ details.fdsec[open]>summary::after{transform:rotate(90deg)}
 .glescore{font-size:2.8rem;font-weight:800;color:var(--accent);text-align:center;margin:4px 0}
 .glemiss{border-left:4px solid #d33;padding:6px 10px;margin:6px 0;background:rgba(211,51,51,.07);border-radius:6px;font-size:.92rem}
 @media(max-width:640px){.glrow{grid-template-columns:1fr auto}.glrow .glw{grid-column:1/-1}}
-.fladm{margin:6px 0;padding:14px 16px}
-.fladm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-.fladm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-.fladm-sec{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-.fladm-sec h4{margin:0 0 8px;font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;opacity:.75}
-.fladm-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:4px 0}
+.fladm{margin:6px 0;padding:4px 12px;font-size:.85rem;border-radius:10px}
+.fladm-line{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;padding:7px 0;border-top:1px solid var(--line)}
+.fladm-lb{flex:none;width:68px;font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.6}
+.fladm input{flex:1;min-width:140px;max-width:300px;padding:4px 8px;font-size:.85rem}
+.fladm .meta{font-size:.76rem}
+.fladm-off{display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:1}
+.fladm-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:2px 4px 2px 10px}
 .stok{color:var(--ok)}.stko{color:var(--danger-line)}
 svg.pen{vertical-align:-2px}
 /* ===== FLOWSHEET : modification des cases ===== */
@@ -1836,7 +1837,7 @@ function tileHTML(k,l){
 */
 /* ORDRE DES ONGLETS : réglable dans l'onglet Convertisseur (classes 3 et 4) ; navList() renvoie NAV dans l'ordre choisi (NAVORD), les onglets inconnus restent à leur place d'origine à la suite. */
 function navList(){ const pos=k=>{ const i=NAVORD.indexOf(k); return i<0?1e6+NAV.findIndex(n=>n[0]===k):i; }; return [...NAV].sort((a,b)=>pos(a[0])-pos(b[0])); }
-const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['glossaire','','nav_gloss'],['jeux','','nav_jeux'],['convertisseur','','nav_conv'],['settings','','nav_set']];
+const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['glossaire','','nav_gloss'],['jeux','','nav_jeux'],['settings','','nav_set']];
 function buildNav(){
   document.body.classList.toggle('adm',isAdmin());
   $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px">${canEditTutos()?`<button class="nb ib ${navEdit?'on':''}" onclick="toggleNavEdit()" aria-pressed="${navEdit}" title="${esc(L('Modifier le menu : glisser pour changer l’ordre, toucher un nom pour le renommer','Edit the menu: drag to reorder, tap a name to rename it'))}">${navEdit?L('Terminer','Done'):L('Modifier','Edit')}</button>`:''}<button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button></div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
@@ -1878,7 +1879,7 @@ function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') rende
 function renderSection(){ const v=state.view;
   if(v==='home') renderHome(); else if(v==='settings') renderSettings(); else if(v==='fiches') renderFiches(state.section);
   else if(v==='jeux') renderGame();
-  else if(v==='flow') renderFlow(); else if(v==='conv') renderConv();
+  else if(v==='flow') renderFlow(); else if(v==='conv') renderConv(); else if(v==='del') renderDel();
   else if(v==='gloss') renderGloss();
   else if(v==='machines') renderMachines3D();
   else if(v==='fiche') openFiche(state.fid); else if(v==='fedit') renderFicheEditor(); else renderList(); }
@@ -2084,7 +2085,7 @@ function renderFlow(id){
     <button onclick="flZoom(.6)" title="Zoom +">＋</button><button onclick="flZoom(1/.6)" title="Zoom −">−</button>
     <button onclick="flFit()">${L('Vue d’ensemble','Fit')}</button>
     <button id="flShow" onclick="flToggleShow()" aria-pressed="false">${L('Voir les zones','Show zones')}</button>
-    ${isAdmin()?`<button id="flAdmBtn" onclick="flAdmToggle()" aria-pressed="false">${L('Modifier','Edit')}</button>`:''}
+    ${isAdmin()?`<button id="flAdmBtn" onclick="flAdmToggle()" aria-pressed="false">${L('Modifier','Edit')}</button><button onclick="renderConv(true)">${esc(cvT('cv_add_btn'))}</button><button onclick="renderDel()">${esc(cvT('cv_del_btn'))}</button>`:''}
   </div>
   ${isAdmin()?flAdmHTML():''}
   <div id="flZbar" class="box noprint hidden" style="margin:6px 0"><b>${L('Modifier les cases','Edit zones')}</b> · ${L('Mode « Dessiner » : glissez sur le plan pour tracer un rectangle, puis indiquez le repère. Cliquez une case existante pour la supprimer.','“Draw” mode: drag on the plan to draw a rectangle, then enter the tag. Click an existing zone to delete it.')}
@@ -2108,20 +2109,12 @@ function flMarkLinks(){ document.querySelectorAll('#flHot .fh').forEach(r=>r.cla
 /* ---- panneau « Modifier » (administrateur uniquement) : tout est regroupé ici ---- */
 function flAdmHTML(){
   const s=FLOW_SITES.find(x=>x.id===FL.site)||{name:'',id:''};
-  const off=FLOW_OFF.length?`<div class="fladm-sec"><h4>${L('Flowsheets supprimés','Deleted flowsheets')}</h4>`+FLOW_OFF.map(o=>`<div class="fladm-row"><span><b>${esc(o.name)}</b> <span class="meta">(${esc(o.id)})</span></span><span class="row"><button onclick="flPurgeOff('${esc(o.id)}')">${L('Vider le cache','Clear cache')}</button><button onclick="cvRestore('${esc(o.id)}','flow')">${L('Rétablir','Restore')}</button></span></div>`).join('')+`<div style="margin-top:6px"><button onclick="flPurgeOff()">${L('Vider le cache des supprimés','Clear cache of deleted')}</button></div></div>`:'';
+  const off=FLOW_OFF.length?`<div class="fladm-line"><span class="fladm-lb">${L('Supprimés','Deleted')}</span><div class="fladm-off">`+FLOW_OFF.map(o=>`<span class="fladm-chip"><b>${esc(o.name)}</b><button class="small" onclick="flPurgeOff('${esc(o.id)}')">${L('Vider le cache','Clear cache')}</button><button class="small" onclick="cvRestore('${esc(o.id)}','flow')">${L('Rétablir','Restore')}</button></span>`).join('')+`<button class="small" onclick="flPurgeOff()">${L('Tout vider','Clear all')}</button></div></div>`:'';
   return `<div id="flAdm" class="box noprint fladm hidden">
-   <div class="fladm-head"><b>${L('Administration du flowsheet','Flowsheet administration')}</b><span class="meta">${esc(s.name)}</span></div>
-   <div class="fladm-grid">
-    <div class="fladm-sec"><h4>${L('Nom affiché','Display name')}</h4>
-      <div class="row"><input id="flRn" value="${esc(s.name)}" maxlength="60" style="flex:1;min-width:150px" aria-label="${esc(L('Nom du flowsheet','Flowsheet name'))}" onkeydown="if(event.key==='Enter')flRename()"><button class="primary" onclick="flRename()">${L('Renommer','Rename')}</button></div></div>
-    <div class="fladm-sec"><h4>${L('Contenu','Content')}</h4>
-      <p class="meta" style="margin:0 0 8px">${L('Cliquez un équipement sur le plan pour modifier sa photo, sa description et sa fiche.','Click an item on the plan to edit its photo, description and sheet.')}</p><div class="row"><button id="flZ" onclick="flToggleZedit()" aria-pressed="false">${L('Modifier les cases','Edit zones')}</button><button onclick="renderConv(true)">${esc(cvT('cv_add_btn'))}</button></div>
-      <p class="meta" style="margin:8px 0 0">${L('Le Convertisseur permet aussi d’importer, d’exporter et de remplacer un plan.','The Converter can also import, export and replace a plan.')}</p></div>
-    <div class="fladm-sec"><h4>${L('Maintenance','Maintenance')}</h4>
-      <div class="row"><button onclick="flClearCache()">${L('Vider le cache','Clear cache')}</button><button class="danger" onclick="flDelete()">${L('Supprimer ce flowsheet','Delete this flowsheet')}</button></div>
-      <p class="meta" style="margin:8px 0 0">${L('Vider le cache force le retéléchargement des plans publiés. Les flowsheets créés sur cet appareil, leurs cases et leurs infos ne sont pas touchés.','Clearing the cache forces published plans to be downloaded again. Flowsheets created on this device, their zones and info are not affected.')}</p></div>
-    ${off}
-   </div></div>`;
+   <div class="fladm-line" style="border-top:0"><span class="fladm-lb">${L('Nom','Name')}</span><input id="flRn" value="${esc(s.name)}" maxlength="60" aria-label="${esc(L('Nom du flowsheet','Flowsheet name'))}" onkeydown="if(event.key==='Enter')flRename()"><button class="small primary" onclick="flRename()">${L('Renommer','Rename')}</button></div>
+   <div class="fladm-line"><span class="fladm-lb">${L('Plan','Plan')}</span><button class="small" id="flZ" onclick="flToggleZedit()" aria-pressed="false">${L('Modifier les cases','Edit zones')}</button><span class="meta">${L('Cliquez un équipement sur le plan pour modifier sa photo, sa description et sa fiche.','Click an item on the plan to edit its photo, description and sheet.')}</span></div>
+   <div class="fladm-line"><span class="fladm-lb">${L('Gestion','Manage')}</span><button class="small" onclick="flClearCache()">${L('Vider le cache','Clear cache')}</button></div>
+  </div>`;
 }
 function flAdmToggle(){
   if(!isAdmin()) return needAdm();
@@ -2163,7 +2156,7 @@ async function flClearCache(){
       }
     }
     await Promise.all(FLOW_SITES.filter(s=>!s.custom&&s.js).map(s=>fetch(s.js,{cache:'reload'}).catch(()=>{})));
-    if(state.view==='conv') cvRedraw(); else { renderFlow(FL.site); flAdmToggle(); }
+    if(state.view==='del') renderDel(); else if(state.view==='conv') cvRedraw(); else { renderFlow(FL.site); flAdmToggle(); }
     toast(L('Cache des flowsheets vidé','Flowsheet cache cleared'));
   }catch(e){ toast(L('Impossible de vider le cache','Could not clear the cache')); }
 }
@@ -2358,17 +2351,18 @@ async function cvRegister(id,name,pack){
 /* ---- page de l'onglet ---- */
 function renderConv(focusNew){
   if(!canEditTutos()){ toast(T('need_cls3')); return; }
-  if(state.section!=='convertisseur'||focusNew) CVE=false;
-  state.section='convertisseur'; state.view='conv'; $('filters').classList.add('hidden'); buildNav(); CV.idTouched=false;
+  if(state.view!=='conv'||focusNew) CVE=false;
+  state.section='flowsheet'; state.view='conv'; $('filters').classList.add('hidden'); buildNav(); $('app').classList.remove('flowwide'); CV.idTouched=false;
   const rows=FLOW_SITES.map(s=>{
     const n=((FL.zn[s.id]||{}).add||[]).length, id=esc(s.id);
     return `<div style="border-top:1px solid var(--line);padding:10px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <div style="flex:1;min-width:200px"><b>${esc(s.name)}</b> <span class="meta">(${id})</span><div class="meta">${s.custom?L('Sur cet appareil uniquement','On this device only'):L('Publié (fichier flowsheets/)','Published (flowsheets/ file)')}${n?` · ${n} ${L('case(s) ajoutée(s)','added zone(s)')}`:''}</div></div>
       <button onclick="renderFlow('${id}')">${L('Ouvrir','Open')}</button>
       <button onclick="cvExport('${id}')">${L('Exporter .js','Export .js')}</button>
-      ${CVE&&isAdmin()?`<button onclick="cvRename('${id}')">${L('Renommer','Rename')}</button>${s.custom?`<button onclick="cvPickReplace('${id}')">${L('Remplacer le plan','Replace plan')}</button>`:''}<button class="danger" onclick="cvDelete('${id}')">${L('Supprimer','Delete')}</button>`:''}</div>`;
+      ${isAdmin()?`<button onclick="cvRename('${id}')">${L('Renommer','Rename')}</button>${s.custom?`<button onclick="cvPickReplace('${id}')">${L('Remplacer le plan','Replace plan')}</button>`:''}`:''}</div>`;
   }).join('');
-  $('app').innerHTML=`<div class="row noprint" style="margin:8px 0"><h2 style="margin:0">${cvEd('nav_conv',esc(T('nav_conv')))}</h2>${isAdmin()?`<button class="${CVE?'primary':''}" style="margin-left:auto" onclick="cvEditToggle()" aria-pressed="${CVE}">${CVE?L('Terminer','Done'):L('Modifier','Edit')}</button>`:''}</div>
+  $('app').innerHTML=`<div class="row noprint" style="margin:8px 0"><h2 style="margin:0">${cvEd('cv_add_btn',esc(cvT('cv_add_btn')))}</h2>${isAdmin()?`<button class="${CVE?'primary':''}" style="margin-left:auto" onclick="cvEditToggle()" aria-pressed="${CVE}">${CVE?L('Terminer','Done'):L('Modifier','Edit')}</button>`:''}<button onclick="renderFlow()">${L('Retour au flowsheet','Back to flowsheet')}</button></div>
+  ${CVE&&isAdmin()?`<p class="meta noprint" style="margin:0 0 6px">${L('Cliquez sur un texte souligné pour le modifier.','Click an underlined text to edit it.')}</p>`:''}
   <div id="cvMsg" class="box" style="display:none"></div>
   <div style="${CVBOX}">
     <h3 style="margin-top:0">${cvH('cv_create_title')} ${cvPen('cv_create_title')}</h3>
@@ -2391,8 +2385,7 @@ function renderConv(focusNew){
     <p class="meta">${cvH('cv_import_help')} ${cvPen('cv_import_help')}</p>
     <input id="cvPack" type="file" accept=".js" onchange="cvImport(this)">
   </div>
-  <div style="${CVBOX}"><h3 style="margin-top:0">${cvH('cv_sites_title')} ${cvPen('cv_sites_title')}</h3>${rows||`<p class="meta">${L('Aucun flowsheet.','No flowsheet.')}</p>`}${CVE&&isAdmin()?`<div style="border-top:1px solid var(--line);padding-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button onclick="flClearCache()">${L('Vider le cache des flowsheets','Clear flowsheet cache')}</button></div>`:''}</div></div>
-  ${cvOffBox()}
+  <div style="${CVBOX}"><h3 style="margin-top:0">${cvH('cv_sites_title')} ${cvPen('cv_sites_title')}</h3>${rows||`<p class="meta">${L('Aucun flowsheet.','No flowsheet.')}</p>`}</div></div>
   <input id="cvRep" type="file" accept=".pdf,.svg,.png,.jpg,.jpeg,.webp" hidden onchange="cvReplace(this)">`;
   window.scrollTo(0,0); if(focusNew) setTimeout(()=>{ const e=$('cvFile'); if(e) e.focus(); },50);
 }
@@ -2414,7 +2407,20 @@ async function cvCreate(){
   }catch(e){ cvMsg(esc(e.message||String(e)),true); }
   cvBusy(false,lbl);
 }
-function cvEditToggle(){ if(!isAdmin()) return needAdm(); CVE=!CVE; cvRedraw(); }
+/* ---- page « Supprimer un flowsheet » (administrateur) : liste avec Supprimer, flowsheets supprimés (rétablir / vider le cache), cache général ---- */
+function renderDel(){
+  if(!isAdmin()){ needAdm(); return; }
+  if(state.view!=='del') CVE=false;
+  state.section='flowsheet'; state.view='del'; $('filters').classList.add('hidden'); buildNav(); $('app').classList.remove('flowwide');
+  const rows=FLOW_SITES.map(s=>{ const id=esc(s.id);
+    return `<div style="border-top:1px solid var(--line);padding:10px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div style="flex:1;min-width:200px"><b>${esc(s.name)}</b> <span class="meta">(${id})</span><div class="meta">${s.custom?L('Sur cet appareil uniquement','On this device only'):L('Publié (fichier flowsheets/)','Published (flowsheets/ file)')}</div></div><button class="danger" onclick="cvDelete('${id}','del')">${L('Supprimer','Delete')}</button></div>`; }).join('');
+  $('app').innerHTML=`<div class="row noprint" style="margin:8px 0"><h2 style="margin:0">${cvEd('cv_del_btn',esc(cvT('cv_del_btn')))}</h2>${isAdmin()?`<button class="${CVE?'primary':''}" style="margin-left:auto" onclick="cvEditToggle()" aria-pressed="${CVE}">${CVE?L('Terminer','Done'):L('Modifier','Edit')}</button>`:''}<button onclick="renderFlow()">${L('Retour au flowsheet','Back to flowsheet')}</button></div>
+  ${CVE&&isAdmin()?`<p class="meta noprint" style="margin:0 0 6px">${L('Cliquez sur un texte souligné pour le modifier.','Click an underlined text to edit it.')}</p>`:''}
+  <div style="${CVBOX}"><h3 style="margin-top:0">${cvH('cv_sites_title')}</h3>${rows||`<p class="meta">${L('Aucun flowsheet.','No flowsheet.')}</p>`}<div style="border-top:1px solid var(--line);padding-top:10px"><button onclick="flClearCache()">${L('Vider le cache des flowsheets','Clear flowsheet cache')}</button></div></div>
+  ${cvOffBox('del')}`;
+  window.scrollTo(0,0);
+}
+function cvEditToggle(){ if(!isAdmin()) return needAdm(); CVE=!CVE; if(state.view==='del') renderDel(); else cvRedraw(); }
 function cvRename(id){
   if(!isAdmin()) return needAdm();
   const s=FLOW_SITES.find(x=>x.id===id); if(!s) return;
@@ -2447,7 +2453,7 @@ async function cvDelete(id,from){
   }
   if(FL.site===id) FL.site=null;
   try{ bkSchedule(); }catch(e){}
-  if(from==='flow'){ FL.site=null; renderFlow(); } else cvRedraw();
+  if(from==='flow'){ FL.site=null; renderFlow(); } else if(from==='del') renderDel(); else cvRedraw();
   toast(L('Flowsheet supprimé','Flowsheet deleted'));
 }
 function cvRestore(id,from){
@@ -2456,12 +2462,12 @@ function cvRestore(id,from){
   FLOW_SITES.push(...FLOW_OFF.splice(i,1)); const h=fhGet(); h[id]=false;
   try{ localStorage.setItem(FHKEY,JSON.stringify(h)); }catch(e){ toast(T('storage_full')); }
   try{ bkSchedule(); }catch(e){}
-  if(from==='flow') renderFlow(id); else cvRedraw();
+  if(from==='flow') renderFlow(id); else if(from==='del') renderDel(); else cvRedraw();
   toast(L('Flowsheet rétabli','Flowsheet restored'));
 }
 function cvOffBox(from){
-  if(!FLOW_OFF.length||!isAdmin()||(!from&&!CVE)) return '';
-  return `<div style="${CVBOX}"><div class="row" style="margin-bottom:6px"><h3 style="margin:0;flex:1">${L('Flowsheets supprimés','Deleted flowsheets')}</h3><button onclick="flPurgeOff()">${L('Vider le cache des supprimés','Clear cache of deleted')}</button></div>`+FLOW_OFF.map(s=>`<div style="border-top:1px solid var(--line);padding:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:140px"><b>${esc(s.name)}</b> <span class="meta">(${esc(s.id)})</span></div><button onclick="flPurgeOff('${esc(s.id)}')">${L('Vider le cache','Clear cache')}</button><button onclick="cvRestore('${esc(s.id)}'${from?`,'${from}'`:''})">${L('Rétablir','Restore')}</button></div>`).join('')+`</div>`;
+  if(!FLOW_OFF.length||!isAdmin()) return '';
+  return `<div style="${CVBOX}"><div class="row" style="margin-bottom:6px"><h3 style="margin:0;flex:1">${cvH('cv_off_title')}</h3><button onclick="flPurgeOff()">${L('Vider le cache des supprimés','Clear cache of deleted')}</button></div>`+FLOW_OFF.map(s=>`<div style="border-top:1px solid var(--line);padding:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:140px"><b>${esc(s.name)}</b> <span class="meta">(${esc(s.id)})</span></div><button onclick="flPurgeOff('${esc(s.id)}')">${L('Vider le cache','Clear cache')}</button><button onclick="cvRestore('${esc(s.id)}'${from?`,'${from}'`:''})">${L('Rétablir','Restore')}</button></div>`).join('')+`</div>`;
 }
 /* réaffiche l'onglet sans remonter en haut de page et garde le bloc « Modifier les noms… » ouvert */
 function cvRedraw(){ const y=window.scrollY, o=($('cvLb')||{}).open; renderConv(); const d=$('cvLb'); if(d&&o) d.open=true; window.scrollTo(0,y); }
@@ -2515,7 +2521,9 @@ const CV_DEF={
  cv_import_title:['Importer un fichier .js existant','Import an existing .js file','Titre de la section « Importer »','“Import” section title'],
  cv_import_help:['Un flowsheet exporté depuis un autre appareil (même format que Reims.js). Il est ajouté à cet appareil ; le fichier n’est pas exécuté, seulement lu.','A flowsheet exported from another device (same format as Reims.js). It is added to this device; the file is only read, not executed.','Texte d’aide de la section « Importer »','“Import” section help text'],
  cv_sites_title:['Flowsheets','Flowsheets','Titre de la liste des flowsheets','Flowsheet list title'],
- cv_add_btn:['Ajouter un flowsheet','Add a flowsheet','Bouton de la rubrique Flowsheet','Button in the Flowsheet section']
+ cv_add_btn:['Ajouter un flowsheet','Add a flowsheet','Bouton « Ajouter » et titre de sa page','“Add” button and its page title'],
+ cv_del_btn:['Supprimer un flowsheet','Delete a flowsheet','Bouton « Supprimer » et titre de sa page','“Delete” button and its page title'],
+ cv_off_title:['Flowsheets supprimés','Deleted flowsheets','Titre de la liste des supprimés','Deleted list title']
 };
 const cvDef=(k,l)=>CV_DEF[k]?CV_DEF[k][l==='en'?1:0]:(typeof (I18N[l]||{})[k]==='string'?I18N[l][k]:'');
 const cvT=k=>(LBL[k]&&LBL[k][lang])||cvDef(k,lang);
@@ -2541,7 +2549,7 @@ function lbEdit(k){
   const first=$('lbm_'+lang); if(first){ first.focus(); if(first.select&&!long) first.select(); }
 }
 function lbClose(){ const d=$('lbModal'); if(d) d.remove(); }
-function lbRefresh(){ buildNav(); if(['home','conv','flow','settings','gloss','jeux','fiches'].includes(state.view)){ const y=window.scrollY; renderSection(); window.scrollTo(0,y); } }
+function lbRefresh(){ buildNav(); if(['home','conv','del','flow','settings','gloss','jeux','fiches'].includes(state.view)){ const y=window.scrollY; renderSection(); window.scrollTo(0,y); } }
 function lbSave(k){
   const o=LBL[k]=LBL[k]||{};
   ['fr','en'].forEach(l=>{ const el=$('lbm_'+l); if(!el) return; const v=el.value.trim(); if(v&&v!==cvDef(k,l)) o[l]=v; else delete o[l]; });
