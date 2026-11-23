@@ -86,6 +86,7 @@
   Les grains de verre qui circulent                    const M3_GRAINS
   Les couleurs de toute l'appli                        :root (dans le style, en haut)
   Hors connexion (cache)                               sw.js : changer le numéro de version
+  Bouton Retour / carte Reprendre / recherche globale   section 6 (fin du script) : histPush  resumeHTML  gSearch
 
  Repères : chaque réglage modifiable est précédé de la ligne " MODIFIABLE" dans le code.
 
@@ -666,7 +667,7 @@ a.btn.primary{background:linear-gradient(135deg,var(--accent),#2d8fe0);color:var
 .stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .stat{background:rgba(45,143,224,.12);border:1px solid rgba(45,143,224,.35);border-radius:12px;padding:6px 12px;font-size:.82rem;color:var(--muted)}
 .stat b{display:block;font-size:1.35rem;line-height:1.1;color:var(--accent)}
-@media(max-width:640px){.hero{grid-template-columns:1fr;padding:14px}.hero .logocol{order:-1}.hero .logo3d{width:min(200px,70%)}.hero h2{font-size:1.25rem!important;text-align:center}.hero .row,.hero .stats{justify-content:center}.hero .meta{text-align:center}}
+@media(max-width:640px){.hero{grid-template-columns:1fr;padding:14px}.hero .logocol{order:-1}.hero .logo3d{width:min(140px,45%)}.hero h2{font-size:1.25rem!important;text-align:center}.hero .row,.hero .stats{justify-content:center}.hero .meta{text-align:center}}
 
 /* Ecran de connexion */
 .authcard{position:relative;overflow:hidden;padding-top:18px}
@@ -850,6 +851,30 @@ img{image-orientation:from-image}
 .cbph{display:grid;place-items:center;min-height:110px;border:1px dashed var(--line);border-radius:8px;color:var(--muted)}
 #cbModal textarea,#cbModal input:not([type=checkbox]):not([type=file]),#cbModal select{width:100%;box-sizing:border-box}
 @media(max-width:780px){ .cgrid>.cblk{grid-column:span 12!important} }
+/* ===================== SIBELCO 2.1 : recherche globale + carte « Reprendre » (accueil) =====================
+   .gsearch = champ de recherche de l'accueil (tutos + fiches + mots-clés) ; .gres = liste des résultats ;
+   .resume  = carte « Reprendre » (dernier tutoriel ouvert, non terminé). */
+.gsearch{padding:10px 12px}
+.gsearch input{width:100%;font:inherit;padding:10px 12px 10px 38px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235d6b78' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:18px;background-position:12px center}
+.gsearch input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,143,224,.2)}
+.gres:empty{display:none}
+.gres{margin-top:8px;display:grid;gap:4px}
+.gres .gr{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid transparent;background:transparent}
+.gres .gr:hover,.gres .gr:focus-visible{background:rgba(45,143,224,.10);border-color:rgba(45,143,224,.35)}
+.gres .gr .gk{flex:0 0 auto;font-size:.68rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:999px;color:#fff;background:var(--accent)}
+.gres .gr .gk.f{background:#1a8a6a}.gres .gr .gk.g{background:#7a4bb8}
+.gres .gr .gt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gres .gr .gt small{display:block;color:var(--muted);font-size:.78rem;overflow:hidden;text-overflow:ellipsis}
+.gres .gr mark{background:rgba(224,168,0,.35);color:inherit;border-radius:3px;padding:0 1px}
+.gres .none{color:var(--muted);font-size:.85rem;padding:6px 10px}
+.resume{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-left-color:var(--accent);background:rgba(45,143,224,.10);color:var(--text)}
+.resume .rt{flex:1;min-width:180px}
+.resume .ra{display:flex;gap:6px;align-items:center;margin-left:auto}
+.resume .rt b{display:block}
+.resume .rt .meta{display:block;margin-top:2px}
+.resume .progress{height:6px;margin-top:6px}
+@media(max-width:640px){.gsearch{padding:8px}}
 </style>
 </head>
 <body>
@@ -2072,6 +2097,8 @@ function renderHome(){
    ${!settings.chosen?`<div class="panel"><b>${esc(T('ask_level'))}</b><div class="row" style="margin-top:8px">${CLS.slice(0,4).map((x,i)=>`<button onclick="chooseCls(${i})">${esc(clsL(i))}</button>`).join('')}</div></div>`:''}
    ${(c<1&&ob)?`<div class="box danger"><b>${esc(T('oblig_title'))}</b><br>${esc(T('oblig_txt'))}<div style="margin-top:8px"><button class="primary" onclick="openTuto('${ob.id}')">${esc(T('oblig_go'))}</button></div></div>`:''}
    ${settings.trained?`<div class="box" style="border-left-color:var(--ok)">${esc(T('trained_on'))} ${esc(new Date(settings.trained).toLocaleDateString(lang))}</div>`:''}
+   ${resumeHTML()}
+   <div class="panel gsearch"><input id="gq" type="search" autocomplete="off" placeholder="${esc(L('Rechercher partout : tuto, fiche, mot-clé…','Search everywhere: tutorial, sheet, keyword…'))}" oninput="gSearch(this.value)" aria-label="${esc(L('Recherche globale','Global search'))}"><div id="gres" class="gres" role="list"></div></div>
    ${progHTML(true)}
    <div class="tiles">${navList().filter(n=>(NAV.slice(1,7).some(m=>m[0]===n[0])||isCust(n[0]))).map(([k,i,l])=>tileHTML(k,l)).join('')}</div>
    <p class="disclaimer">${esc(T('footer'))}</p>`;
@@ -5383,6 +5410,110 @@ mountLogos(); netUpdate(); instUpdate();
  On essaie de charger fond-verre.jpg ; si elle existe, la classe "photo" est ajoutée à <html> et le CSS remplace le motif de verre par la photo.
 */
 (function(){var i=new Image();i.onload=function(){document.documentElement.classList.add('photo');};i.src='fond-verre.jpg';})();
+/*
+ ===================== 6. SIBELCO 2.1 : HISTORIQUE, REPRISE, RECHERCHE GLOBALE =====================
+ Trois ajouts indépendants du reste du code (ils « enveloppent » les fonctions d'affichage existantes) :
+
+ a) HISTORIQUE DU NAVIGATEUR : chaque page affichée (accueil, liste, tuto, fiche, jeu...) est inscrite dans l'historique
+    du navigateur (history.pushState). Le bouton « Retour » du téléphone (ou du navigateur) revient donc à la page
+    précédente au lieu de QUITTER l'appli. Le geste « précédent » d'Android / iOS fonctionne aussi.
+      - histPush()    : inscrit la page courante (ou remplace l'entrée si c'est la même page redessinée) ;
+      - histRestore() : ré-affiche une page à partir de ce qui avait été inscrit ;
+      - histLock      : évite d'inscrire une page pendant qu'on la restaure (sinon boucle).
+ b) REPRENDRE : le dernier tutoriel ouvert est mémorisé dans le compte (settings.lastTuto). S'il n'est pas terminé,
+    l'accueil affiche une carte « Reprendre » avec un bouton. (resumeHTML)
+ c) RECHERCHE GLOBALE : champ sur l'accueil qui cherche en même temps dans les tutos (titre, machine, catégorie, étapes),
+    les fiches (titre, machine, texte) et les mots-clés (mot, définition). Un clic ouvre directement l'élément. (gSearch)
+*/
+let histLock=false;
+function histSnap(){ return {view:state.view,section:state.section,id:state.id||null,fid:state.fid||null,fl:(typeof FL!=='undefined'&&FL.site)||null,gl:(typeof GL!=='undefined'&&GL.q)||''}; }
+const histSame=(a,b)=>!!a&&!!b&&a.view===b.view&&a.section===b.section&&a.id===b.id&&a.fid===b.fid;
+function histPush(over){
+  if(histLock||document.body.classList.contains('nolog')) return;
+  const s=Object.assign(histSnap(),over||{}), cur=history.state&&history.state.sib;
+  try{ if(histSame(cur,s)) history.replaceState({sib:s},''); else history.pushState({sib:s},''); }catch(e){}
+}
+function histRestore(s){
+  histLock=true;
+  try{
+    if(typeof m3Stop==='function') m3Stop();
+    Object.assign(state,{view:s.view,section:s.section,id:s.id,fid:s.fid});
+    const v=s.view;
+    if(v==='view'&&s.id&&tutos.some(t=>t.id===s.id)) openTuto(s.id);
+    else if(v==='fiche'&&s.fid&&fiches.some(f=>f.id===s.fid)) openFiche(s.fid);
+    else if(v==='fiche'||v==='fedit'||v==='fiches') renderFiches(s.section);
+    else if(v==='flow') renderFlow(s.fl||undefined);
+    else if(v==='gloss'){ if(typeof GL!=='undefined') GL.q=s.gl||''; renderGloss(); }
+    else if(v==='edit'||v==='list'||v==='view') renderList();
+    else if(v==='game'||v==='jeux') renderGame();
+    else if(v==='custom'&&!isCust(s.section)) renderHome();
+    else renderSection();
+  }catch(e){ try{ renderHome(); }catch(x){} }
+  histLock=false;
+}
+window.addEventListener('popstate',e=>{
+  if(document.body.classList.contains('nolog')) return;            // écran de connexion : rien à restaurer
+  const s=e.state&&e.state.sib;
+  histRestore(s||{view:'home',section:'home',id:null,fid:null});
+});
+// Enveloppe des fonctions d'affichage : après chaque affichage, la page est inscrite dans l'historique.
+['renderHome','renderList','openTuto','openFiche','renderFiches','renderFlow','renderGloss','renderGame','renderSettings',
+ 'renderCustom','renderMachines3D','renderConv','renderDel','renderEditor','renderFicheEditor'].forEach(n=>{
+  const f=window[n]; if(typeof f!=='function') return;
+  window[n]=function(){ const r=f.apply(this,arguments); histPush(); return r; };
+});
+if(typeof gFrame==='function'){ const g=gFrame; window.gFrame=function(){ const r=g.apply(this,arguments); histPush({view:'game'}); return r; }; }
+// Après la connexion : l'accueil remplace l'entrée « connexion » (pas d'entrée inutile dans l'historique).
+if(typeof enter==='function'){ const en=enter; window.enter=function(){ histLock=true; try{ en.apply(this,arguments); }finally{ histLock=false; } try{ history.replaceState({sib:histSnap()},''); }catch(e){} }; }
+
+/* b) REPRENDRE : mémorise le dernier tuto ouvert (dans le compte) et affiche la carte sur l'accueil. */
+{ const ot=openTuto; window.openTuto=function(id){ const r=ot.apply(this,arguments); if(settings&&settings.id&&tutos.some(t=>t.id===id)&&!isLocked(tutos.find(t=>t.id===id))){ if(settings.lastTuto!==id){ settings.lastTuto=id; saveSettings(); } } return r; }; }
+function resumeHTML(){
+  const id=settings&&settings.lastTuto; if(!id) return '';
+  const raw=tutos.find(t=>t.id===id); if(!raw||isDone(id)||isLocked(raw)) return '';
+  const t=view(raw), n=(t.steps||[]).length, d=state.done[id]||[], dn=d.filter(Boolean).length, p=n?Math.round(dn/n*100):0;
+  return `<div class="box resume"><div class="rt"><span class="meta">${esc(L('Reprendre où vous en étiez','Pick up where you left off'))}</span><b>${esc(t.title)}</b>
+    <span class="meta">${esc(machineL(t.machine))} · ${esc(t.duration)} ${esc(T('min'))} · ${n} ${esc(L('étapes','steps'))}${dn?` · ${dn}/${n} ${esc(L('faites','done'))}`:''}</span>
+    ${dn?`<div class="progress"><div style="width:${p}%"></div></div>`:''}</div>
+    <div class="ra"><button class="primary" onclick="openTuto('${esc(id)}')">${esc(L('Reprendre','Resume'))} →</button>
+    <button class="small" title="${esc(L('Retirer cette carte','Remove this card'))}" aria-label="${esc(L('Retirer','Remove'))}" onclick="settings.lastTuto='';saveSettings();renderHome()">✕</button></div></div>`;
+}
+
+/* c) RECHERCHE GLOBALE (accueil) : jusqu'à 10 résultats, les termes trouvés sont surlignés. */
+const gNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function gMark(txt,words){
+  let h=esc(txt||'');
+  words.forEach(w=>{ if(!w) return; const re=new RegExp('('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig'); h=h.replace(re,'<mark>$1</mark>'); });
+  return h;
+}
+function gSearch(q){
+  const box=$('gres'); if(!box) return;
+  const words=gNorm(q).split(/\s+/).filter(w=>w.length>=2);
+  if(!words.length){ box.innerHTML=''; return; }
+  const hit=s=>{ const n=gNorm(s); return words.every(w=>n.includes(w)); };
+  const res=[];
+  tutos.forEach(raw=>{ const t=view(raw); const steps=(t.steps||[]).map(s=>s.text).join(' ');
+    if(hit([t.title,t.machine,t.category,t.level].join(' '))||hit(steps)) res.push({k:'t',id:t.id,title:t.title,sub:[catL(t.category),machineL(t.machine),levelL(t.level)].filter(Boolean).join(' · '),lock:isLocked(raw)}); });
+  fiches.forEach(f=>{ if(hit([f.title,f.machine,f.text].join(' '))) res.push({k:'f',id:f.id,title:f.title,sub:({constructeur:T('nav_cons'),consommables:T('nav_cons2'),presentation:T('nav_pres')})[f.type]||f.type}); });
+  if(typeof glItems==='function') glItems().forEach(g=>{ const w=lang==='en'&&g.word_en?g.word_en:g.word, d=lang==='en'&&g.def_en?g.def_en:g.def; if(hit(w+' '+d)) res.push({k:'g',word:g.word,title:w,sub:d}); });
+  // Les titres qui contiennent le mot d'abord, puis le reste, 10 résultats maximum.
+  res.sort((a,b)=>(hit(b.title)?1:0)-(hit(a.title)?1:0));
+  const top=res.slice(0,10);
+  const KL={t:L('Tuto','Tutorial'),f:L('Fiche','Sheet'),g:L('Mot','Word')};
+  box.innerHTML=top.length?top.map(r=>{
+    const act=r.k==='t'?`openTuto('${esc(r.id)}')`:r.k==='f'?`openFiche('${esc(r.id)}')`:`GL.q=${esc(JSON.stringify(r.word))};renderGloss()`;
+    return `<button class="gr" role="listitem" onclick="${act}"><span class="gk ${r.k}">${esc(KL[r.k])}</span><span class="gt">${gMark(r.title,words)}${r.lock?' 🔒':''}<small>${gMark(r.sub,words)}</small></span></button>`;
+  }).join('')+(res.length>10?`<div class="none">${res.length-10} ${esc(L('autres résultats : précisez la recherche.','more results: refine your search.'))}</div>`:'')
+  :`<div class="none">${esc(L('Aucun résultat.','No result.'))}</div>`;
+}
+// Raccourci clavier : touche « / » (hors champ de saisie) = aller au champ de recherche de la page.
+document.addEventListener('keydown',e=>{
+  if(e.key!=='/'||e.ctrlKey||e.metaKey||e.altKey) return;
+  const a=document.activeElement; if(a&&(/^(input|textarea|select)$/i.test(a.tagName)||a.isContentEditable)) return;
+  const f=document.getElementById('gq')||document.getElementById('glQ')||(($('q')&&!$('filters').classList.contains('hidden'))?$('q'):null);
+  if(f){ e.preventDefault(); f.focus(); f.select&&f.select(); }
+});
+
 /* EXPLICATION SUPPLÉMENTAIRE : LANCEMENT
  safeBoot() (section 5) restaure d'abord les données depuis la copie de secours si elles ont disparu, puis appelle boot().
 */
