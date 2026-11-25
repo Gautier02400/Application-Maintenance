@@ -1,0 +1,834 @@
+/* ============================================================================
+   style.css : APPARENCE de l'appli Tutos Maintenance (couleurs, cartes, boutons, menu, mode sombre...)
+   Chargé par index.html (<link rel="stylesheet" href="style.css">). Les couleurs générales sont dans :root ci-dessous.
+   Après une modification : lancez maj-version.ps1 pour que les appareils récupèrent la nouvelle version.
+   ============================================================================ */
+/* EXPLICATION SUPPLÉMENTAIRE : COMMENT LIRE LE CSS (apparence)
+ Le CSS décrit l'apparence ; il ne contient aucune logique.
+ 1) Les couleurs sont des VARIABLES (--danger-bg, --accent, --card, --line, --text...) définies dans :root.
+ 2) Le MODE SOMBRE redéfinit ces mêmes variables, soit à la demande (data-theme="dark" posé par applyTheme()),
+    soit automatiquement (@media prefers-color-scheme: dark) : on ne réécrit donc pas chaque style.
+ 3) Les @media (max-width: ...) adaptent la mise en page au téléphone ; @media print prépare l'impression ;
+    @media (prefers-reduced-motion) coupe les animations pour les personnes sensibles au mouvement.
+ 4) Les classes .cover.c-xxx donnent une couleur unie par rubrique ; .m3grid... = cadre de la visionneuse 3D des machines.
+ POUR CHANGER L'ASPECT DE TOUTE L'APPLI : modifiez d'abord les variables de :root (clair ET sombre).
+*/
+/*
+ ===================== 1. APPARENCE (CSS) =====================
+ Toute la feuille de style est dans la balise style. Les couleurs sont stockées dans des "variables"
+ (--bg, --card, --text...) : pour changer une couleur dans TOUTE l'appli, on change la variable.
+
+ VARIABLES DE COULEUR (thème CLAIR par défaut).
+   --bg     : fond de la page          --card  : fond des cartes / panneaux
+   --text   : couleur du texte         --muted : texte secondaire (gris)
+   --line   : traits et bordures       --brand : bleu foncé du bandeau et du menu
+   --accent : bleu des boutons         --ok    : vert (validé / étape faite)
+   --warn-* : encadrés jaunes d'avertissement   --danger-* : encadrés rouges de sécurité
+ Les 3 premières lignes (box-sizing, padding-top/bottom) servent à laisser la place
+ aux encoches / barres système des téléphones (safe-area).
+*/
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f2f5f9;--card:#ffffff;--text:#1b2733;--muted:#5d6b78;--line:#dbe1e7;
+  --brand:#0a2f5a;--accent:#0a5aa8;--accent-text:#ffffff;--ok:#1a8a4a;--warn-bg:#fff4d6;--warn-line:#e0a800;--warn-text:#5c4300;
+  --danger-bg:#fde8e8;--danger-line:#d33;--danger-text:#7a1414;
+}
+/*
+ THEME SOMBRE AUTOMATIQUE : si l'appareil est en mode sombre, on redéfinit les variables.
+ ":root:not([data-theme="light"])" = "sauf si l'utilisateur a forcé le thème clair".
+*/
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10161c;--card:#19222b;--text:#e8edf2;--muted:#9aa9b6;--line:#2c3a47;
+    --brand:#0a2540;--accent:#5aaeea;--accent-text:#04121f;--ok:#4cc57f;--warn-bg:#3a2f0b;--warn-line:#c99a00;--warn-text:#ffe29a;
+    --danger-bg:#3d1717;--danger-line:#e66;--danger-text:#ffb3b3;
+  }
+}
+/*
+ THEME SOMBRE FORCE : appliqué quand l'utilisateur choisit "Sombre" dans Paramètres
+ (le script ajoute l'attribut data-theme="dark" sur la balise <html>, voir applyTheme()).
+*/
+:root[data-theme="dark"]{
+  --bg:#10161c;--card:#19222b;--text:#e8edf2;--muted:#9aa9b6;--line:#2c3a47;
+  --brand:#0a2540;--accent:#5aaeea;--accent-text:#04121f;--ok:#4cc57f;--warn-bg:#3a2f0b;--warn-line:#c99a00;--warn-text:#ffe29a;
+  --danger-bg:#3d1717;--danger-line:#e66;--danger-text:#ffb3b3;
+}
+/*
+ --- Base de la page : police système, fond, texte, bandeau fixe en haut (header) ---
+*/
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
+header{background:var(--brand);color:#fff;border-bottom:3px solid #2d8fe0;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.wrap{max-width:980px;margin:0 auto;padding:12px 16px}
+.top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+h1{font-size:1.15rem;margin:0}
+h1 small{display:block;font-weight:400;color:#c5d6ea;font-size:.8rem}
+header button.primary,header .lang button.on{background:#2d8fe0;border-color:#2d8fe0;color:#fff}
+/*
+ --- Boutons : un style commun ; .primary = bouton bleu plein ; .danger = rouge ; .small = petit ---
+*/
+button,.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
+button.danger{color:var(--danger-line);border-color:var(--danger-line)}
+button.small{padding:4px 8px;font-size:.85rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,textarea{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+textarea{resize:vertical;min-height:70px}
+label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 4px}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-top:10px}
+@media (max-width:640px){.filters{grid-template-columns:1fr}}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.chip{border-radius:999px;padding:4px 12px;font-size:.85rem}
+.chip.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+/*
+ --- Grille de cartes (liste des tutoriels et des fiches) : autant de colonnes que la place le permet ---
+*/
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.card:hover{border-color:var(--accent)}
+.card h3{margin:0;font-size:1rem}
+.meta{color:var(--muted);font-size:.82rem;display:flex;gap:10px;flex-wrap:wrap}
+.tag{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tag.valide{color:var(--ok);border-color:var(--ok)}
+.tag.avalider{color:var(--warn-line);border-color:var(--warn-line)}
+/*
+ --- .panel = grand bloc blanc arrondi ; .box = encadré jaune (attention) ; .box.danger = encadré rouge (sécurité) ---
+*/
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+.box{border-left:4px solid var(--warn-line);background:var(--warn-bg);color:var(--warn-text);padding:10px 12px;border-radius:6px;margin:10px 0}
+.box.danger{border-left-color:var(--danger-line);background:var(--danger-bg);color:var(--danger-text)}
+.box ul{margin:4px 0 0 18px;padding:0}
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.progress>div{height:100%;background:var(--ok);width:0;transition:width .2s}
+/*
+ --- Étapes d'un tutoriel : rond numéroté .num + texte. Classe .done = étape cochée (rond vert, texte barré) ---
+*/
+.step{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.step:first-of-type{border-top:0}
+.num{flex:0 0 32px;height:32px;border-radius:50%;background:var(--accent);color:var(--accent-text);display:grid;place-items:center;font-weight:700}
+.step.done .num{background:var(--ok)}
+.step.done .txt{color:var(--muted);text-decoration:line-through}
+.step .body{flex:1;min-width:0}
+.step img{max-width:100%;width:auto;height:auto;max-height:min(520px,75vh);object-fit:contain;border-radius:8px;border:1px solid var(--line);margin-top:8px;display:block}
+.step label.chk{display:flex;gap:8px;align-items:center;margin:8px 0 0;color:var(--muted);cursor:pointer}
+.step input[type=checkbox]{width:20px;height:20px;padding:0}
+.edit-step{border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0;background:var(--bg)}
+/* --- Tuto guidé : pastilles d'étapes, média, question, impression --- */
+.printonly{display:none}
+@media print{.printonly{display:block}}
+.gnav{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.gdot{width:36px;height:36px;border-radius:50%;padding:0;display:grid;place-items:center;font-weight:700;border:2px solid var(--line);background:var(--card);color:var(--muted)}
+.gdot.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.gdot.cur{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.gdot:disabled{opacity:.4;cursor:not-allowed}
+.gstep{padding:6px 0}
+.gtxt{font-size:1.05rem;line-height:1.55;margin:10px 0}
+.gmedia{max-width:100%;border-radius:8px;border:1px solid var(--line);margin-top:8px;display:block}
+.gq{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:10px 12px;margin:12px 0;background:var(--bg)}
+.gq label.opt{display:flex;gap:8px;align-items:center;margin:6px 0;color:var(--text);cursor:pointer;font-size:.95rem}
+.gq label.opt input{width:18px;height:18px;padding:0}
+.gq label.opt.good{color:var(--ok);font-weight:600}
+.gq label.opt.ko{color:var(--danger-text)}
+.gq .bad{color:var(--danger-text);margin-top:8px;font-weight:600}
+label.tpbtn{display:inline-block;margin:0;padding:4px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--text);font-size:.8rem;background:var(--card)}
+.tpedit{margin-top:6px;gap:6px}
+.hidden{display:none!important}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+.disclaimer{font-size:.8rem;color:var(--muted);margin-top:24px}
+.lang{display:flex}
+.lang button{border-radius:0;padding:8px 10px;font-size:.85rem}
+.lang button:first-child{border-radius:8px 0 0 8px}
+.lang button:last-child{border-radius:0 8px 8px 0;margin-left:-1px}
+.lang button.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
+/*
+ --- IMPRESSION / PDF : on cache le menu, le bandeau et les boutons pour n'imprimer que le contenu ---
+*/
+/* Logo Sibelco en haut à droite de TOUT ce qui s'imprime (1re page) : image .printlogo posée en tête de page, invisible à l'écran.
+   Pour le changer de taille : modifiez "height:16mm". Le fichier est icon-512.png (le même que le logo du bandeau). */
+.printlogo{display:none}
+@media print{
+  .printlogo{display:block;height:16mm;width:auto;margin:0 0 5mm auto}
+}
+@media print{
+  header,.noprint,.toast{display:none!important}
+  body{background:#fff;color:#000}
+  .panel,.card{border-color:#999}
+}
+/*
+ --- Logo Sibelco en haut à gauche : fichier icon-512.png, fond blanc pour rester lisible sur le bandeau bleu ---
+*/
+.brand{display:flex;align-items:center;gap:12px}
+.logo{height:40px;width:auto;background:#fff;padding:4px 8px;border-radius:6px}
+
+
+/*
+ --- Menu latéral (#side) : caché à gauche, il glisse quand on clique sur le bouton ☰ (classe .open).
+     Les badges .cls0 à .cls4 sont les pastilles de couleur des 5 classes d'utilisateur. ---
+*/
+/* Menu latéral + classes */
+#side{position:fixed;top:0;bottom:0;left:0;width:220px;background:var(--card);border-right:1px solid var(--line);z-index:30;padding:calc(12px + env(safe-area-inset-top,0px)) 10px calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:4px;overflow:auto}
+#side .nb{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px}
+#side .nb.on{background:var(--accent);color:var(--accent-text);font-weight:600}
+#side .sp{flex:1}
+.menu-btn,#scrim{display:none}
+@media(min-width:781px){body{padding-left:220px}}
+@media(max-width:780px){#side{transform:translateX(-100%);transition:transform .2s}#side.open{transform:none}.menu-btn{display:inline-block}#scrim.open{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:25}}
+.cls{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 10px;border-radius:999px;color:#fff}
+.cls4{background:#6f42c1}.cls0{background:#c0392b}.cls1{background:#b9770e}.cls2{background:#1a8a4a}.cls3{background:#0a5aa8}
+.card.locked{opacity:.6}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:12px 0}
+a.btn{display:inline-block;text-decoration:none;color:var(--accent)}
+@media print{#side{display:none!important}body{padding-left:0!important}}
+
+#side{background:var(--brand);border-right:3px solid #2d8fe0}
+#side .nb{color:#fff}#side .nb:hover{background:rgba(255,255,255,.12)}#side .nb.on{background:#2d8fe0;color:#fff}
+#side .meta{color:#c5d6ea}
+header .wrap{max-width:none;padding:6px 14px}
+.menu-btn{display:inline-flex!important;align-items:center;justify-content:center;padding:5px 8px;border-radius:8px}
+.menu-btn svg{width:1.2em!important;height:1.2em!important}
+#side{transform:translateX(-100%);transition:transform .2s;width:200px;padding-left:8px;padding-right:8px}
+#side.open{transform:none;box-shadow:4px 0 18px rgba(0,0,0,.25)}
+body{transition:padding-left .2s}
+@media(min-width:781px){body{padding-left:0}body.nav-pinned{padding-left:200px}}
+@media(max-width:780px){body.nav-pinned{padding-left:0}}
+header .top{gap:8px}
+header .brand{gap:8px}
+header .logo,header.big .logo{height:clamp(30px,4vw,38px);padding:3px 8px;border-radius:6px}
+header h1,header.big h1{font-size:.98rem;line-height:1.2}
+header h1 small,header.big h1 small{font-size:.72rem}
+header .lang button,header.big .lang button{font-size:.72rem;padding:4px 8px;line-height:1.2}
+#toolbar .tbtn{font-size:.85rem;padding:6px 12px}
+#toolbar .filters{margin-top:8px;gap:8px}
+#toolbar .filters input,#toolbar .filters select{padding:6px 10px;font-size:.9rem}
+header.big .wrap{padding:6px 14px}
+header.big .menu-btn{font-size:1rem;padding:5px 8px}
+#side .nb{font-size:.88rem;padding:7px 10px;border-radius:7px}
+#side .nb.ib{width:auto;padding:5px 7px;display:inline-flex;align-items:center}
+#side .nb.ib svg{width:1.15em;height:1.15em}
+#side .nb.pinbtn.on{background:rgba(255,255,255,.24)}
+#side .nbrow{display:flex;align-items:center;gap:2px}
+#side .nbrow>.nb:first-child{flex:1;min-width:0}
+#side .nbrow>.nb.ib{flex:none;justify-content:center;min-width:26px}
+#side .nbrow .nb:disabled{opacity:.3;cursor:default}
+#side .nbedit{position:relative;border-radius:7px}
+#side .nbedit>.nb{flex:1;min-width:0}
+#side .grip{flex:none;display:inline-flex;align-items:center;justify-content:center;width:34px;height:36px;cursor:grab;touch-action:none;color:rgba(255,255,255,.75);user-select:none;-webkit-user-select:none}
+#side .nbedit.dragging{z-index:5;background:rgba(45,143,224,.5);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+#side .nbedit.dragging .grip{cursor:grabbing}
+#side .nbedit.dropbefore{box-shadow:0 -2px 0 0 #fff}
+#side .nbedit.dropafter{box-shadow:0 2px 0 0 #fff}
+#side .nbhint{margin:0;padding:4px 10px 8px;font-size:.76rem;color:rgba(255,255,255,.75)}
+#side .sidehd .cls{font-size:.68rem;white-space:nowrap;padding:2px 8px}
+#side .sidehd{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:2px 0 8px}
+@media(max-width:780px){#side .pinbtn{display:none!important}}
+/* Accueil / contenus plus compacts */
+#app h2{font-size:1.2rem}
+.panel{padding:14px}
+.tiles{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.tiles .card h3{font-size:.95rem}
+/* Infobulle des classes : apparaît au survol (ou au toucher) d'une pastille de classe */
+.cls{cursor:help}
+#clstip{position:fixed;z-index:60;display:none;width:min(340px,calc(100vw - 16px));background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.35);padding:8px;font-size:.82rem;line-height:1.35;pointer-events:none}
+#clstip .cttl{font-weight:700;padding:2px 6px 6px}
+#clstip .ctr{padding:6px;border-radius:7px}
+#clstip .ctr.me{background:rgba(45,143,224,.18);outline:1px solid #2d8fe0}
+#clstip .ctr .d{color:var(--muted);margin-top:3px}
+#clstip .ctr .cls{font-size:.72rem;cursor:inherit}
+#clstip .ctr .you{font-size:.72rem;margin-left:6px;color:var(--accent)}
+@media print{#clstip{display:none!important}}
+/*
+ ILLUSTRATIONS DES CARTES ET TUILES (zone .cover)
+ Chaque carte/tuile a en haut un bandeau ".cover" de proportion fixe (aspect-ratio 2/1).
+ Il peut contenir 2 choses :
+   1) une PHOTO (<img>) : elle remplit tout le bandeau (object-fit:cover = recadrée sans déformation) ;
+   2) à défaut, un PICTOGRAMME <svg> blanc semi-transparent (34 % de la taille), posé sur un dégradé de couleur.
+ Le bandeau de base est une couleur unie (#24476e).
+ Pour changer la taille du pictogramme : width/height de ".card .cover svg" ;
+ son épaisseur de trait : stroke-width ; sa transparence : stroke-opacity.
+*/
+/* Cartes de tutoriel avec image d'illustration */
+.card.tcard{overflow:hidden}
+.card .cover{margin:-14px -14px 4px;aspect-ratio:2/1;overflow:hidden;background:#24476e;display:grid;place-items:center}
+.card .cover img{width:100%;height:100%;object-fit:cover;display:block}
+.card .cover svg{width:34%;height:34%;stroke:#fff;stroke-opacity:.6;fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.tcover{width:auto;max-width:100%;height:auto;max-height:min(440px,62vh);object-fit:contain;border-radius:10px;margin:0 auto 10px;display:block}
+
+/*
+ COULEUR DU FOND DE CHAQUE ILLUSTRATION
+ Le script écrit class="cover c-xxx" où xxx = nom de la rubrique ou du jeu (constructeur, consommables,
+ presentation, quiz, link, vf, order...). Chaque ligne ci-dessous donne la couleur (unie) de cette rubrique.
+ POUR CHANGER UNE COULEUR : modifiez les 2 codes couleur (#12385e = début, #3aa0c9 = fin).
+ POUR AJOUTER UNE NOUVELLE RUBRIQUE / UN NOUVEAU JEU : ajoutez une ligne ".cover.c-monnom{background:#xxxxxx}"
+ (outil pratique pour choisir des couleurs : n'importe quel "color picker" en ligne).
+*/
+/* Couleur des illustrations par rubrique / jeu (selon c-xxx) */
+.cover.c-constructeur{background:#1d4f7c}
+.cover.c-consommables{background:#2f5d50}
+.cover.c-presentation{background:#3d4f66}
+.cover.c-jeux,.cover.c-order{background:#7a4a24}
+.cover.c-quiz{background:#5c3a4e}
+.cover.c-link{background:#2f5d50}
+.cover.c-vf{background:#3b6146}
+.tiles .card .cover{aspect-ratio:5/2}
+/*
+ --- Jeux : .qopt = bouton de réponse (vert .good / rouge .bad après réponse), .lkit = élément du jeu Relier,
+     .ordlist = liste des étapes remises dans l'ordre ---
+*/
+/* Jeux : quiz, vrai/faux, mémoire, remettre dans l'ordre */
+.qbar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.qbar>div{height:100%;background:var(--accent);transition:width .1s linear}
+.qopt{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px}
+.qopt.good{border-color:var(--ok);background:rgba(26,138,74,.2)}
+.qopt.bad{border-color:var(--danger-line);background:var(--danger-bg);color:var(--danger-text)}
+.qopt:disabled{opacity:1;cursor:default}
+.lkbox{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(58px,auto);gap:10px clamp(34px,11vw,90px);max-width:640px;margin:0 auto}
+.lksvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.lkit{display:flex;gap:8px;align-items:center;width:100%;text-align:left;padding:8px 10px;border-width:2px;font-size:.85rem;line-height:1.25;word-break:break-word;hyphens:auto}
+.lkit .me{font-size:1.4rem;flex:none}
+.lkit.sel{border-color:#2d8fe0;box-shadow:0 0 0 3px rgba(45,143,224,.35)}
+.lkit.ok{background:rgba(26,138,74,.22);border-color:var(--ok)}
+.lkit.ko{background:var(--danger-bg);border-color:var(--danger-line);color:var(--danger-text)}
+.lkit:disabled{opacity:1;cursor:default}
+.ordlist{margin:8px 0;padding-left:0;list-style-position:inside}
+.ordlist li{background:rgba(26,138,74,.16);border-left:4px solid var(--ok);padding:6px 8px;margin:4px 0;border-radius:4px}
+/*
+ --- Affichage d'un PDF dans une fiche : chaque page est dessinée dans un <canvas> (voir showPdf) ---
+*/
+/* PDF affiché en entier (toutes les pages, sans cadre défilant) */
+.pdfpages{display:flex;flex-direction:column;gap:10px;align-items:center}
+.pdfpg{width:100%;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 1px 5px rgba(0,0,0,.18)}
+.pdfpg canvas{width:100%;height:auto;display:block;border-radius:6px}
+/*
+ Machines en 3D (rubrique Présentation) : .m3cover = vignette de la carte ; .m3tabs = choix de la marque ;
+ .m3grid = canevas 3D à gauche + explications à droite (une seule colonne sur téléphone) ;
+ .m3chip = les 8 repères sous le canevas (--c = couleur de la technologie).
+*/
+.m3cover{position:relative}
+.m3cover svg{width:72%;height:auto;max-height:100%}
+.m3badge{position:absolute;top:8px;right:8px;background:#fff;color:#4a2a7a;font-weight:800;font-size:.72rem;padding:2px 9px;border-radius:999px;letter-spacing:.04em}
+.m3tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.m3tabs .chip{display:inline-flex;align-items:center;gap:7px;padding:7px 14px}
+.m3dot{width:11px;height:11px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.28)}
+.m3model{width:auto;padding:6px 10px}
+.m3grid{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:900px){.m3grid{grid-template-columns:1fr}}
+.m3cvbox{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.m3cvbox canvas{display:block;width:100%;touch-action:none;cursor:grab;outline-offset:-3px}
+.m3cvbox canvas:active{cursor:grabbing}
+.m3hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:.72rem;color:var(--muted);pointer-events:none;transition:opacity .5s}
+.m3hint.gone{opacity:0}
+.m3ctl{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.m3ctl button.on{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.m3chips{display:flex;gap:6px;flex-wrap:wrap}
+.m3chip{border-left:4px solid var(--c);display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 8px}
+.m3chip b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--c);color:#fff;font-size:.72rem}
+.m3chip.on{border-color:var(--c);box-shadow:0 0 0 2px var(--c) inset}
+.m3chip.off{opacity:.45}
+.m3side{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;min-height:240px}
+.m3hd{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.m3num{flex:0 0 34px;height:34px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:800}
+.m3pts{margin:0;padding-left:18px}
+.m3pts li{margin:6px 0}
+.m3det{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.m3det b{font-size:.8rem;color:var(--muted);margin-right:2px}
+.m3avail{margin-top:12px;font-size:.82rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+.m3avail.no{color:var(--warn-text);background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:8px;padding:8px 10px}
+.m3flow{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.m3flow a{display:flex;gap:8px;align-items:center;text-decoration:none;color:var(--text);padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card)}
+.m3flow a:hover{border-color:var(--c)}
+.m3flow b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--c);color:#fff;font-size:.74rem}
+@media print{.m3ctl,.m3chips,.m3hint{display:none!important}}
+/* Aperçu PowerPoint (fiches de présentation) : miniature + une carte de texte par diapositive */
+.pptthumb{max-width:420px;width:100%;border-radius:8px;border:1px solid var(--line);display:block;margin:8px 0}
+.pptslide{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:8px 12px;margin:8px 0;background:var(--bg)}
+.pptslide b{display:block;font-size:.78rem;color:var(--muted);margin-bottom:2px}
+/* Menu ouvert non épinglé : le bouton ☰ garde sa place (invisible) pour que le titre ne bouge pas ; il disparaît vraiment seulement quand le cadenas est coché */
+body.nav-open .menu-btn{visibility:hidden}
+/* Ecran large : menu ouvert (épinglé ou non) -> le bouton ☰ disparaît et le titre se décale vers la droite pour rester visible */
+@media(min-width:781px){
+  body.nav-open .menu-btn{display:none!important}
+  /* menu ouvert (épinglé ou non) : toute la page (titre + contenu) se décale pour rester visible */
+  body.nav-open{padding-left:200px}
+}
+/* Téléphone : le menu ouvert pousse la page vers la droite (sans l'écraser) */
+@media(max-width:780px){
+  html{overflow-x:hidden}
+  header,#toolbar,#app{transition:transform .2s}
+  body.nav-open header,body.nav-open #toolbar,body.nav-open #app{transform:translateX(200px)}
+}
+/* Mode administrateur : menu plus large et plus aéré (il contient le bouton Modifier et la poignée de déplacement des onglets) */
+body.adm #side{width:290px;padding-left:12px;padding-right:12px}
+body.adm #side .nb{font-size:.98rem;padding:10px 12px}
+body.adm #side .nb.ib{font-size:.9rem;padding:7px 12px}
+body.adm #side .sidehd{padding:4px 0 12px}
+body.adm #side .sidehd .cls{font-size:.76rem;padding:3px 10px}
+body.adm #side .grip{height:42px;width:38px}
+/* en-tête du menu : classe + petit bouton Modifier + cadenas sur la MÊME ligne (le badge se raccourcit si besoin, le cadenas reste visible) */
+#side .sidehd{flex-wrap:nowrap}
+#side .sidehd .cls{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:auto!important}
+#side .sidehd>div{flex:none;display:flex;gap:4px!important}
+#side .sidehd .nb.ib:not(.pinbtn){font-size:.72rem;padding:3px 8px;font-weight:600;white-space:nowrap;border:1px solid rgba(255,255,255,.35);border-radius:6px}
+#side .sidehd .nb.ib.on:not(.pinbtn){background:rgba(255,255,255,.24)}
+#side .sidehd .nb.pinbtn{flex:none;padding:4px 7px}
+.cvedit{cursor:pointer;border-bottom:1px dashed var(--accent,#2d8fe0);background:rgba(45,143,224,.10);border-radius:3px;padding:0 2px}
+.cvedit:hover{background:rgba(45,143,224,.22)}
+@media(min-width:781px){ body.adm.nav-open{padding-left:290px} }
+@media(max-width:780px){ body.adm.nav-open header,body.adm.nav-open #toolbar,body.adm.nav-open #app{transform:translateX(290px)} }
+/* Barre d'outils SOUS le bandeau : boutons Nouveau / Exporter / Importer + recherche + filtres */
+#toolbar .wrap{padding-bottom:0}
+#toolbar .actions{display:flex;gap:8px;flex-wrap:wrap}
+#toolbar:has(#actions.hidden):has(#filters.hidden){display:none}
+header .brand>span{min-width:0}
+/* ===== TELEPHONE ===== */
+@media(max-width:640px){
+  header .top{flex-wrap:nowrap;gap:8px}
+  header h1.brand{flex:1;min-width:0}
+  header .brand>span{overflow:hidden}
+  header h1,header.big h1{font-size:.9rem}
+  header h1 small,header.big h1 small{font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #toolbar .actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  #toolbar .actions .tbtn{width:100%;padding:8px 10px;font-size:.85rem}
+  #toolbar .actions .tbtn.primary{grid-column:1/-1}
+  #toolbar .filters{grid-template-columns:1fr 1fr;gap:6px}
+  #toolbar .filters #q{grid-column:1/-1}
+  #toolbar .filters select{min-width:0;text-overflow:ellipsis}
+  header:not(.big){position:static}
+  .tiles{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .wrap{padding-left:12px;padding-right:12px}
+  header .wrap{padding-left:10px;padding-right:10px}
+}
+@media(max-width:380px){header h1 small,header.big h1 small{display:none}}
+/*
+ --- body.nolog : appliquée quand personne n'est connecté -> on cache menu et bandeau, il ne reste que l'écran de connexion ---
+*/
+body.nolog{padding-left:0!important}body.nolog #side,body.nolog header,body.nolog #toolbar,body.nolog #scrim{display:none!important}
+
+
+/*
+ ============================================================================
+ ===================== FINITIONS (style sobre) =====================
+ Couleurs pleines, ombres légères, pas d'animation décorative : l'appli doit être lisible et rapide en atelier,
+ sur un téléphone ou une tablette, avec des gants et une lumière moyenne.
+ ============================================================================
+*/
+:root{--shadow:0 1px 3px rgba(10,47,90,.10);--shadow-hi:0 6px 18px rgba(10,47,90,.16);--ease:ease}
+:root[data-theme="dark"]{--shadow:0 1px 3px rgba(0,0,0,.4);--shadow-hi:0 6px 18px rgba(0,0,0,.5)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--shadow:0 1px 3px rgba(0,0,0,.4);--shadow-hi:0 6px 18px rgba(0,0,0,.5)}}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(10,90,168,.25)}
+
+/* Bandeau et menu : bleu Sibelco uni */
+header{background:var(--brand);border-bottom:3px solid var(--accent)}
+#side{background:var(--brand);border-right:0}
+#side .nb.on{background:rgba(255,255,255,.16);box-shadow:inset 3px 0 0 #fff}
+
+/* Boutons, cartes, panneaux */
+button{transition:background .15s,border-color .15s}
+button:active{transform:translateY(1px)}
+a.btn.primary{background:var(--accent);color:var(--accent-text);padding:8px 16px;border-radius:8px;font-weight:600}
+.panel{border-radius:10px;box-shadow:var(--shadow)}
+.card{border-radius:10px;box-shadow:var(--shadow);transition:border-color .15s,box-shadow .15s}
+.card:hover{border-color:var(--accent);box-shadow:var(--shadow-hi)}
+.card .cover{position:relative}
+.progress{height:8px}
+.progress>div{background:var(--ok);transition:width .3s}
+.toast{border-radius:8px;padding:10px 18px;box-shadow:var(--shadow-hi);transition:opacity .2s}
+
+/* Accueil : en-tête simple */
+.homehd h2{margin:0 0 8px;font-size:1.5rem}
+.homecls{gap:8px;align-items:center;flex-wrap:wrap}
+.homehd>.meta{margin:8px 0 0}
+.trained{display:inline-flex;align-items:center;gap:4px;font-size:.78rem;font-weight:600;color:var(--ok);border:1px solid var(--ok);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.stat{background:rgba(45,143,224,.10);border:1px solid rgba(45,143,224,.35);border-radius:10px;padding:6px 14px;font-size:.85rem;color:var(--muted);min-width:76px}
+.stat b{display:block;font-size:1.45rem;line-height:1.15;color:var(--accent)}
+@media (max-width:480px){.homehd h2{font-size:1.25rem}.stat{flex:1;min-width:0;padding:6px 10px}}
+
+/* Écran de connexion */
+.authhd{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.authhd img{width:52px;height:52px;border-radius:8px;background:#fff;padding:3px;border:1px solid var(--line)}
+.authhd h2{margin:0;font-size:1.15rem}
+.authhd .meta{font-size:.8rem}
+.pwwrap{position:relative}
+.pwwrap input{padding-right:42px}
+.pweye{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:transparent;padding:6px 8px;color:var(--muted);box-shadow:none!important;display:grid;place-items:center}
+.pweye:hover{color:var(--accent)}
+.pweye svg{display:block}
+.capswarn{color:var(--warn-line);margin-top:4px}
+
+/* Pastille hors ligne, bouton Installer, bandeau de mise à jour, fenêtre d'installation */
+.netpill{background:#c0392b;color:#fff;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+header .row{gap:6px;flex-wrap:nowrap}
+#bInstall{font-size:.72rem;padding:4px 10px;line-height:1.2;white-space:nowrap}
+.updbar{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;display:flex;gap:12px;align-items:center;background:var(--brand);color:#fff;padding:8px 10px 8px 16px;border-radius:10px;box-shadow:var(--shadow-hi);font-size:.9rem;max-width:94vw}
+@media (max-width:480px){.instlbl{display:none}#bInstall{padding:6px 10px;font-size:.9rem}}
+.instov{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:16px;background:rgba(6,18,34,.6)}
+.instbox{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-hi);padding:18px 18px 14px;max-width:440px;width:100%;max-height:90vh;overflow:auto}
+.instbox h2{margin:0 0 8px;font-size:1.1rem}
+.instbox p{margin:6px 0;font-size:.92rem;line-height:1.45}
+.instbox .instnote{color:var(--muted);font-size:.82rem}
+.instbox .instact{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:14px}
+@media print{.updbar,.netpill,#bInstall{display:none!important}}
+/* Animations coupées si l'appareil demande de les réduire */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+/* Textes modifiables de la page Machines 3D (mode modification) */
+.m3 [contenteditable="true"][data-k]{outline:2px dashed var(--accent);outline-offset:3px;border-radius:4px;cursor:text;min-height:1.3em}
+.m3 [contenteditable="true"][data-k]:focus{outline-style:solid;background:rgba(10,90,168,.08)}
+.m3 [contenteditable="true"][data-k]:empty:before{content:attr(data-ph);opacity:.55}
+.m3 .m3hint[contenteditable="true"]{pointer-events:auto}
+
+/* ===== FLOWSHEET INTERACTIF ===== */
+.cover.c-flowsheet{background:#235a6b}
+.cover.c-glossaire{background:#6b5326}
+/* ===== MOTS-CLES / DEFINITIONS ===== */
+/* cartes Sibelco : face avant = bleu nuit + globe à facettes du logo ; face arrière = définition. Pas de 3D (fiable sur tous les téléphones) : fondu entre les deux faces. */
+.glgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.glf{position:relative;cursor:pointer;outline:none;border-radius:18px;-webkit-tap-highlight-color:transparent;transition:transform .2s ease}
+.glf:hover{transform:translateY(-3px)}
+.glf:focus-visible{box-shadow:0 0 0 3px var(--accent)}
+.glfi{display:grid;min-height:190px}
+.glfa,.glfb{grid-area:1/1;border-radius:18px;position:relative;overflow:hidden;transition:opacity .35s ease,transform .35s ease,visibility .35s}
+.glfa{background:var(--card);color:var(--text);padding:16px 18px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.glfa::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);opacity:.7}
+.glt,.glword,.glhint{position:relative;z-index:1}
+.glogo{width:30px;height:30px;border-radius:50%;background:#fff;padding:2px;object-fit:contain;flex:none}
+.glword{font-size:1.4rem;font-weight:800;line-height:1.2;color:var(--accent);overflow-wrap:anywhere}
+.glhint{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.glfb{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);opacity:0;visibility:hidden;transform:scale(.96);display:flex;flex-direction:column}
+.glfb::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
+.glbk{padding:16px 18px 12px 22px;position:relative;z-index:1;flex:1}
+.glbk h4{margin:0 0 8px;color:var(--accent);font-size:1.05rem;display:flex;align-items:center;gap:8px}
+.glbk .glogo{width:24px;height:24px;border:1px solid var(--line)}
+.glbk p{margin:0;line-height:1.5;color:var(--text)}
+.glfb .small{margin:0 18px 14px 22px;align-self:flex-start;position:relative;z-index:1}
+.glf.flip .glfa{opacity:0;visibility:hidden;transform:scale(1.03)}
+.glf.flip .glfb{opacity:1;visibility:visible;transform:none}
+.glband{display:flex;align-items:center;gap:10px;padding:10px 12px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M0 0h22L11 22z' fill='%23fff' fill-opacity='.10'/%3E%3Cpath d='M0 22h22L11 0z' fill='%2338b6f0' fill-opacity='.16'/%3E%3C/svg%3E"),linear-gradient(120deg,#0a2f5a,#0a5aa8);color:#fff}
+.glband b{font-size:1rem}
+.glband .glogo{width:28px;height:28px}
+/* dossiers à l'intérieur d'une fiche constructeur */
+.fdsec{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:10px 12px;margin:10px 0;background:var(--card)}
+details.fdsec>summary{cursor:pointer;display:flex;align-items:center;gap:10px;font-weight:700;list-style:none}
+details.fdsec>summary::-webkit-details-marker{display:none}
+details.fdsec>summary::after{content:"›";margin-left:auto;font-size:1.4rem;color:var(--accent);transition:transform .2s}
+details.fdsec[open]>summary::after{transform:rotate(90deg)}
+.fdsec svg.fdic{width:24px;height:24px;flex:none;color:var(--accent)}
+.fdsec .fpdfs{margin-top:10px}
+.fdsec .fdhead{display:flex;align-items:center;gap:8px}
+.fdsec .fdhead input{flex:1;min-width:0;font-weight:700}
+.fpdfrow select{max-width:150px}
+/* fiches constructeur : liste de PDF */
+.fpdfs{display:flex;flex-direction:column;gap:8px;margin:6px 0}
+.fpdfrow{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-left:4px solid #2d8fe0;border-radius:10px;padding:10px 12px;text-align:left;width:100%}
+.fpdfbtn{cursor:pointer;font:inherit;color:var(--text)}
+.fpdfbtn:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.fpdfic{flex:none;background:#d33;color:#fff;font-weight:800;font-size:.7rem;letter-spacing:.06em;padding:6px 8px;border-radius:6px}
+.fpdfn{flex:1;font-weight:600;overflow-wrap:anywhere}
+.fpdfgo{font-size:1.4rem;color:var(--accent)}
+.fpdfrow input{flex:1;min-width:0}
+.gllist{display:flex;flex-direction:column;gap:8px}
+.glrow{display:grid;grid-template-columns:minmax(110px,220px) 1fr auto;gap:12px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.glw{font-weight:700}
+.gld{cursor:pointer;transition:filter .2s}
+.gld.blur{filter:blur(7px);user-select:none;-webkit-user-select:none}
+.glrow{border-left:4px solid #2d8fe0}
+.glw{color:var(--accent)}
+/* évaluation */
+.gle{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);max-width:720px;margin:8px auto}
+.gle .glband{justify-content:space-between}
+.gle .glbody{padding:16px}
+.gleq{font-size:1.05rem;line-height:1.5;padding:14px;border-left:4px solid #2d8fe0;background:rgba(45,143,224,.08);border-radius:8px;margin:0 0 12px}
+.gleo{display:block;width:100%;text-align:left;margin:6px 0;padding:11px 14px;font-size:.98rem}
+.gleo.ok{background:rgba(26,138,74,.2);border-color:var(--ok);color:var(--text)}
+.gleo.ko{background:rgba(211,51,51,.18);border-color:#d33;color:var(--text)}
+.gleo[disabled]{opacity:1;cursor:default}
+.glescore{font-size:2.8rem;font-weight:800;color:var(--accent);text-align:center;margin:4px 0}
+.glemiss{border-left:4px solid #d33;padding:6px 10px;margin:6px 0;background:rgba(211,51,51,.07);border-radius:6px;font-size:.92rem}
+@media(max-width:640px){.glrow{grid-template-columns:1fr auto}.glrow .glw{grid-column:1/-1}}
+.fladm{margin:6px 0;padding:4px 12px;font-size:.85rem;border-radius:10px}
+.fladm-line{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;padding:7px 0;border-top:1px solid var(--line)}
+.fladm-lb{flex:none;width:68px;font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.6}
+.fladm input{flex:1;min-width:140px;max-width:300px;padding:4px 8px;font-size:.85rem}
+.fladm .meta{font-size:.76rem}
+.fladm-off{display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:1}
+.fladm-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:2px 4px 2px 10px}
+.stok{color:var(--ok)}.stko{color:var(--danger-line)}
+svg.pen{vertical-align:-2px}
+/* ===== FLOWSHEET : modification des cases ===== */
+.flbox.zedit{cursor:crosshair}
+.flbox.zedit.zpan{cursor:grab}
+.flbox.zedit .fh{fill:rgba(26,138,74,.16);stroke:#1a8a4a;stroke-width:1;stroke-dasharray:4 3}
+.flbox.zedit .fh:hover{fill:rgba(220,38,38,.3);stroke:#dc2626}
+.fdraw{fill:rgba(224,138,0,.25);stroke:#e08a00;stroke-width:2;stroke-dasharray:6 4;vector-effect:non-scaling-stroke;pointer-events:none}
+.wrap.flowwide{max-width:none}
+.flbox{position:relative;height:calc(100vh - 215px);min-height:420px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.flbox:active{cursor:grabbing}
+.flsvg{width:100%;height:100%;display:block}
+.fh{fill:transparent;stroke:none;cursor:pointer;vector-effect:non-scaling-stroke}
+.fh:hover{fill:rgba(10,90,168,.22);stroke:#0a5aa8;stroke-width:2}
+.flshow .fh{fill:rgba(45,143,224,.16);stroke:#2d8fe0;stroke-width:1}
+.flshow .fh.ln{fill:rgba(26,138,74,.18);stroke:#1a8a4a}
+.fh.hit{fill:rgba(255,170,0,.45);stroke:#e08a00;stroke-width:3;animation:flblink .8s ease-in-out 4}
+@keyframes flblink{50%{fill:rgba(255,170,0,.1)}}
+.fltip{position:absolute;z-index:5;width:250px;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);overflow:hidden;pointer-events:none;font-size:.88rem}
+.fltip.pin{pointer-events:auto}
+.fltip[hidden]{display:none}
+.fltip img{width:100%;height:140px;object-fit:contain;background:var(--bg);display:block}
+.fltip .flph{height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#235a6b;color:#fff;font-size:.75rem}
+.fltip .flph svg{width:34px;height:34px;fill:none;stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.fltip .flt{padding:10px 12px}
+.fltip .flt p{margin:6px 0}
+.fltip .flgo{font-size:.78rem;color:var(--muted)}
+.fltip .flgo.ok{color:var(--ok);font-weight:600}
+.flmodal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto}
+.flmodal .panel{width:min(480px,100%);max-height:94vh;overflow:auto;margin:0}
+@media(max-width:640px){.flbox{height:calc(100vh - 260px)}.fltip{width:220px}}
+/* ===== PHOTOS D'ILLUSTRATION : jamais déformées, jamais coupées n'importe comment =====
+   Photo de format proche de la carte -> elle la remplit (cover). Photo verticale ou très différente -> elle est affichée
+   en ENTIER (contain) sur un fond gris uni (classe .fitc posée par fitCover() dans le script). */
+.card .cover img{position:relative;z-index:1}
+.card .cover::after{z-index:2;pointer-events:none}
+.card .cover.fitc{background:#e9edf2}
+:root[data-theme="dark"] .card .cover.fitc{background:#0f151b}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .card .cover.fitc{background:#0f151b}}
+.card .cover.fitc::before{content:none}
+.card .cover.fitc img{object-fit:contain}
+img{image-orientation:from-image}
+
+/* ---- Cadrage des illustrations : photo entière sur fond flou (ou « Remplir » réglé par la classe .fill) ---- */
+.card .cover.hasimg::before{content:"";position:absolute;inset:-12%;background:var(--bg) center/cover no-repeat;filter:blur(16px) saturate(1.15) brightness(.92);z-index:0}
+.card .cover img{object-fit:contain;position:relative;z-index:1}
+.card .cover.fill img{object-fit:cover;object-position:var(--op,50% 50%)}
+.card .cover.fill.hasimg::before{display:none}
+.cover[class*=" c-c_"]{background:#34495e}
+/* ---- Onglets personnalisés : grille de cases ---- */
+.cgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px;margin:12px 0}
+.cblk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);min-width:0;overflow-wrap:anywhere}
+.cblk.cbed{outline:2px dashed var(--accent);outline-offset:-5px}
+.cbctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.cbctl select{padding:4px 6px;font-size:.85rem}
+.cbh{margin:6px 0 0}
+.cbimg img{width:100%;height:auto;display:block;border-radius:8px}
+.cbimg.fill{aspect-ratio:16/9;overflow:hidden;border-radius:8px}
+.cbimg.fill img{height:100%;object-fit:cover;border-radius:0}
+.cbph{display:grid;place-items:center;min-height:110px;border:1px dashed var(--line);border-radius:8px;color:var(--muted)}
+#cbModal textarea,#cbModal input:not([type=checkbox]):not([type=file]),#cbModal select{width:100%;box-sizing:border-box}
+@media(max-width:780px){ .cgrid>.cblk{grid-column:span 12!important} }
+/* ===================== SIBELCO 2.1 : recherche globale + carte « Reprendre » (accueil) =====================
+   .gsearch = champ de recherche de l'accueil (tutos + fiches + mots-clés) ; .gres = liste des résultats ;
+   .resume  = carte « Reprendre » (dernier tutoriel ouvert, non terminé). */
+.gsearch{padding:10px 12px}
+.gsearch input{width:100%;font:inherit;padding:10px 12px 10px 38px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235d6b78' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:18px;background-position:12px center}
+.gsearch input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,143,224,.2)}
+.gres:empty{display:none}
+.gres{margin-top:8px;display:grid;gap:4px}
+.gres .gr{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid transparent;background:transparent}
+.gres .gr:hover,.gres .gr:focus-visible{background:rgba(45,143,224,.10);border-color:rgba(45,143,224,.35)}
+.gres .gr .gk{flex:0 0 auto;font-size:.68rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:999px;color:#fff;background:var(--accent)}
+.gres .gr .gk.f{background:#1a8a6a}.gres .gr .gk.g{background:#7a4bb8}
+.gres .gr .gt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gres .gr .gt small{display:block;color:var(--muted);font-size:.78rem;overflow:hidden;text-overflow:ellipsis}
+.gres .gr mark{background:rgba(224,168,0,.35);color:inherit;border-radius:3px;padding:0 1px}
+.gres .none{color:var(--muted);font-size:.85rem;padding:6px 10px}
+.resume{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-left-color:var(--accent);background:rgba(45,143,224,.10);color:var(--text)}
+.resume .rt{flex:1;min-width:180px}
+.resume .ra{display:flex;gap:6px;align-items:center;margin-left:auto}
+.resume .rt b{display:block}
+.resume .rt .meta{display:block;margin-top:2px}
+.resume .progress{height:6px;margin-top:6px}
+@media(max-width:640px){.gsearch{padding:8px}}
+
+/* ===================== LECTURE D'UN TUTO =====================
+ .tuhd = en-tête du tuto ; .sfc = pastilles énergies (rouge) / EPI (bleu) ; .pre = « Avant de commencer » ;
+ .gstep = l'étape affichée ; .gnext = aperçu de l'étape suivante ; .gfin = fin du tuto ; .zoomov = photo en grand. */
+.tuhd h2{margin:8px 0 4px;font-size:1.35rem;line-height:1.25}
+.tuhd .tver{margin:4px 0 8px;font-size:.78rem}
+.tuhd .tcover{cursor:zoom-in}
+.sfcs{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.sfc{display:inline-block;font-size:.8rem;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid}
+.sfc.en{background:#fff;color:#b71c1c;border-color:#e57373}
+.sfc.ppe{background:#e8f1fb;color:#0a4a8a;border-color:#9cc3ea}
+:root[data-theme="dark"] .sfc.en{background:#2a1414;color:#ff9a9a}
+:root[data-theme="dark"] .sfc.ppe{background:#0f2338;color:#9cc9f2}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sfc.en{background:#2a1414;color:#ff9a9a}:root:not([data-theme="light"]) .sfc.ppe{background:#0f2338;color:#9cc9f2}}
+.ppebox,.toolbox{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:10px 12px;margin:10px 0}
+.toolbox ul,.box ul{margin:6px 0 0;padding-left:20px}
+.box.ok{border-left-color:var(--ok);background:transparent;color:var(--text);border:1px solid var(--line);border-left:4px solid var(--ok)}
+.pre h3{margin:4px 0}
+.prechk{display:flex;gap:10px;align-items:flex-start;padding:10px 4px;border-bottom:1px solid var(--line);color:var(--text);cursor:pointer;font-size:.98rem;line-height:1.4}
+.prechk input{width:22px;height:22px;flex:none;margin-top:1px;padding:0}
+#preGo{margin-top:14px;width:100%;padding:12px;font-size:1rem}
+.ghd{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.gstep .gtxt{font-size:1.12rem;line-height:1.6;margin:12px 0}
+.gstep img.gmedia{cursor:zoom-in;max-height:60vh;object-fit:contain;background:var(--bg)}
+.gbtns{display:flex;justify-content:space-between;gap:10px;margin-top:14px}
+.gbtns button{padding:10px 16px;font-size:.98rem}
+.gbtns button.primary{flex:1;max-width:340px;margin-left:auto}
+.gnext{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line);color:var(--muted);font-size:.88rem}
+.gnext span{font-weight:600}
+.gfin{margin-top:14px;border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:6px;padding:12px 14px}
+.gfin p{margin:6px 0}
+.rmform summary{cursor:pointer;font-weight:600;color:var(--accent)}
+.rmform textarea{margin:8px 0}
+.rmk{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:6px 0;border-top:1px solid rgba(0,0,0,.08)}
+.zoomov{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.88);display:grid;place-items:center;padding:12px;cursor:zoom-out}
+.zoomov img{max-width:100%;max-height:100%;object-fit:contain}
+.zoomx{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;padding:0;font-size:1.4rem}
+@media (max-width:640px){.gbtns button{padding:12px 14px}.gstep .gtxt{font-size:1.08rem}}
+
+/* Fiche d'intervention imprimée : case à cocher par étape, contrôles, tableau de signature */
+@media print{
+  .pinfo{margin-bottom:8px;font-size:.95rem}
+  .pstep{break-inside:avoid;align-items:flex-start}
+  .pstep .pbox{flex:0 0 16px;height:16px;border:1.5px solid #000;margin-top:8px}
+  .pstep img{max-width:60%;max-height:220px;margin-top:6px}
+  .psign{width:100%;border-collapse:collapse;margin-top:16px;break-inside:avoid}
+  .psign td{border:1px solid #000;padding:6px;font-size:.8rem;width:25%;height:22px}
+  .psign tr:last-child td{height:42px}
+  .plines{height:80px;border-bottom:1px solid #000;background:repeating-linear-gradient(#fff 0 25px,#999 25px 26px)}
+  .sfc{border:1px solid #000!important;color:#000!important;background:#fff!important}
+}
+
+/* Éditeur de tuto : cases énergies / EPI, options repliables d'une étape, bouton « Insérer une étape ici » */
+.ckgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 14px;margin:4px 0 6px}
+.ckgrid label{display:flex;gap:8px;align-items:center;margin:0;font-weight:400;color:var(--text);cursor:pointer}
+.ckgrid input{width:18px;height:18px;padding:0;flex:none}
+.edmore{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.edmore summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:.9rem}
+.edins{display:block;margin:-4px auto 4px;opacity:.75}
+.edins:hover{opacity:1}
+.tag.loto{color:#b71c1c;border-color:#e57373}
+
+/* ===================== FOND D'ÉCRAN =====================
+ #bgimg = la photo (posée par applyBg() dans app.js) ; ::after = voile clair / sombre dont l'opacité vient de --veil
+ (réglée dans Paramètres > Fond d'écran). Sans photo : fond uni var(--bg). */
+#bgimg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--bg) center/cover no-repeat}
+#bgimg::after{content:"";position:absolute;inset:0;background:rgba(242,245,249,var(--veil,.82))}
+:root[data-theme="dark"] #bgimg::after{background:rgba(16,22,28,var(--veil,.82))}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #bgimg::after{background:rgba(16,22,28,var(--veil,.82))}}
+html:not(.hasbg) #bgimg::after{display:none}
+html.hasbg body{background:transparent}
+.bgopt{display:inline-flex;align-items:center;gap:6px;margin:0;color:var(--text);font-size:.95rem;cursor:pointer}
+.bgopt input{width:18px;height:18px;padding:0}
+.btn.small{padding:5px 10px;font-size:.85rem}
+@media print{#bgimg{display:none}}
+
+/* ===================== MODE INTERVENTION : le tuto prend toute la page =====================
+ body.tfocus est posé par tuEnter() (app.js) à l'ouverture d'un tuto et retiré dès qu'on change de page.
+ .tbar = barre fixe en haut (Quitter, titre, progression, temps, A−/A+, plein écran, imprimer, modifier) ;
+ .tugrid = sur grand écran, infos du tuto à gauche (.tuside) et étape à droite (.tumain) ; sur téléphone, l'un sous l'autre.
+ body[data-ts] = taille du texte des étapes choisie avec A− / A+. */
+body.tfocus header,body.tfocus #toolbar,body.tfocus #side,body.tfocus #scrim,body.tfocus .updbar{display:none!important}
+body.tfocus{padding-left:0!important}
+body.tfocus #app{transform:none!important;max-width:1500px;padding-top:calc(68px + env(safe-area-inset-top,0px));padding-bottom:24px}
+.tbar{display:none}
+body.tfocus .tbar{display:flex;position:fixed;top:0;left:0;right:0;z-index:40;align-items:center;gap:10px;background:var(--brand);color:#fff;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px));box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.tbar button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.28);padding:7px 11px;font-size:.9rem;white-space:nowrap}
+.tbar button:hover{background:rgba(255,255,255,.22)}
+.tbt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.tbt b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbt>span{font-size:.8rem;color:#c5d6ea}
+.tbr{display:flex;gap:6px;align-items:center}
+.tbprog{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.18)}
+.tbprog>div{height:100%;width:0;background:#4cc57f;transition:width .3s}
+#gbox{scroll-margin-top:76px}
+.tuinfo>summary{cursor:pointer;font-weight:600;color:var(--accent);margin:8px 0}
+body.tfocus .tumain{min-height:calc(100vh - 110px)}
+body.tfocus .tuhd .tcover{max-height:240px}
+@media (min-width:1000px){
+  body.tfocus .tugrid{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:16px;align-items:start}
+  body.tfocus .tuside{position:sticky;top:calc(76px + env(safe-area-inset-top,0px));max-height:calc(100vh - 92px);overflow:auto}
+  body.tfocus .tuside .panel{margin-top:0}
+  body.tfocus .tumain{margin-top:0}
+}
+@media (max-width:999px){
+  /* téléphone / tablette : les boutons Précédent / Valider restent collés en bas de l'écran, à portée de pouce */
+  body.tfocus .gbtns{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;background:var(--card);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);box-shadow:0 -2px 8px rgba(0,0,0,.12)}
+  body.tfocus .gbtns button.primary{max-width:none}
+  body.tfocus #app{padding-bottom:96px}
+  body.tfocus .tumain{min-height:0}
+}
+@media (max-width:640px){ .tbl,.tbw{display:none} .tbar{gap:6px} .tbar button{padding:7px 9px} }
+body[data-ts="-1"] .gstep .gtxt{font-size:1rem}
+body[data-ts="1"] .gstep .gtxt{font-size:1.3rem}
+body[data-ts="2"] .gstep .gtxt{font-size:1.55rem}
+body[data-ts="3"] .gstep .gtxt{font-size:1.85rem}
+body[data-ts="2"] .gstep .box,body[data-ts="3"] .gstep .box{font-size:1.15rem}
+@media print{.tbar{display:none!important}body.tfocus #app{padding-top:0}}
+
+/* Historique des interventions (Paramètres, classes 3 et 4) et « Dernières réalisations » en haut d'un tuto */
+.tulog summary{cursor:pointer;font-size:.85rem;color:var(--muted);margin:6px 0}
+.logtab{overflow:auto;max-height:360px;border:1px solid var(--line);border-radius:6px}
+.logtab table{width:100%;border-collapse:collapse;font-size:.85rem}
+.logtab th,.logtab td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.logtab th{position:sticky;top:0;background:var(--card)}
+
+/* Tuiles de l'accueil : les boutons Photo / Cadrer / × (classes 3 et 4) n'apparaissent qu'au survol sur ordinateur */
+@media (hover:hover){ .tcard .tpedit{opacity:0;transition:opacity .15s} .tcard:hover .tpedit,.tcard:focus-within .tpedit{opacity:1} }
+
+/* Validation des tutos */
+.valbox{border-left-color:var(--warn-line)}
+.vallist{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow:auto}
+.valit{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;width:100%}
+.valit:hover{border-color:var(--accent)}
+.mlink{color:var(--accent);font-weight:600}
+
+/* QR codes des machines : cartes à imprimer et à coller sur les trieurs */
+.qrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:14px 0}
+.qrcard{background:#fff;color:#111;border:2px solid #0a2f5a;border-radius:10px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;break-inside:avoid}
+.qrcard svg{width:100%;max-width:200px;height:auto}
+.qrcard b{font-size:1.15rem}
+.qrcard .meta{color:#444;display:block;font-size:.78rem}
+.qrhd{display:flex;align-items:center;gap:6px;font-weight:700;color:#0a2f5a;font-size:.85rem}
+.qrhd img{width:26px;height:26px}
+@media print{.qrgrid{grid-template-columns:repeat(2,1fr);gap:10mm}.qrcard{border-width:1.5px}}
+
+/* ===================== LOGO 3D SIBELCO (globe) =====================
+ .logo3d = le cadre carré (240 px max) qui contient le dessin 3D ; changez "240px" pour agrandir/réduire PARTOUT.
+ .logo3d.big = taille dans la fenêtre agrandie ; .shadow = ombre ovale sous le globe ; .hint = "Cliquez ou faites glisser".
+ .wordmark = le texte SIBELCO sous le globe (du vrai texte, pas une image : dégradé bleu, police Arial Black).
+ touch-action:pan-y = sur téléphone, glisser le doigt vers le haut/bas fait défiler la page, vers la gauche/droite tourne le logo. */
+
+.logo3d{position:relative;width:min(240px,100%);aspect-ratio:1;margin:0 auto 20px;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;-webkit-tap-highlight-color:transparent;border-radius:50%}
+.logo3d:active{cursor:grabbing}
+.logo3d:focus-visible{outline-offset:-6px}
+.logo3d canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.logo3d .shadow{position:absolute;left:24%;right:24%;bottom:8%;height:6%;background:radial-gradient(closest-side,rgba(10,47,90,.38),transparent);pointer-events:none;animation:floaty 4.5s ease-in-out infinite}
+.logo3d .hint{position:absolute;left:0;right:0;bottom:-20px;text-align:center;font-size:.72rem;color:var(--muted);pointer-events:none;transition:opacity .5s;animation:blink 2.6s ease-in-out infinite}
+.logo3d .hint.gone{opacity:0;animation:none}
+.logo3d.big{width:min(78vw,380px)}
+@keyframes floaty{50%{transform:scaleX(.85);opacity:.7}}
+@keyframes blink{50%{opacity:.45}}
+.wordmark{font-family:"Arial Black","Segoe UI Black","Segoe UI",system-ui,sans-serif;font-weight:900;font-size:2.1rem;letter-spacing:.06em;text-align:center;line-height:1;margin-top:2px;
+  background:linear-gradient(180deg,#0a4f9e,#0a2f5a);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+:root[data-theme="dark"] .wordmark{background:linear-gradient(180deg,#8fd0ff,#3d9be0);-webkit-background-clip:text;background-clip:text}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .wordmark{background:linear-gradient(180deg,#8fd0ff,#3d9be0);-webkit-background-clip:text;background-clip:text}}
+.wordmark.sm{font-size:1.35rem}
+/* Fenêtre « logo agrandi » (clic sur le logo du bandeau) */
+.logoov{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(6,18,34,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadein .2s}
+.logoov.out{opacity:0;transition:opacity .18s}
+.logoov-card{position:relative;background:var(--card);border-radius:24px;padding:22px 26px 24px;box-shadow:0 30px 80px rgba(0,0,0,.5);text-align:center;max-width:94vw;animation:pop .35s var(--ease)}
+.logoov-card::before{content:"";position:absolute;inset:0;border-radius:24px;background:radial-gradient(300px 220px at 50% 28%,rgba(45,143,224,.2),transparent 70%);pointer-events:none}
+.logoov-card>*{position:relative}
+.logoov-x{position:absolute!important;right:10px;top:10px;border-radius:50%;width:34px;height:34px;padding:0;display:grid;place-items:center}
+@keyframes fadein{from{opacity:0}}
+@keyframes pop{from{opacity:0;transform:scale(.88) translateY(14px)}}
+@media print{.logo3d,.logoov{display:none!important}}
+/* Accueil : texte à gauche, globe 3D à droite (au-dessus sur téléphone) */
+.homehd{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:14px;align-items:center}
+.homehd .logocol .logo3d{width:min(180px,100%);margin-bottom:26px}
+@media (max-width:640px){.homehd{grid-template-columns:1fr}.homehd .logocol{order:-1}.homehd .logo3d{width:min(130px,40%)!important;margin-bottom:12px}.homehd h2{text-align:center}}
+/* Écran de connexion : globe + SIBELCO + titre */
+.authlogo{text-align:center;margin-bottom:14px}
+.authlogo .logo3d{width:min(170px,60%);margin-bottom:26px}
+.authlogo h2{margin:8px 0 0;font-size:1.1rem}
+.authlogo .meta{display:block;font-size:.8rem}
