@@ -7,25 +7,29 @@
      2) permettre l'installation de l'appli comme une vraie application (PWA).
    ============================================================================ */
 
-// Nom du cache. IMPORTANT : à chaque fois que vous modifiez index.html (ou un autre fichier de la liste),
-// changez ce numéro (v27 -> v28...) pour que les appareils suppriment l'ancienne copie et récupèrent la nouvelle.
-const CACHE = 'tutos-maintenance-v55';
+// Nom du cache. IMPORTANT : à chaque fois que vous modifiez index.html, app.js, style.css (ou un autre fichier de la liste),
+// changez ce numéro pour que les appareils affichent « Nouvelle version disponible ».
+// Le plus simple : lancez le script  maj-version.ps1  (clic droit > Exécuter avec PowerShell) qui augmente le numéro tout seul.
+const CACHE = 'tutos-maintenance-v60';
 
 // Fichiers de l'appli à mettre en cache dès l'installation (ils doivent tous exister dans le dossier).
-// Ajoutez ici "./fond-verre.jpg" si vous utilisez une photo de fond.
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
+const FILES = ['./', './index.html', './style.css', './app.js', './manifest.webmanifest',
+  './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 
-// Fichiers OPTIONNELS : mis en cache si présents. Si l'un d'eux a été supprimé du dépôt (flowsheet retiré, pas de tutos partagés...),
+// Fichiers OPTIONNELS : mis en cache si présents. Si l'un d'eux manque (flowsheet retiré, pas de bibliothèque locale...),
 // cela ne bloque PAS l'installation de l'appli.
 const OPTIONAL = [
   // Flowsheets interactifs (un fichier .js par site : plan + équipements)
   './flowsheets/saint-romain.js', './flowsheets/Reims.js',
   // Données partagées (Paramètres > Exporter pour le site, publiées sur Git)
-  './donnees.json'];
+  './donnees.json',
+  // Photo de fond du site (Paramètres > Fond d'écran)
+  './fond-verre.jpg',
+  // Copies locales des bibliothèques (dossier lib/, facultatif : sinon on passe par le CDN ci-dessous)
+  './lib/pdf.min.js', './lib/pdf.worker.min.js', './lib/jszip.min.js', './lib/qrcode.min.js'];
 
 // Bibliothèques externes : pdf.js (affichage des PDF) et JSZip (lecture des PowerPoint .pptx).
 // Mises en cache "si possible" : si Internet manque pendant l'installation, ça ne bloque pas l'appli.
-// (Le logo 3D, lui, est dessiné par l'appli elle-même : aucune bibliothèque à télécharger.)
 const CDN = [
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
@@ -53,24 +57,33 @@ self.addEventListener('activate', e => {
   );
 });
 
+// On ne garde en cache QUE les fichiers de l'appli (même site) et les 3 bibliothèques ci-dessus.
+// Tout le reste (sites externes, liens ouverts depuis l'appli...) passe directement par Internet : le cache ne grossit pas sans fin.
+const cacheable = url => url.origin === self.location.origin || CDN.includes(url.href);
+
 // REQUETES : "réseau d'abord, avec délai limite".
 //   - Internet répond vite : on sert la version la plus récente et on en garde une copie.
 //   - Internet absent ou trop lent (> 4 s) : on sert la copie du cache (ou index.html à défaut).
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || !/^https?:/.test(req.url)) return;
+  const url = new URL(req.url);
+  if (!cacheable(url)) return;                     // laissé au navigateur, sans passer par le cache
+  const nav = req.mode === 'navigate';
   e.respondWith((async () => {
     const net = fetch(req).then(r => {
-      if (r && r.ok) { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {}); }
+      if (r && r.ok && r.type !== 'opaque') { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {}); }
       return r;
     });
-    const fromCache = async () => (await caches.match(req)) || (req.mode === 'navigate' ? await caches.match('./index.html') : undefined);
+    // ignoreSearch pour les pages : "index.html?source=pwa" retrouve bien la copie de "index.html"
+    const fromCache = async () => (await caches.match(req, { ignoreSearch: nav })) || (nav ? await caches.match('./index.html') : undefined);
+    let timer;
     try {
-      return await Promise.race([net, new Promise((_, no) => setTimeout(() => no(new Error('timeout')), NETWORK_TIMEOUT_MS))]);
+      return await Promise.race([net, new Promise((_, no) => { timer = setTimeout(() => no(new Error('timeout')), NETWORK_TIMEOUT_MS); })]);
     } catch (err) {
       const hit = await fromCache();
       if (hit) return hit;
       return net;           // rien en cache : on attend quand même la réponse d'Internet
-    }
+    } finally { clearTimeout(timer); }
   })());
 });
