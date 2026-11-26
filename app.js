@@ -4330,7 +4330,7 @@ function loadModelViewer(){
 // poi = points de la visite guidée : [y, z (hauteur), angle horizontal°, angle vertical°, distance m] en coordonnées Blender de la machine
 // version des fichiers 3D : ajoutée à leur adresse (…glb?v=67) pour que les navigateurs prennent tout de suite la nouvelle version
 // (GitHub les garde 10 min en cache). Mise à jour automatiquement par maj-version.ps1, en même temps que sw.js.
-const APP_VER = 'v69';
+const APP_VER = 'v70';
 const M3D_LIST=[
  {id:'redwave', file:'modeles3d/redwave.glb', col:'#d7261e', name:'Redwave CX',
   sub:['Trieur à goulotte : capots basculants, alimentation vibrante, chute libre devant les caméras','Chute sorter: tilting covers, vibrating feeder, free fall in front of the cameras'],
@@ -5387,7 +5387,7 @@ avUpdate();
 /* Paramètres > Application : installer ou DÉSINSTALLER l'appli (le bandeau n'affiche plus que « Installer », et seulement si elle n'est pas installée) */
 (function(){ const rs=renderSettings; renderSettings=function(){ rs();
   const h=`<div class="panel" id="apppanel"><h3 style="margin-top:0">${L('Application','Application')}</h3>
-    <p class="meta">${isStandalone()?L('L’appli est installée sur cet appareil.','The app is installed on this device.'):L('L’appli est ouverte dans le navigateur.','The app is open in the browser.')}</p>
+    <p class="meta">${isStandalone()?L('L’appli est installée sur cet appareil.','The app is installed on this device.'):L('L’appli est ouverte dans le navigateur.','The app is open in the browser.')} · ${L('Version','Version')} <b>${APP_VER}</b></p>
     <div class="row">${isStandalone()?`<button class="danger" onclick="instDialog('uninstall')">${L('Désinstaller l’appli','Uninstall the app')}</button>`:`<button class="primary" onclick="$('bInstall').click()">${L('Installer l’appli','Install the app')}</button>`}</div></div>`;
   const s=$('safepanel'); if(s) s.insertAdjacentHTML('beforebegin',h); else $('app').insertAdjacentHTML('beforeend',h); }; })();
 /* ===================== HISTORIQUE DES INTERVENTIONS =====================
