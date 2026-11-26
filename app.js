@@ -2793,7 +2793,7 @@ function renderFiches(type){
   state.section=type; state.view='fiches'; $('filters').classList.add('hidden'); buildNav();
   const l=fiches.filter(f=>f.type===type);
   $('app').innerHTML=`<div class="row" style="margin:12px 0;justify-content:space-between"><h2 style="margin:0">${esc(T(type==='constructeur'?'nav_cons':type==='consommables'?'nav_cons2':'nav_pres'))}</h2>${canEditFiche(type)?`<button class="primary" onclick="editFiche('','${type}')">${esc(T('add_fiche'))}</button>`:''}</div>`+
-   ((l.length||type==='presentation')?`<div class="grid">${type==='presentation'?m3Card():''}${l.map(f=>`<div class="card tcard" onclick="openFiche('${f.id}')"><div class="cover c-${type}">${f.cover?`<img src="${imgUrl(f.cover)}" alt="" loading="lazy">`:icoSVG(type)}</div><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${fFiles(f).length?`<span>${f.type==='constructeur'?fFiles(f).length+' PDF':(fileKind(f.file)==='ppt'?'PowerPoint':'PDF')}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
+   ((l.length||type==='presentation')?`<div class="grid">${type==='presentation'?m3Card()+m3dCards():''}${l.map(f=>`<div class="card tcard" onclick="openFiche('${f.id}')"><div class="cover c-${type}">${f.cover?`<img src="${imgUrl(f.cover)}" alt="" loading="lazy">`:icoSVG(type)}</div><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${fFiles(f).length?`<span>${f.type==='constructeur'?fFiles(f).length+' PDF':(fileKind(f.file)==='ppt'?'PowerPoint':'PDF')}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
 /*
@@ -4250,6 +4250,81 @@ function m3Card(){
     <span class="m3badge">3D</span></div><h3>${esc(L('Les trieurs en 3D : Redwave, Binder+Co, Steinert','Sorters in 3D: Redwave, Binder+Co, Steinert'))}</h3>
     <div class="meta"><span>${esc(L('VIS · UV · NIR · inductif','VIS · UV · NIR · inductive'))}</span><span>${esc(L('Interactif','Interactive'))}</span></div></div>`;
 }
+/* ============================================================================
+ ===================== MODÈLES 3D BLENDER (fichiers .glb) =====================
+ Les modèles sont faits dans Blender puis exportés en .glb (Fichier > Exporter > glTF 2.0) dans le dossier modeles3d/.
+ Ils s'affichent avec model-viewer (bibliothèque Google, copie locale lib/model-viewer.min.js, sinon jsdelivr) :
+ rotation au doigt / à la souris, zoom, réalité augmentée sur tablette compatible.
+ VUE ÉCLATÉE : l'animation du fichier va de « machine fermée » (0 s) à « machine éclatée » (end secondes, voir M3D_LIST) ;
+ le curseur « Vue éclatée » choisit le moment de l'animation affiché.
+ POUR AJOUTER UN MODÈLE : déposez le .glb dans modeles3d/, ajoutez une ligne dans M3D_LIST, et dans sw.js (liste OPTIONAL).
+ Fichier Blender source : dossier Blender/ à côté de l'appli (REDWAVE_CX_VIS_eclate.blend).
+============================================================================ */
+// MODIFIABLE : la liste des modèles 3D (id, fichier, titre, sous-titre, légende des pièces)
+const M3D_LIST=[
+ {id:'redwave-cx-vis', file:'modeles3d/redwave-cx-vis.glb', end:59/30,   // end = seconde de l'animation où la machine est complètement éclatée (image 60 à 30 i/s)
+  title:['Redwave CX — technologie VIS','Redwave CX — VIS technology'],
+  sub:['Vue éclatée 3D (modèle Blender)','3D exploded view (Blender model)'],
+  parts:[
+   ['#f2b705',['Caméras VIS + ligne de détection','VIS cameras + detection line'],['Caméras dans le visible : elles regardent la chute de verre sur toute la largeur (faisceau jaune, bouton « Voir la détection VIS ») et repèrent les indésirables par leur couleur et leur transparence.','Visible-light cameras: they watch the falling glass across the full width (yellow beam, “See VIS detection” button) and spot unwanted items by colour and transparency.']],
+   ['#fff6d5',['Éclairage LED avant / arrière','Front / rear LED lighting'],['Barres LED qui éclairent la chute de verre de façon uniforme pour que les caméras voient bien les couleurs.','LED bars lighting the falling glass evenly so the cameras see colours well.']],
+   ['#ffffff',['Fond de référence','Reference background'],['Plaque blanche derrière la chute : fond connu et constant derrière chaque morceau de verre. À garder propre.','White plate behind the fall: a known, constant background behind each piece of glass. Keep it clean.']],
+   ['#9aa5b1',['Alimentation vibrante','Vibrating feeder'],['Trémie tampon, auge vibrante, moteur et ressorts : étalent le calcin en une couche régulière.','Buffer hopper, vibrating trough, motor and springs: spread the cullet into an even layer.']],
+   ['#c0c7cf',['Goulotte de chute','Chute'],['Glissière rainurée qui accélère et aligne le verre avant la zone de détection.','Grooved slide that speeds up and aligns the glass before the detection zone.']],
+   ['#6b7785',['Rampe d’éjection (32 buses)','Ejection manifold (32 nozzles)'],['Électrovannes et buses : un souffle d’air comprimé dévie les indésirables repérés par les caméras.','Solenoid valves and nozzles: a blast of compressed air deflects the unwanted items found by the cameras.']],
+   ['#3b4652',['Lame séparatrice','Splitter plate'],['Sépare le flux soufflé (rejet) du flux non soufflé (produit bon).','Splits the blown stream (reject) from the unblown stream (good product).']],
+   ['#8a6f55',['Trémies produit bon / rejet','Good product / reject hoppers'],['Récupèrent les deux flux sous la machine.','Collect both streams under the machine.']],
+   ['#d7261e',['Capots, flasques, portes','Covers, side panels, doors'],['Carters de protection : machine consignée avant toute ouverture.','Protective guards: machine locked out before any opening.']]]}
+];
+const MV_LIB='https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js';
+let _mv=null;
+function loadModelViewer(){
+  if(window.customElements&&customElements.get('model-viewer')) return Promise.resolve();
+  if(_mv) return _mv;
+  _mv=new Promise((res,rej)=>{
+    const tryLoad=(src,next)=>{ const s=document.createElement('script'); s.type='module'; s.src=src;
+      s.onload=()=>customElements.whenDefined('model-viewer').then(res); s.onerror=()=>{ s.remove(); next?tryLoad(next,null):(_mv=null,rej(new Error('mv'))); }; document.head.appendChild(s); };
+    tryLoad(LIB_LOCAL+'model-viewer.min.js',MV_LIB);
+  });
+  return _mv;
+}
+function m3dCards(){
+  return M3D_LIST.map(m=>`<div class="card tcard" onclick="render3DModel('${m.id}')"><div class="cover c-presentation m3cover"><span class="catmono" style="color:#fff;font-weight:800;font-size:1.5rem">VIS</span><span class="m3badge">3D</span></div><h3>${esc(L(...m.title))}</h3><div class="meta"><span>${esc(L(...m.sub))}</span><span>${L('Interactif','Interactive')}</span></div></div>`).join('');
+}
+function render3DModel(id){
+  const m=M3D_LIST.find(x=>x.id===id); if(!m) return;
+  if(typeof m3Stop==='function') m3Stop();
+  state.section='presentation'; state.view='model3d'; state.id=id; $('filters').classList.add('hidden'); buildNav();
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="renderFiches('presentation')">${esc(T('back'))}</button></div>
+   <div class="panel"><h2 style="margin-top:0">${esc(L(...m.title))}</h2><p class="meta">${esc(L(...m.sub))} · ${L('faites tourner avec le doigt ou la souris, pincez / molette pour zoomer.','rotate with finger or mouse, pinch / wheel to zoom.')}</p>
+    <div class="m3dgrid"><div class="m3dview">
+      <div id="mvbox" class="mvbox"><p class="meta" style="padding:20px">${L('Chargement du modèle 3D…','Loading the 3D model…')}</p></div>
+      <div class="m3dctl"><label for="mvx">${L('Vue éclatée','Exploded view')}</label><input type="range" id="mvx" min="0" max="100" value="0" oninput="mvSet(this.value/100)">
+        <div class="row" style="gap:6px"><button class="primary" onclick="mvPlay(27/59)">${L('Voir la détection VIS','See VIS detection')}</button><button onclick="mvPlay(1)">${L('Éclater','Explode')}</button><button onclick="mvPlay(0)">${L('Assembler','Assemble')}</button><button onclick="mvReset()">${L('Vue initiale','Reset view')}</button></div></div>
+    </div><div class="m3dlegend"><h3 style="margin-top:0">${L('Les éléments','The parts')}</h3>${m.parts.map(p=>`<div class="m3dpart"><i style="background:${p[0]}"></i><div><b>${esc(L(...p[1]))}</b><p>${esc(L(...p[2]))}</p></div></div>`).join('')}
+      <p class="meta">${L('Modèle schématique réalisé dans Blender pour la formation : ce n’est pas un plan constructeur.','Schematic model made in Blender for training: not a manufacturer drawing.')}</p></div></div></div>`;
+  window.scrollTo(0,0);
+  if(location.protocol==='file:'){ $('mvbox').innerHTML=`<div class="box danger">${L('La 3D s’affiche quand l’appli est ouverte en ligne (adresse GitHub), pas en double-cliquant sur index.html.','3D shows when the app is opened online (GitHub address), not by double-clicking index.html.')}</div>`; return; }
+  loadModelViewer().then(()=>{
+    const box=$('mvbox'); if(!box) return;
+    box.innerHTML=`<model-viewer id="mv" src="${esc(m.file)}" alt="${esc(L(...m.title))}" camera-controls touch-action="pan-y" shadow-intensity="1" exposure="1.05" environment-image="neutral" camera-orbit="-35deg 68deg 7.5m" min-camera-orbit="auto auto 2m" max-camera-orbit="auto auto 14m" ar ar-modes="webxr scene-viewer quick-look" interaction-prompt="none"></model-viewer>`;
+    const mv=$('mv'); mv.dataset.end=m.end;
+    // l'animation doit être lancée une fois pour connaître sa durée : on la lance puis on la met tout de suite en pause au début
+    mv.addEventListener('load',()=>{ if(mv.availableAnimations.length) mv.animationName=mv.availableAnimations[0]; mv.play();
+      let n=0; const ready=()=>{ if(mv.duration>0||n++>60){ mv.pause(); mv.currentTime=(+$('mvx').value/100)*(+mv.dataset.end||2); mv.dataset.ready='1'; } else setTimeout(ready,50); }; ready(); });
+    mv.addEventListener('error',()=>{ box.innerHTML=`<div class="box danger">${L('Le fichier 3D n’a pas pu être chargé.','The 3D file could not be loaded.')}</div>`; });
+  }).catch(()=>{ const b=$('mvbox'); if(b) b.innerHTML=`<div class="box danger">${L('Impossible de charger la visionneuse 3D (pas d’Internet et pas de copie dans lib/).','Could not load the 3D viewer (no Internet and no copy in lib/).')}</div>`; });
+}
+// curseur : 0 = machine fermée, 1 = machine éclatée
+let mvAnim=0;
+function mvSet(k){ const mv=$('mv'); if(!mv||!mv.dataset.ready) return; cancelAnimationFrame(mvAnim); mv.pause(); mv.currentTime=Math.max(0,Math.min(1,k))*(+mv.dataset.end||2); }
+function mvPlay(to){
+  const mv=$('mv'), sl=$('mvx'); if(!mv||!mv.dataset.ready||!sl) return; cancelAnimationFrame(mvAnim);
+  const from=+sl.value/100, t0=performance.now(), d=1600*Math.abs(to-from)+1;
+  const step=n=>{ const k=Math.min(1,(n-t0)/d), e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2, v=from+(to-from)*e; sl.value=Math.round(v*100); mv.pause(); mv.currentTime=v*(+mv.dataset.end||2); if(k<1) mvAnim=requestAnimationFrame(step); };
+  mvAnim=requestAnimationFrame(step);
+}
+function mvReset(){ const mv=$('mv'); if(!mv) return; mv.cameraOrbit='-35deg 68deg 7.5m'; mv.cameraTarget='auto auto auto'; mv.fieldOfView='auto'; mvPlay(0); }
 
 /* EXPLICATION SUPPLÉMENTAIRE : PAGE "MACHINES 3D"
  Fabrique le HTML (onglets de marque, canvas #m3cv, panneau d'explication, boutons) puis appelle m3Start() qui lance l'animation.
@@ -4841,6 +4916,7 @@ function histRestore(s){
     else if(v==='fiche'&&s.fid&&fiches.some(f=>f.id===s.fid)) openFiche(s.fid);
     else if(v==='fiche'||v==='fedit'||v==='fiches') renderFiches(s.section);
     else if(v==='machine'&&s.mach) renderMachine(s.mach);
+    else if(v==='model3d'&&s.id) render3DModel(s.id);
     else if(v==='flow') renderFlow(s.fl||undefined);
     else if(v==='gloss'){ if(typeof GL!=='undefined') GL.q=s.gl||''; renderGloss(); }
     else if(v==='edit'||v==='list'||v==='view') renderList();
@@ -4856,7 +4932,7 @@ window.addEventListener('popstate',e=>{
   histRestore(s||{view:'home',section:'home',id:null,fid:null});
 });
 // Enveloppe des fonctions d'affichage : après chaque affichage, la page est inscrite dans l'historique.
-['renderHome','renderList','openTuto','openFiche','renderFiches','renderFlow','renderGloss','renderGame','renderSettings',
+['renderHome','renderList','openTuto','openFiche','renderFiches','renderFlow','renderGloss','renderGame','renderSettings','render3DModel',
  'renderCustom','renderMachines3D','renderConv','renderDel','renderEditor','renderFicheEditor'].forEach(n=>{
   const f=window[n]; if(typeof f!=='function') return;
   window[n]=function(){ const r=f.apply(this,arguments); histPush(); return r; };
