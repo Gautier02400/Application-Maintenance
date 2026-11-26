@@ -1348,7 +1348,7 @@ try{ new MutationObserver(frameCovers).observe(document.documentElement,{childLi
 function buildNav(){
   document.body.classList.toggle('adm',isAdmin());
   $('side').innerHTML=`<div class="sidehd"><span class="cls cls${settings.cls}" style="width:fit-content">${esc(clsL(settings.cls))}</span><div style="display:flex;gap:2px">${canEditTutos()?`<button class="nb ib ${navEdit?'on':''}" onclick="toggleNavEdit()" aria-pressed="${navEdit}" title="${esc(L('Modifier le menu : glisser pour changer l’ordre, toucher un nom pour le renommer','Edit the menu: drag to reorder, tap a name to rename it'))}">${navEdit?L('Terminer','Done'):L('Modifier','Edit')}</button>`:''}<button class="nb ib pinbtn ${isPinned()?'on':''}" onclick="togglePin()" aria-pressed="${isPinned()}" title="${isPinned()?L('Déverrouiller le menu','Unpin the menu'):L('Garder le menu ouvert','Keep the menu open')}">${isPinned()?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg>`}</button></div></div>${settings.name?`<b style="color:#fff;padding:0 10px 10px;font-size:.9rem">${esc(settings.name)}</b>`:'<div style="height:8px"></div>'}`+
-   navItems()+`<button class="nb" onclick="logout()">${L('Déconnexion','Log out')}</button>`;
+   navItems();
   document.querySelector('header').classList.toggle('big',state.section!=='tutos'); $('app').classList.toggle('flowwide',state.section==='flowsheet');
   $('actions').classList.toggle('hidden',state.section!=='tutos');
   $('btnNew').classList.toggle('hidden',!canEditTutos());
@@ -2158,7 +2158,8 @@ function lbReset(k){ delete LBL[k]; cvLabelsPersist(); lbClose(); lbRefresh(); }
 function toggleNavEdit(){ navEdit=!navEdit; buildNav(); }
 const GRIP='<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="6" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="18" r="1.7"/><circle cx="15" cy="18" r="1.7"/></svg>';
 function navItems(){
-  const arr=navList().filter(([k])=>k!=='convertisseur'||canEditTutos()), ed=navEdit&&canEditTutos();
+  // Mon profil, Équipe et Paramètres (et Déconnexion) ne sont plus dans ce menu : ils sont dans le menu de la photo de profil, en haut à droite
+  const arr=navList().filter(([k])=>!['profil','equipe','settings'].includes(k)&&(k!=='convertisseur'||canEditTutos())), ed=navEdit&&canEditTutos();
   return (ed?`<p class="nbhint">${L('Glissez les onglets vers le haut ou le bas. Touchez un nom pour le renommer. « Ajouter un onglet » en bas du menu.','Drag the tabs up or down. Tap a name to rename it.')}</p>`:'')+arr.map(([k,i,l])=>{
     const sp=k==='settings'?'<div class="sp"></div>':'';
     if(!ed) return sp+`<button class="nb ${state.section===k?'on':''}" onclick="go('${k}')">${esc(T(l))}</button>`;
