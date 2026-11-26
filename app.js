@@ -4410,7 +4410,7 @@ function render3DModel(id,tech){
    <div class="panel"><h2 style="margin-top:0">${L('Trieurs en 3D — fonctionnement et technologies','3D sorters — operation and technologies')}</h2>
     <div class="chips">${M3D_LIST.map(tab).join('')}</div>
     <p class="meta" style="margin:0 0 8px">${esc(L(...m.sub))}</p>
-    <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><button class="primary" onclick="m3dTour(0)">🧭 ${L('Visite guidée','Guided tour')}</button>
+    <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><button class="primary" onclick="m3dTour(0)">${L('Visite guidée','Guided tour')}</button>
       <div class="chips" id="m3dtechs" style="margin:0">${tb('all',L('Vue d’ensemble','Overview'))}${M3D_TECH.map(([k,c,col])=>tb(k,k==='ind'?L('Inductif','Inductive'):c,col)).join('')}</div></div>
     <div class="m3dgrid"><div class="m3dview">
       <div id="mvbox" class="mvbox"><p class="meta" style="padding:20px">${L('Chargement du modèle 3D…','Loading the 3D model…')}</p></div>
@@ -4493,7 +4493,7 @@ function m3dTourCard(){
   box.innerHTML=`<div class="m3dtour"><div class="meta">${L('Visite guidée','Guided tour')} · ${i+1} / ${n}</div>
     <div class="m3ddots">${M3D_TOUR.map((_,j)=>`<button class="${j===i?'on':''}" onclick="m3dTour(${j})" aria-label="${j+1}"></button>`).join('')}</div>
     <h3>${s.tech?`<i class="m3dot" style="background:${M3D_TECH.find(t=>t[0]===s.tech)[2]}"></i>`:''}${head}</h3>${body}
-    <div class="row" style="gap:6px;margin-top:10px"><button onclick="m3dTour(${i-1})" ${i===0?'disabled':''}>← ${L('Précédent','Previous')}</button>${i<n-1?`<button class="primary" onclick="m3dTour(${i+1})">${L('Suivant','Next')} →</button>`:`<button class="primary" onclick="M3DS.tour=-1;m3dTech('all');mvReset()">${L('Terminer','Finish')} ✓</button>`}<button onclick="M3DS.tour=-1;m3dTech('all');mvReset()">${L('Quitter','Leave')}</button></div></div>`;
+    <div class="row" style="gap:6px;margin-top:10px"><button onclick="m3dTour(${i-1})" ${i===0?'disabled':''}>← ${L('Précédent','Previous')}</button>${i<n-1?`<button class="primary" onclick="m3dTour(${i+1})">${L('Suivant','Next')} →</button>`:`<button class="primary" onclick="M3DS.tour=-1;m3dTech('all');mvReset()">${L('Terminer','Finish')}</button>`}<button onclick="M3DS.tour=-1;m3dTech('all');mvReset()">${L('Quitter','Leave')}</button></div></div>`;
 }
 // étape en cours pour la technologie choisie, d'après l'image de l'animation (synchronisée avec le passage de l'indésirable)
 function m3dStepAt(f){
@@ -5370,10 +5370,10 @@ function avMenu(e){
   if($('avMenu')) return avClose();
   const b=$('bAvatar'), m=document.createElement('div'); m.id='avMenu'; m.className='avmenu'; m.setAttribute('role','menu');
   m.innerHTML=`<div class="avhd">${avatar(settings,46)}<div><b>${esc(settings.name)}</b>${settings.poste?`<div class="meta">${esc(settings.poste)}</div>`:''}<span class="cls cls${+settings.cls||0}">${esc(clsL(+settings.cls||0))}</span></div></div>
-    <button role="menuitem" onclick="avGo('profil')">👤 ${L('Mon profil','My profile')}</button>
-    <button role="menuitem" onclick="avGo('equipe')">👥 ${L('Équipe / organigramme','Team / org chart')}</button>
-    <button role="menuitem" onclick="avGo('settings')">⚙️ ${L('Paramètres','Settings')}</button>
-    <button role="menuitem" class="out" onclick="avGo('logout')">⎋ ${L('Déconnexion','Log out')}</button>`;
+    <button role="menuitem" onclick="avGo('profil')">${L('Mon profil','My profile')}</button>
+    <button role="menuitem" onclick="avGo('equipe')">${L('Équipe / organigramme','Team / org chart')}</button>
+    <button role="menuitem" onclick="avGo('settings')">${L('Paramètres','Settings')}</button>
+    <button role="menuitem" class="out" onclick="avGo('logout')">${L('Déconnexion','Log out')}</button>`;
   document.body.appendChild(m);
   const r=b.getBoundingClientRect(); m.style.top=(r.bottom+8)+'px'; m.style.right=Math.max(8,window.innerWidth-r.right)+'px';
   b.setAttribute('aria-expanded','true');
