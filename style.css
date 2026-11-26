@@ -847,3 +847,10 @@ body[data-ts="2"] .gstep .box,body[data-ts="3"] .gstep .box{font-size:1.15rem}
 .m3dpart p{margin:2px 0 0;font-size:.85rem;color:var(--muted)}
 @media (max-width:860px){.m3dgrid{grid-template-columns:1fr}.mvbox{height:52vh}}
 .m3dtech .m3dot,.chips .m3dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.m3dcap{min-height:2.2em;margin-top:8px}
+.m3dstep{display:inline-block;border:2px solid;border-radius:8px;padding:6px 10px;background:var(--card);font-size:.95rem}
+.m3dsteps{padding-left:22px}
+.m3dsteps li{padding:4px 6px;border-radius:6px;margin:2px 0;transition:background .2s}
+.m3dsteps li.on{background:rgba(242,183,5,.22);font-weight:600}
+.m3dcycle{padding-left:22px}
+#mvFlowBtn.on{outline:3px solid rgba(255,255,255,.6)}

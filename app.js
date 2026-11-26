@@ -3948,7 +3948,7 @@ document.addEventListener('keydown',e=>{
 /*
  ============================================================================
  ===================== MACHINES EN 3D (rubrique "Fiches présentation") =====================
- Une visionneuse 3D des 3 marques de trieurs optiques (Redwave, Binder+Co « Clarity », Steinert), dessinée au canvas,
+ Une visionneuse 3D des 3 marques de trieurs optiques (Redwave, Binder+Co « Clarity », Mogensen), dessinée au canvas,
  SANS bibliothèque (comme le logo 3D) -> elle marche hors connexion.
    - on fait tourner la machine au doigt / à la souris, on zoome (molette ou pincement) ;
    - « Vue interne » rend le carter transparent : goulotte, caméras, buses, sorties ;
@@ -3969,7 +3969,7 @@ document.addEventListener('keydown',e=>{
 const M3_BRANDS=[
   {id:'redwave', name:'Redwave',               col:'#d7261e'},
   {id:'binder',  name:'Binder+Co · Clarity',   col:'#1f7ac8'},
-  {id:'steinert',name:'Steinert',              col:'#e8b800'}
+  {id:'steinert',name:'Mogensen',              col:'#8a8f95'}   // id interne « steinert » conservé (3e schéma 3D)
 ];
 
 /*
@@ -4247,7 +4247,7 @@ const m3Avail=id=>{ const ms=M3_MODELS[M3S.brand]||[]; if(!ms.length||!M3_TECH[i
 function m3Card(){
   return `<div class="card tcard m3card" onclick="renderMachines3D()" tabindex="0" onkeydown="if(event.key==='Enter')renderMachines3D()"><div class="cover c-presentation m3cover">
     <svg viewBox="0 0 120 80" aria-hidden="true"><path d="M14 52l46-22 46 22-46 22z" fill="rgba(255,255,255,.18)" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M14 52v8l46 22v-8M106 52v8L60 82v-8" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M40 42l20-10 20 10-20 10z" fill="#fff" opacity=".9"/><circle cx="92" cy="22" r="3" fill="#ffd54a"/><circle cx="102" cy="30" r="2.2" fill="#7fe0c8"/><circle cx="82" cy="16" r="2.2" fill="#a98bff"/></svg>
-    <span class="m3badge">3D</span></div><h3>${esc(L('Les trieurs en 3D : Redwave, Binder+Co, Steinert','Sorters in 3D: Redwave, Binder+Co, Steinert'))}</h3>
+    <span class="m3badge">3D</span></div><h3>${esc(L('Les trieurs en 3D : Redwave, Binder+Co, Mogensen','Sorters in 3D: Redwave, Binder+Co, Mogensen'))}</h3>
     <div class="meta"><span>${esc(L('VIS · UV · NIR · inductif','VIS · UV · NIR · inductive'))}</span><span>${esc(L('Interactif','Interactive'))}</span></div></div>`;
 }
 /* ============================================================================
@@ -4260,7 +4260,7 @@ function m3Card(){
  POUR AJOUTER UN MODÈLE : déposez le .glb dans modeles3d/, ajoutez une ligne dans M3D_LIST, et dans sw.js (liste OPTIONAL).
  TECHNOLOGIES : dans Blender, les matériaux TECH_VIS_… / TECH_NIR_… / TECH_UV_… / TECH_IND_… (Faisceau, Lum, Ligne) sont allumés ou
  éteints par m3dApply() selon la technologie choisie.
- Fichier Blender source : dossier Blender/ à côté de l'appli (TRIEURS_3D_technologies.blend).
+ Fichier Blender source : dossier Blender/ à côté de l'appli (TRIEURS_3D_v2_flux.blend).
 ============================================================================ */
 const MV_LIB='https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js';
 let _mv=null;
@@ -4274,100 +4274,149 @@ function loadModelViewer(){
   });
   return _mv;
 }
-// MODIFIABLE : les modèles 3D (un fichier .glb par marque, chacun avec les 4 technologies VIS, NIR, UV, inductif)
+// MODIFIABLE : les modèles 3D (un fichier .glb par marque, chacun avec les 4 technologies VIS, NIR, UV, inductif + le flux de verre)
 const M3D_LIST=[
  {id:'redwave', file:'modeles3d/redwave.glb', col:'#d7261e', name:'Redwave CX',
   sub:['Trieur à goulotte : capots basculants, alimentation vibrante, chute libre devant les capteurs','Chute sorter: tilting covers, vibrating feeder, free fall in front of the sensors'],
-  where:{vis:['Caméras VIS à l’avant, en haut, avec l’éclairage LED et le fond de référence.','VIS cameras at the front top, with LED lighting and reference background.'],
+  where:{vis:['Caméra VIS à l’avant en haut ; éclairage LED et fond de référence blanc derrière le rideau de verre.','VIS camera at the front top; LED lighting and white reference background behind the glass curtain.'],
          nir:['Capteur NIR et lampe halogène à l’avant, en bas.','NIR sensor and halogen lamp at the front bottom.'],
          uv:['Caméra UV et lampe UV à l’avant, tout en haut.','UV camera and UV lamp at the very front top.'],
          ind:['Barre de capteurs inductifs sous la fin de la goulotte.','Inductive sensor bar under the end of the chute.']}},
- {id:'binder', file:'modeles3d/binder-clarity.glb', col:'#1f7ac8', name:'Binder+Co Clarity',
-  sub:['Trieur à goulotte en armoire : trémie, auge vibrante, goulotte inclinée, zone de détection, éjection','Cabinet chute sorter: hopper, vibrating trough, inclined chute, detection zone, ejection'],
-  where:{vis:['Caméras VIS et LED à l’avant, en haut de la zone de chute.','VIS cameras and LEDs at the front, above the fall zone.'],
-         nir:['Capteur NIR et lampe halogène à l’arrière, en bas.','NIR sensor and halogen lamp at the rear bottom.'],
+ {id:'binder', file:'modeles3d/binder-clarity.glb', col:'#1f6fc2', name:'Binder+Co Clarity',
+  sub:['Trieur à goulotte : grand capot basculant, extrémités bleues, armoire de commande en bout','Chute sorter: large tilting hood, blue ends, control cabinet at the end'],
+  where:{vis:['Caméra VIS à l’avant sous le capot ; rétro-éclairage LED à l’arrière : la lumière traverse le verre.','VIS camera at the front under the hood; LED backlight at the rear: light goes through the glass.'],
+         nir:['Capteur NIR et lampe halogène au-dessus de la sortie de goulotte.','NIR sensor and halogen lamp above the chute outlet.'],
          uv:['Caméra UV et lampe UV à l’avant, en bas.','UV camera and UV lamp at the front bottom.'],
          ind:['Capteurs inductifs sous la fin de la goulotte.','Inductive sensors under the end of the chute.']}},
- {id:'steinert', file:'modeles3d/steinert.glb', col:'#e8b800', name:'Steinert',
-  sub:['Trieur à bande : convoyeur, pont capteurs au-dessus de la bande, éjection en bout de bande','Belt sorter: conveyor, sensor bridge above the belt, ejection at the belt end'],
-  where:{vis:['Caméras VIS et LED dans le pont capteurs, au-dessus de la bande.','VIS cameras and LEDs in the sensor bridge, above the belt.'],
-         nir:['Capteur NIR et lampes halogènes dans le pont capteurs.','NIR sensor and halogen lamps in the sensor bridge.'],
-         uv:['Caméra UV et lampe UV dans le pont capteurs.','UV camera and UV lamp in the sensor bridge.'],
-         ind:['Capteurs inductifs SOUS la bande, juste avant la sortie.','Inductive sensors UNDER the belt, just before the discharge.']}}
+ {id:'mogensen', file:'modeles3d/mogensen.glb', col:'#4b4e52', name:'Mogensen',
+  sub:['Trieur compact : alimentation vibrante bleue au-dessus, capot nervuré, face avant anthracite, 2 voyants verts','Compact sorter: blue vibrating feeder on top, ribbed cover, dark front panel, 2 green lights'],
+  where:{vis:['Caméra VIS à l’avant ; rétro-éclairage LED à l’arrière du rideau de verre.','VIS camera at the front; LED backlight behind the glass curtain.'],
+         nir:['Capteur NIR et lampe halogène en haut, sous le capot nervuré.','NIR sensor and halogen lamp at the top, under the ribbed cover.'],
+         uv:['Caméra UV et lampe UV à l’avant, en bas.','UV camera and UV lamp at the front bottom.'],
+         ind:['Capteurs inductifs sous la fin de la goulotte.','Inductive sensors under the end of the chute.']}}
 ];
-// technologies : code du site (vis…), code dans le fichier 3D (VIS…), couleur (mêmes couleurs que la visionneuse « Trieurs en 3D »)
-const M3D_TECH=[['vis','VIS','#f2b705'],['nir','NIR','#ff6a3d'],['uv','UV','#9b5cff'],['ind','IND','#0fb5a0']];
-const M3D_OPEN=27/59;   // position du curseur où la machine est ouverte et les faisceaux visibles
-let M3DS={brand:'redwave',tech:'all'};
+// technologies : code du site, code dans le fichier 3D, couleur, image où l'indésirable passe devant le capteur (voir DET_FR dans Blender)
+const M3D_TECH=[['vis','VIS','#f2b705',45],['nir','NIR','#ff6a3d',75],['uv','UV','#9b5cff',105],['ind','IND','#0fb5a0',135]];
+/* Fonctionnement de chaque technologie (d'après le diaporama de stage) : principe, étapes, indésirable montré dans l'animation */
+const M3D_HOW={
+ vis:{fr:'La technologie VIS trie le verre selon sa transparence : si la lumière traverse le morceau, c’est du verre.',en:'VIS sorts glass by transparency: if light passes through the piece, it is glass.',
+  ok:['Transparent = verre','Transparent = glass'],ko:['Opaque = indésirable','Opaque = undesirable'],cont:['Pierre (grise)','Stone (grey)'],
+  steps:[['Éclairage','une lumière visible (LED) éclaire le verre par l’arrière','Lighting','visible LED light shines through the glass from behind'],['Détection','la caméra mesure la lumière qui traverse chaque morceau','Detection','the camera measures the light passing through each piece'],['Analyse','l’ordinateur compare : transparent = verre, opaque = indésirable','Analysis','the computer compares: transparent = glass, opaque = undesirable'],['Éjection','les morceaux opaques sont soufflés par les jets d’air de la rampe','Ejection','opaque pieces are blown out by the air jets of the nozzle bar'],['Résultat','le verre propre continue vers la sortie « bon »','Result','clean glass continues to the “good” outlet']]},
+ uv:{fr:'La lumière UV fait briller certains matériaux (fluorescence) : on repère ainsi les indésirables invisibles à l’œil nu.',en:'UV light makes some materials glow (fluorescence), revealing undesirables invisible to the naked eye.',
+  ok:['Non fluorescent = verre','Non-fluorescent = glass'],ko:['Fluorescent = indésirable','Fluorescent = undesirable'],cont:['Céramique fluorescente (blanche)','Fluorescent ceramic (white)'],
+  steps:[['Éclairage UV','la lampe UV éclaire le flux de verre','UV lighting','the UV lamp lights the glass stream'],['Détection','la caméra UV capte la fluorescence','Detection','the UV camera captures the fluorescence'],['Analyse','le logiciel classe chaque morceau','Analysis','software classifies each piece'],['Éjection','les morceaux fluorescents sont soufflés','Ejection','fluorescent pieces are blown out'],['Résultat','le verre continue, les indésirables sont partis','Result','glass continues, undesirables are gone']]},
+ nir:{fr:'Chaque matériau absorbe et réfléchit l’infrarouge à sa façon : sa signature infrarouge révèle sa nature.',en:'Each material absorbs and reflects infrared its own way: its infrared signature reveals what it is.',
+  ok:['Signature du verre = accepté','Glass signature = accepted'],ko:['Autre signature = éjecté','Other signature = ejected'],cont:['Plastique (bleu)','Plastic (blue)'],
+  steps:[['Éclairage NIR','la lampe halogène envoie de l’infrarouge sur le flux','NIR lighting','the halogen lamp sends infrared onto the stream'],['Réflexion','chaque matériau renvoie le NIR à sa façon','Reflection','each material reflects NIR its own way'],['Détection','le capteur NIR lit la signature infrarouge','Detection','the NIR sensor reads the infrared signature'],['Éjection','les morceaux dont la signature ne correspond pas sont soufflés','Ejection','pieces with a non-matching signature are blown out'],['Résultat','le verre accepté continue','Result','accepted glass continues']]},
+ ind:{fr:'Le capteur crée un champ électromagnétique : un métal qui le traverse crée des courants de Foucault qui modifient le signal.',en:'The sensor creates an electromagnetic field: a metal passing through it induces eddy currents that change the signal.',
+  ok:['Pas de métal = accepté','No metal = accepted'],ko:['Métal détecté = éjecté','Metal detected = ejected'],cont:['Capsule métallique (gris métal)','Metal cap (metallic grey)'],
+  steps:[['Champ magnétique','les bobines sous la goulotte créent un champ','Magnetic field','the coils under the chute create a field'],['Induction','des courants de Foucault apparaissent dans le métal','Induction','eddy currents appear in the metal'],['Détection','le signal du capteur change','Detection','the sensor signal changes'],['Éjection','les métaux sont soufflés par les jets d’air','Ejection','metals are blown out by air jets'],['Résultat','le verre sans métal continue','Result','metal-free glass continues']]}
+};
+// repères de temps de l'animation (secondes, 30 images/s, image 1 = 0 s)
+const FR=f=>(f-1)/30, T_OPEN=FR(28), T_FLOW0=FR(30), T_FLOW1=FR(150), T_EXP0=FR(154), T_EXP1=FR(200);
+let M3DS={brand:'redwave',tech:'all'}, mvAnim=0, mvLoop=0;
 function m3dCards(){
-  return `<div class="card tcard" onclick="render3DModel()"><div class="cover c-presentation m3cover"><span class="catmono" style="color:#fff;font-weight:800;font-size:1.25rem">VIS · NIR · UV · IND</span><span class="m3badge">3D</span></div><h3>${L('Trieurs 3D Blender : vue éclatée et technologies','Blender 3D sorters: exploded view and technologies')}</h3><div class="meta"><span>Redwave · Binder+Co · Steinert</span><span>${L('Interactif','Interactive')}</span></div></div>`;
+  return `<div class="card tcard" onclick="render3DModel()"><div class="cover c-presentation m3cover"><span class="catmono" style="color:#fff;font-weight:800;font-size:1.25rem">VIS · NIR · UV · IND</span><span class="m3badge">3D</span></div><h3>${L('Trieurs 3D : fonctionnement, flux du verre et technologies','3D sorters: operation, glass flow and technologies')}</h3><div class="meta"><span>Redwave · Binder+Co · Mogensen</span><span>${L('Interactif','Interactive')}</span></div></div>`;
 }
 function render3DModel(id,tech){
   if(id&&M3D_LIST.some(x=>x.id===id)) M3DS.brand=id; if(tech) M3DS.tech=tech;
   const m=M3D_LIST.find(x=>x.id===M3DS.brand)||M3D_LIST[0];
-  if(typeof m3Stop==='function') m3Stop();
+  if(typeof m3Stop==='function') m3Stop(); mvStop();
   state.section='presentation'; state.view='model3d'; state.id=m.id; $('filters').classList.add('hidden'); buildNav();
   const tab=x=>`<button class="chip ${x.id===m.id?'on':''}" onclick="render3DModel('${x.id}')"><i class="m3dot" style="background:${x.col}"></i>${esc(x.name)}</button>`;
-  const tb=(k,lab,col)=>`<button class="chip m3dtech ${M3DS.tech===k?'on':''}" onclick="m3dTech('${k}')">${col?`<i class="m3dot" style="background:${col}"></i>`:''}${esc(lab)}</button>`;
-  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="renderFiches('presentation')">${esc(T('back'))}</button></div>
-   <div class="panel"><h2 style="margin-top:0">${L('Trieurs en 3D — technologies de détection','3D sorters — detection technologies')}</h2>
+  const tb=(k,lab,col)=>`<button class="chip m3dtech ${M3DS.tech===k?'on':''}" data-k="${k}" onclick="m3dTech('${k}')">${col?`<i class="m3dot" style="background:${col}"></i>`:''}${esc(lab)}</button>`;
+  $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="mvStop();renderFiches('presentation')">${esc(T('back'))}</button></div>
+   <div class="panel"><h2 style="margin-top:0">${L('Trieurs en 3D — fonctionnement et technologies','3D sorters — operation and technologies')}</h2>
     <div class="chips">${M3D_LIST.map(tab).join('')}</div>
     <p class="meta" style="margin:0 0 8px">${esc(L(...m.sub))}</p>
     <div class="chips" id="m3dtechs">${tb('all',L('Toutes','All'))}${M3D_TECH.map(([k,c,col])=>tb(k,k==='ind'?L('Inductif','Inductive'):c,col)).join('')}</div>
     <div class="m3dgrid"><div class="m3dview">
       <div id="mvbox" class="mvbox"><p class="meta" style="padding:20px">${L('Chargement du modèle 3D…','Loading the 3D model…')}</p></div>
-      <div class="m3dctl"><label for="mvx">${L('Vue éclatée','Exploded view')}</label><input type="range" id="mvx" min="0" max="100" value="${Math.round(M3D_OPEN*100)}" oninput="mvSet(this.value/100)">
-        <div class="row" style="gap:6px"><button class="primary" onclick="mvPlay(M3D_OPEN)">${L('Voir les capteurs','See the sensors')}</button><button onclick="mvPlay(1)">${L('Éclater','Explode')}</button><button onclick="mvPlay(0)">${L('Fermer la machine','Close the machine')}</button><button onclick="mvReset()">${L('Vue initiale','Reset view')}</button></div>
+      <div id="m3dcap" class="m3dcap"></div>
+      <div class="m3dctl">
+        <div class="row" style="gap:6px"><button class="primary" id="mvFlowBtn" onclick="mvFlow()">▶ ${L('Fonctionnement (flux du verre)','Operation (glass flow)')}</button><button onclick="mvPlay(1)">${L('Vue éclatée','Exploded view')}</button><button onclick="mvPlay(0)">${L('Fermer la machine','Close the machine')}</button><button onclick="mvReset()">${L('Vue initiale','Reset view')}</button></div>
+        <label for="mvx">${L('Fermée · ouverte · éclatée','Closed · open · exploded')}</label><input type="range" id="mvx" min="0" max="100" value="50" oninput="mvStop();mvSet(this.value/100)">
         <p class="meta">${L('Faites tourner avec le doigt ou la souris, pincez / molette pour zoomer.','Rotate with finger or mouse, pinch / wheel to zoom.')}</p></div>
     </div><div class="m3dlegend" id="m3dinfo"></div></div>
-    <p class="meta">${L('Modèles schématiques réalisés dans Blender pour la formation : ce ne sont pas des plans constructeur.','Schematic models made in Blender for training: not manufacturer drawings.')}</p></div>`;
+    <p class="meta">${L('Modèles schématiques réalisés dans Blender pour la formation, d’après les photos des machines : ce ne sont pas des plans constructeur.','Schematic models made in Blender for training, based on photos of the machines: not manufacturer drawings.')}</p></div>`;
   m3dInfo(); window.scrollTo(0,0);
   if(location.protocol==='file:'){ $('mvbox').innerHTML=`<div class="box danger">${L('La 3D s’affiche quand l’appli est ouverte en ligne (adresse GitHub), pas en double-cliquant sur index.html.','3D shows when the app is opened online (GitHub address), not by double-clicking index.html.')}</div>`; return; }
   loadModelViewer().then(()=>{
     const box=$('mvbox'); if(!box) return;
-    box.innerHTML=`<model-viewer id="mv" src="${esc(m.file)}" alt="${esc(m.name)}" camera-controls touch-action="pan-y" shadow-intensity="1" exposure="1.05" environment-image="neutral" camera-orbit="-35deg 65deg auto" ar ar-modes="webxr scene-viewer quick-look" interaction-prompt="none"></model-viewer>`;
-    const mv=$('mv'); mv.dataset.end=59/30;
+    box.innerHTML=`<model-viewer id="mv" src="${esc(m.file)}" alt="${esc(m.name)}" camera-controls touch-action="pan-y" shadow-intensity="1" exposure="1.05" environment-image="neutral" camera-orbit="-35deg 62deg auto" ar ar-modes="webxr scene-viewer quick-look" interaction-prompt="none"></model-viewer>`;
+    const mv=$('mv');
     mv.addEventListener('load',()=>{ if(mv.availableAnimations.length) mv.animationName=mv.availableAnimations[0]; mv.play();
-      let n=0; const ready=()=>{ if(mv.duration>0||n++>60){ mv.pause(); mv.dataset.ready='1'; setTimeout(()=>{ mvSet(+$('mvx').value/100); m3dApply(); },80); } else setTimeout(ready,50); }; ready(); });
+      let n=0; const ready=()=>{ if(mv.duration>0||n++>60){ mv.pause(); mv.dataset.ready='1'; setTimeout(()=>{ m3dApply(); mvFlow(); },80); } else setTimeout(ready,50); }; ready(); });
     mv.addEventListener('error',()=>{ box.innerHTML=`<div class="box danger">${L('Le fichier 3D n’a pas pu être chargé.','The 3D file could not be loaded.')}</div>`; });
   }).catch(()=>{ const b=$('mvbox'); if(b) b.innerHTML=`<div class="box danger">${L('Impossible de charger la visionneuse 3D (pas d’Internet et pas de copie dans lib/).','Could not load the 3D viewer (no Internet and no copy in lib/).')}</div>`; });
 }
-// choisir la technologie mise en avant : ses faisceaux et ses lampes restent allumés, les autres s'éteignent
-function m3dTech(k){ M3DS.tech=k; document.querySelectorAll('.m3dtech').forEach(b=>b.classList.toggle('on',b.getAttribute('onclick')===`m3dTech('${k}')`)); m3dInfo(); m3dApply(); const sl=$('mvx'); if(sl&&+sl.value>60) mvPlay(M3D_OPEN); }
+// choisir la technologie : ses capteurs, faisceaux, indésirable et jets restent visibles, les autres s'effacent
+function m3dTech(k){ M3DS.tech=k; document.querySelectorAll('.m3dtech').forEach(b=>b.classList.toggle('on',b.dataset.k===k)); m3dInfo(); m3dApply(); if(!mvLoop) mvFlow(); }
 function m3dApply(){
   const mv=$('mv'); if(!mv||!mv.model) return;
   const hex=h=>[1,3,5].map(i=>{ const c=parseInt(h.substr(i,2),16)/255; return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4); });
   M3D_TECH.forEach(([k,c,col])=>{
     const on=M3DS.tech==='all'||M3DS.tech===k, rgb=hex(col);
     mv.model.materials.forEach(mt=>{
-      if(mt.name===`TECH_${c}_Faisceau`){ try{ mt.setAlphaMode('BLEND'); }catch(e){} mt.pbrMetallicRoughness.setBaseColorFactor([...rgb,on?0.45:0]); mt.setEmissiveFactor(on?rgb:[0,0,0]); }
-      else if(mt.name===`TECH_${c}_Lum`||mt.name===`TECH_${c}_Ligne`){ mt.setEmissiveFactor(on?rgb:rgb.map(v=>v*0.08)); }
+      const n=mt.name, pb=mt.pbrMetallicRoughness;
+      if(n===`TECH_${c}_Faisceau`){ try{ mt.setAlphaMode('BLEND'); }catch(e){} pb.setBaseColorFactor([...rgb,on?0.45:0]); mt.setEmissiveFactor(on?rgb:[0,0,0]); }
+      else if(n===`TECH_${c}_Lum`||n===`TECH_${c}_Ligne`){ mt.setEmissiveFactor(on?rgb:rgb.map(v=>v*0.08)); }
+      else if(n===`TECH_${c}_Indesirable`||n===`TECH_${c}_Jet`){ try{ mt.setAlphaMode('BLEND'); }catch(e){} const f=pb.baseColorFactor; pb.setBaseColorFactor([f[0],f[1],f[2],on?(n.endsWith('Jet')?0.6:1):0]); }
     });
   });
 }
-// panneau de droite : explication de la technologie choisie (textes de la visionneuse « Trieurs en 3D », modifiables par les référents)
+// panneau de droite : principe + étapes de la technologie choisie (ou résumé des 4)
 function m3dInfo(){
   const box=$('m3dinfo'); if(!box) return; const m=M3D_LIST.find(x=>x.id===M3DS.brand)||M3D_LIST[0];
-  const part=id=>(typeof M3_PARTS!=='undefined'?M3_PARTS.find(p=>p.id===id):null);
-  const one=([k,c,col])=>{ const p=part(k); if(!p) return '';
-    return `<div class="m3dpart"><i style="background:${col}"></i><div><b>${esc(L(p.fr,p.en))}</b><p><i>${esc(L(p.sfr,p.sen))}</i></p>
-      ${M3DS.tech!=='all'?(L(p.pfr,p.pen)||[]).map(t=>`<p>${esc(t)}</p>`).join(''):''}
-      <p><b>${L('Sur cette machine','On this machine')} :</b> ${esc(L(...m.where[k]))}</p>
-      ${(L(p.dfr,p.den)||[]).length?`<div class="sfcs">${L(p.dfr,p.den).map(d=>`<span class="sfc" style="border-color:${col}">${esc(d)}</span>`).join('')}</div>`:''}</div></div>`; };
-  const list=M3DS.tech==='all'?M3D_TECH:M3D_TECH.filter(t=>t[0]===M3DS.tech);
-  box.innerHTML=`<h3 style="margin-top:0">${esc(m.name)} — ${M3DS.tech==='all'?L('les 4 technologies','the 4 technologies'):esc(M3DS.tech==='ind'?L('capteurs inductifs','inductive sensors'):M3DS.tech.toUpperCase())}</h3>${list.map(one).join('')}
-    ${M3DS.tech==='all'?`<p class="meta">${L('Touchez une technologie au-dessus de la machine pour l’isoler et lire son explication complète.','Tap a technology above the machine to isolate it and read the full explanation.')}</p>`:''}`;
+  if(M3DS.tech==='all'){
+    box.innerHTML=`<h3 style="margin-top:0">${esc(m.name)} — ${L('comment ça trie','how it sorts')}</h3>
+      <ol class="m3dcycle"><li><b>${L('Détection','Detection')}</b> ${L('par les capteurs','by the sensors')}</li><li><b>${L('Analyse','Analysis')}</b> ${L('par l’ordinateur','by the computer')}</li><li><b>${L('Éjection','Ejection')}</b> ${L('par jet d’air comprimé (rampe de buses)','by compressed-air jet (nozzle bar)')}</li></ol>
+      <p class="meta">${L('Dans l’animation, le verre (vert, blanc, brun) passe de l’alimentation vibrante à la goulotte, tombe devant les capteurs puis dans la sortie « bon ». Chaque seconde, un indésirable passe et il est soufflé vers la sortie « rejet ».','In the animation, glass (green, white, brown) goes from the vibrating feeder to the chute, falls past the sensors then into the “good” outlet. Every second an undesirable passes and is blown into the “reject” outlet.')}</p>
+      ${M3D_TECH.map(([k,c,col])=>{ const h=M3D_HOW[k]; return `<div class="m3dpart" onclick="m3dTech('${k}')" style="cursor:pointer"><i style="background:${col}"></i><div><b>${k==='ind'?L('Capteurs inductifs','Inductive sensors'):L('Technologie ','Technology ')+c}</b><p>${esc(L(h.fr,h.en))}</p><p class="meta">${L('Indésirable montré','Undesirable shown')} : ${esc(L(...h.cont))} · ${esc(L(...m.where[k]))}</p></div></div>`; }).join('')}
+      <p class="meta">${L('Touchez une technologie pour suivre ses étapes pas à pas pendant l’animation.','Tap a technology to follow its steps during the animation.')}</p>`;
+    return;
+  }
+  const [k,c,col]=M3D_TECH.find(t=>t[0]===M3DS.tech), h=M3D_HOW[k];
+  box.innerHTML=`<h3 style="margin-top:0"><i class="m3dot" style="background:${col}"></i>${k==='ind'?L('Capteurs inductifs','Inductive sensors'):L('Technologie ','Technology ')+c} — ${esc(m.name)}</h3>
+    <p>${esc(L(h.fr,h.en))}</p>
+    <div class="sfcs"><span class="sfc" style="border-color:${col}">✓ ${esc(L(...h.ok))}</span><span class="sfc" style="border-color:${col}">✗ ${esc(L(...h.ko))}</span></div>
+    <ol class="m3dsteps" id="m3dsteps">${h.steps.map((s,i)=>`<li data-i="${i}"><b>${esc(L(s[0],s[2]))}</b> : ${esc(L(s[1],s[3]))}</li>`).join('')}</ol>
+    <p><b>${L('Sur cette machine','On this machine')} :</b> ${esc(L(...m.where[k]))}</p>
+    <p class="meta">${L('Dans l’animation, l’indésirable est','In the animation, the undesirable is')} : <b>${esc(L(...h.cont))}</b>.</p>
+    ${(()=>{ const p=(typeof M3_PARTS!=='undefined')?M3_PARTS.find(x=>x.id===k):null; return p&&(L(p.dfr,p.den)||[]).length?`<p class="meta">${L('Ce qu’elle détecte','What it detects')} :</p><div class="sfcs">${L(p.dfr,p.den).map(d=>`<span class="sfc" style="border-color:${col}">${esc(d)}</span>`).join('')}</div>`:''; })()}`;
 }
-// curseur : 0 = machine fermée, 1 = machine éclatée
-let mvAnim=0;
-function mvSet(k){ const mv=$('mv'); if(!mv||!mv.dataset.ready) return; cancelAnimationFrame(mvAnim); mv.pause(); mv.currentTime=Math.max(0,Math.min(1,k))*(+mv.dataset.end||2); }
+// étape en cours pour la technologie choisie, d'après l'image de l'animation (synchronisée avec le passage de l'indésirable)
+function m3dStepAt(f){
+  if(M3DS.tech==='all') return -1; const fd=M3D_TECH.find(t=>t[0]===M3DS.tech)[3], fe=fd+7;
+  if(f>=fd-14&&f<fd-2) return 0; if(f>=fd-2&&f<fd+2) return 1; if(f>=fd+2&&f<fe-1) return 2; if(f>=fe-1&&f<fe+6) return 3; if(f>=fe+6&&f<fe+22) return 4; return -1;
+}
+function m3dCaption(t){
+  const cap=$('m3dcap'); if(!cap) return; const f=1+t*30;
+  if(M3DS.tech==='all'){ cap.innerHTML=''; return; }
+  const i=m3dStepAt(f), h=M3D_HOW[M3DS.tech], col=M3D_TECH.find(x=>x[0]===M3DS.tech)[2];
+  document.querySelectorAll('#m3dsteps li').forEach(li=>li.classList.toggle('on',+li.dataset.i===i));
+  cap.innerHTML=i<0?`<span class="meta">${L('Le verre passe… attendez l’indésirable','Glass is flowing… wait for the undesirable')} (${esc(L(...h.cont))})</span>`:`<span class="m3dstep" style="border-color:${col}">${i+1}. <b>${esc(L(h.steps[i][0],h.steps[i][2]))}</b> — ${esc(L(h.steps[i][1],h.steps[i][3]))}</span>`;
+}
+// FONCTIONNEMENT : la machine est ouverte et le flux de verre tourne en boucle (images 30 à 150)
+function mvFlow(){
+  const mv=$('mv'); if(!mv||!mv.dataset.ready) return; mvStop(); const sl=$('mvx'); if(sl) sl.value=50;
+  let t=T_FLOW0, last=performance.now(); const b=$('mvFlowBtn'); if(b) b.classList.add('on');
+  const step=n=>{ if(!$('mv')) return; t+=(n-last)/1000; last=n; if(t>T_FLOW1) t=T_FLOW0+(t-T_FLOW1); mv.pause(); mv.currentTime=t; m3dCaption(t); mvLoop=requestAnimationFrame(step); };
+  mvLoop=requestAnimationFrame(step);
+}
+function mvStop(){ cancelAnimationFrame(mvLoop); mvLoop=0; cancelAnimationFrame(mvAnim); const b=$('mvFlowBtn'); if(b) b.classList.remove('on'); const c=$('m3dcap'); if(c) c.innerHTML=''; document.querySelectorAll('#m3dsteps li').forEach(li=>li.classList.remove('on')); }
+// curseur : 0 = machine fermée, 0,5 = ouverte (capteurs visibles), 1 = éclatée
+const mvTime=k=>k<=0.5?(k/0.5)*T_OPEN:T_EXP0+((k-0.5)/0.5)*(T_EXP1-T_EXP0);
+function mvSet(k){ const mv=$('mv'); if(!mv||!mv.dataset.ready) return; mv.pause(); mv.currentTime=mvTime(Math.max(0,Math.min(1,k))); }
 function mvPlay(to){
-  const mv=$('mv'), sl=$('mvx'); if(!mv||!mv.dataset.ready||!sl) return; cancelAnimationFrame(mvAnim);
+  const mv=$('mv'), sl=$('mvx'); if(!mv||!mv.dataset.ready||!sl) return; mvStop();
   const from=+sl.value/100, t0=performance.now(), d=1600*Math.abs(to-from)+1;
-  const step=n=>{ const k=Math.min(1,(n-t0)/d), e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2, v=from+(to-from)*e; sl.value=Math.round(v*100); mv.pause(); mv.currentTime=v*(+mv.dataset.end||2); if(k<1) mvAnim=requestAnimationFrame(step); };
+  const step=n=>{ const k=Math.min(1,(n-t0)/d), e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2, v=from+(to-from)*e; sl.value=Math.round(v*100); mvSet(v); if(k<1) mvAnim=requestAnimationFrame(step); };
   mvAnim=requestAnimationFrame(step);
 }
-function mvReset(){ const mv=$('mv'); if(!mv) return; mv.cameraOrbit='-35deg 65deg auto'; mv.cameraTarget='auto auto auto'; mv.fieldOfView='auto'; mvPlay(M3D_OPEN); }
+function mvReset(){ const mv=$('mv'); if(!mv) return; mv.cameraOrbit='-35deg 62deg auto'; mv.cameraTarget='auto auto auto'; mv.fieldOfView='auto'; mvFlow(); }
+// quitter la page 3D arrête la boucle
+new MutationObserver(()=>{ if(mvLoop&&!$('mv')) mvStop(); }).observe($('app'),{childList:true});
 
 /* EXPLICATION SUPPLÉMENTAIRE : PAGE "MACHINES 3D"
  Fabrique le HTML (onglets de marque, canvas #m3cv, panneau d'explication, boutons) puis appelle m3Start() qui lance l'animation.
@@ -4436,7 +4485,7 @@ function m3UI(){
   box.innerHTML=`<div class="m3hd" style="--c:${tc||'var(--accent)'}"><span class="m3num">${p.n}</span><div><h3 style="margin:0"${m3Ed('part.'+p.id+'.t')}>${esc(m3PartTxt(p,'t'))}</h3><div class="meta" style="margin:2px 0 0"${m3Ed('part.'+p.id+'.s')}>${esc(m3PartTxt(p,'s'))}</div></div></div>
    <ul class="m3pts"${m3Ed('part.'+p.id+'.p')}>${m3PartTxt(p,'p').map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
    ${p.dfr?`<div class="m3det"><b>${esc(L('Détecte','Detects'))}</b>${m3tr(p.dfr,p.den).map(t=>`<span class="tag" style="border-color:${tc};color:${tc}">${esc(t)}</span>`).join('')}</div>`:''}
-   ${tc?`<div class="m3avail ${off?'no':''}">${off?esc(L('Cette technologie n’est pas présente sur le modèle choisi.','This technology is not fitted on the selected model.')):esc(L('Présente sur Redwave, Binder+Co et Steinert, selon le modèle.','Available on Redwave, Binder+Co and Steinert, depending on the model.'))}</div>`:''}
+   ${tc?`<div class="m3avail ${off?'no':''}">${off?esc(L('Cette technologie n’est pas présente sur le modèle choisi.','This technology is not fitted on the selected model.')):esc(L('Présente sur Redwave, Binder+Co et Mogensen, selon le modèle.','Available on Redwave, Binder+Co and Mogensen, depending on the model.'))}</div>`:''}
    <div class="row noprint" style="margin-top:14px;justify-content:space-between"><button onclick="m3Step(-1)">← ${esc(L('Précédent','Previous'))}</button><button onclick="m3Select('${p.id}')">${esc(L('Fermer','Close'))}</button><button class="primary" onclick="m3Step(1)">${esc(L('Suivant','Next'))} →</button></div>`;
 }
 
