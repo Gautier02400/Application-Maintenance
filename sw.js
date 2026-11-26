@@ -10,7 +10,7 @@
 // Nom du cache. IMPORTANT : à chaque fois que vous modifiez index.html, app.js, style.css (ou un autre fichier de la liste),
 // changez ce numéro pour que les appareils affichent « Nouvelle version disponible ».
 // Le plus simple : lancez le script  maj-version.ps1  (clic droit > Exécuter avec PowerShell) qui augmente le numéro tout seul.
-const CACHE = 'tutos-maintenance-v65';
+const CACHE = 'tutos-maintenance-v67';
 
 // Fichiers de l'appli à mettre en cache dès l'installation (ils doivent tous exister dans le dossier).
 const FILES = ['./', './index.html', './style.css', './app.js', './manifest.webmanifest',

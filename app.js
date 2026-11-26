@@ -63,7 +63,7 @@ const I18N = {
   storage_full:'Stockage plein ou indisponible : pensez à exporter en JSON',
   footer:'Projet réalisé par Lecertisseur Gautier, Coordinateur Tri Optiques · Sibelco Reims',
   unspecified:'Non précisée', locked_tag:'Verrouillé',
-  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_cons2:'Pièces consommables', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', nav_flow:'Flowsheet',nav_conv:'Convertisseur',nav_gloss:'Mots-clés / Définitions', items:'élément(s)',
+  nav_home:'Accueil', nav_tutos:'Tutos maintenance', nav_cons:'Fiches constructeur', nav_cons2:'Pièces consommables', nav_pres:'Fiches présentation', nav_set:'Paramètres', nav_jeux:'Jeux', nav_flow:'Flowsheet',nav_conv:'Convertisseur',nav_gloss:'Mots-clés / Définitions', nav_profil:'Mon profil', nav_equipe:'Équipe / organigramme', items:'élément(s)',
   welcome:'Bienvenue', your_class:'Votre classe :', ask_level:'Quel est votre niveau sur les trieurs optiques ?',
   confirm_cls:'Je confirme avoir le niveau de cette classe (déclaratif, à valider avec le référent).',
   oblig_title:'Formation obligatoire', oblig_txt:"Vous ne connaissez pas encore les trieurs optiques : terminez d'abord la formation pour débloquer les autres tutoriels.", oblig_go:'Commencer la formation',
@@ -103,7 +103,7 @@ const I18N = {
   storage_full:'Storage full or unavailable: please export to JSON',
   footer:'Project by Lecertisseur Gautier, Optical Sorting Coordinator · Sibelco Reims',
   unspecified:'Not specified', locked_tag:'Locked',
-  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_cons2:'Consumable parts', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', nav_flow:'Flowsheet',nav_conv:'Converter',nav_gloss:'Keywords / Definitions', items:'item(s)',
+  nav_home:'Home', nav_tutos:'Maintenance tutorials', nav_cons:'Manufacturer sheets', nav_cons2:'Consumable parts', nav_pres:'Presentation sheets', nav_set:'Settings', nav_jeux:'Games', nav_flow:'Flowsheet',nav_conv:'Converter',nav_gloss:'Keywords / Definitions', nav_profil:'My profile', nav_equipe:'Team / org chart', items:'item(s)',
   welcome:'Welcome', your_class:'Your class:', ask_level:'What is your level on optical sorters?',
   confirm_cls:'I confirm I have the level of this class (self-declared, to be validated with the referent).',
   oblig_title:'Mandatory training', oblig_txt:'You do not know optical sorters yet: complete the training first to unlock the other tutorials.', oblig_go:'Start training',
@@ -476,9 +476,9 @@ const coverOf=t=>t.cover||((t.steps||[]).find(s=>s.img)||{}).img||'';
  (avec "Verrouillé" si la classe de l'utilisateur est trop basse), puis machine / durée / niveau / nombre d'étapes.
 */
 function cardHTML(t){
-  const cv=coverOf(t);
+  const cv=coverOf(t), fa=t.cover?frameAttrs(t.coverFit,t.coverPos,t.coverZoom):{cls:'',style:''};
   return `<div class="card tcard ${isLocked(t)?'locked':''}" onclick="openTuto('${t.id}')">
-    <div class="cover">${cv?`<img src="${imgUrl(cv)}" alt="" loading="lazy">`:PH_SVG}</div>
+    <div class="cover${fa.cls}" style="${fa.style}">${cv?`<img src="${imgUrl(cv)}" alt="" loading="lazy">`:PH_SVG}</div>
     <div class="row" style="justify-content:space-between"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span></div>
     ${isDone(t.id)?`<div><span class="tag valide">${esc(T('done_on'))} ${esc(fmtDate(doneDate(t.id)))}</span></div>`:''}
     ${rewardTxt(t)||tEn(t).length?`<div class="row" style="gap:6px">${tEn(t).length?`<span class="tag loto">${L('Consignation','Lockout')}</span>`:''}${rewardTxt(t)?`<span class="tag">${esc(rewardTxt(t))}</span>`:''}</div>`:''}
@@ -626,7 +626,7 @@ function openTuto(id,at){
     <div class="tugrid">
     <div class="tuside">
     <div class="panel noprint tuhd">
-      ${t.cover?`<img class="tcover" src="${imgUrl(t.cover)}" alt="">`:''}
+      ${bigCover(t)}
       <div class="row"><span class="tag">${esc(catL(t.category))}</span><span class="tag ${esc(t.status)}">${esc(statusL(t.status))}</span>${rw?`<span class="tag" style="color:var(--accent);border-color:var(--accent)">${esc(rw)}</span>`:''}</div>
       <h2>${esc(t.title)}</h2>
       <div class="meta">${GENERIC_M.includes(machineL(t.machine))?`<span>${esc(machineL(t.machine))}</span>`:`<a href="#" class="mlink" onclick="event.preventDefault();renderMachine(this.dataset.m)" data-m="${esc(machineL(t.machine))}">${esc(machineL(t.machine))}</a>`}<span>${esc(t.duration)} ${T('min')}</span><span>${esc(levelL(t.level))}</span><span>${T('steps_n',n)}</span></div>
@@ -975,14 +975,14 @@ function addPhoto(i,input){
 function coverEdHTML(){
   const d=state.draft;
   return `<label>${L('Image d’illustration (affichée sur la carte, facultatif)','Cover image (shown on the card, optional)')}</label>
-   <div class="row"><input type="file" accept="image/*" style="max-width:320px" onchange="addCover(this)">${d.cover?`<button class="small danger" onclick="rmCover()">${L('Retirer l’image','Remove image')}</button>`:''}</div>
-   ${d.cover?`<img src="${imgUrl(d.cover)}" alt="" style="max-width:260px;border-radius:8px;margin-top:8px;display:block">`:''}`;
+   <div class="row"><input type="file" accept="image/*" style="max-width:320px" onchange="addCover(this)">${d.cover?`<button class="small" onclick="coverFrame()">${L('Cadrer / zoomer','Frame / zoom')}</button><button class="small danger" onclick="rmCover()">${L('Retirer l’image','Remove image')}</button>`:''}</div>
+   ${d.cover?`<div class="card tcard" style="max-width:300px;margin-top:8px;cursor:default"><div class="cover${frameAttrs(d.coverFit,d.coverPos,d.coverZoom).cls}" style="${frameAttrs(d.coverFit,d.coverPos,d.coverZoom).style}"><img src="${imgUrl(d.cover)}" alt=""></div><span class="meta">${L('Aperçu de la carte','Card preview')}</span></div>`:''}`;
 }
 function addCover(inp){
   const f=inp.files&&inp.files[0]; if(!f) return;
   readImg(f,720,0.75,u=>{ state.draft.cover=u; $('coverEd').innerHTML=coverEdHTML(); });
 }
-function rmCover(){ state.draft.cover=''; $('coverEd').innerHTML=coverEdHTML(); }
+function rmCover(){ Object.assign(state.draft,{cover:'',coverFit:'',coverPos:'',coverZoom:100}); $('coverEd').innerHTML=coverEdHTML(); }
 /*
  saveDraft() : contrôle le titre, retire les étapes vides, met à jour la date, remplace (ou ajoute en tête)
  le tutoriel dans la liste puis enregistre. delTuto() supprime après confirmation.
@@ -1187,32 +1187,64 @@ function rmTilePic(k){ delete tilePics[k]; delete tilePics[k+'::fit']; delete ti
 // texte du compteur d'une tuile : « 1 élément », « 18 éléments », « 8/10 éléments » (accessibles / total)
 const cntTxt=k=>{ const c=String(cnt(k)), nb=parseInt(c.split('/').pop())||0; return esc(c)+' '+(lang==='en'?(nb>1?'items':'item'):(nb>1?'éléments':'élément')); };
 function tileHTML(k,l){
-  const pic=tilePics[k], fill=!!pic&&tilePics[k+'::fit']==='fill', pos=tilePics[k+'::pos']||'50% 50%';
-  return `<div class="card tcard" onclick="go('${k}')"><div class="cover c-${k}${fill?' fill':''}"${fill?` style="--op:${esc(pos)}"`:''}>${pic?`<img src="${imgUrl(pic)}" alt="" loading="lazy">`:icoSVG(isCust(k)?'custom':k)}</div><h3>${esc(T(l))}</h3><div class="meta">${cntTxt(k)}</div>`+
+  const pic=tilePics[k], fill=!!pic&&tilePics[k+'::fit']==='fill', pos=tilePics[k+'::pos']||'50% 50%', zm=(+tilePics[k+'::zoom']||100)/100;
+  return `<div class="card tcard" onclick="go('${k}')"><div class="cover c-${k}${fill?' fill':''}"${fill?` style="--op:${esc(pos)};--oz:${zm}"`:''}>${pic?`<img src="${imgUrl(pic)}" alt="" loading="lazy">`:icoSVG(isCust(k)?'custom':k)}</div><h3>${esc(T(l))}</h3><div class="meta">${cntTxt(k)}</div>`+
    (canEditTutos()?`<div class="row noprint tpedit" onclick="event.stopPropagation()"><label class="tpbtn">${L('Photo','Photo')}<input type="file" accept="image/*" class="hidden" onchange="setTilePic('${k}',this)"></label>${pic?`<button class="small" onclick="event.stopPropagation();tileFrame('${k}')">${L('Cadrer','Frame')}</button><button class="small danger" onclick="event.stopPropagation();rmTilePic('${k}')">×</button>`:''}</div>`:'')+`</div>`;
 }
-function tileFrame(k){
-  const pic=tilePics[k]; if(!pic) return; lbClose();
-  const fill=tilePics[k+'::fit']==='fill', p=(tilePics[k+'::pos']||'50% 50%').split(' ').map(v=>parseInt(v)||50);
+/* ===================== CADRAGE DES PHOTOS (zoom / dézoom / position) =====================
+ Une seule fenêtre de cadrage, utilisée pour : les photos des tuiles de l'accueil, l'image d'un tuto (carte + grande image en
+ haut du tuto) et l'image d'une fiche. Deux modes : « photo entière » (rien n'est coupé) ou « remplir le cadre » avec
+ zoom 100 à 400 % (curseur, boutons − / +, molette) et position (curseurs, ou faire glisser la photo dans l'aperçu).
+ Réglage enregistré : fit = 'fill' ou '', pos = 'x% y%', zoom = 100 à 400. */
+const frameAttrs=(fit,pos,zoom)=>fit==='fill'?{cls:' fill',style:`--op:${esc(pos||'50% 50%')};--oz:${(+zoom||100)/100}`}:{cls:'',style:''};
+function frameDialog(src,cfg,title,onSave){
+  lbClose();
+  const fill=cfg.fit==='fill', p=String(cfg.pos||'50% 50%').split(' ').map(v=>parseInt(v)||50), z=+cfg.zoom||100;
   const d=document.createElement('div'); d.id='lbModal'; d.className='flmodal';
   d.innerHTML=`<div class="panel"><h3 style="margin-top:0">${L('Cadrage de la photo','Photo framing')}</h3>
-   <div class="tiles" style="grid-template-columns:1fr;margin:0 0 10px"><div class="card tcard" style="cursor:default"><div class="cover c-${esc(k)}${fill?' fill':''}" id="tfPrev" style="--op:${p[0]}% ${p[1]}%"><img src="${imgUrl(pic)}" alt=""></div><h3>${esc(T(k.startsWith('c_')?'cn_'+k:(NAV.find(n=>n[0]===k)||[0,0,''])[2]))}</h3></div></div>
+   <div class="tiles" style="grid-template-columns:1fr;margin:0 0 10px"><div class="card tcard" style="cursor:default"><div class="cover${fill?' fill':''}" id="tfPrev" style="--op:${p[0]}% ${p[1]}%;--oz:${z/100};touch-action:none"><img src="${imgUrl(src)}" alt="" draggable="false"></div><h3>${esc(title||'')}</h3></div></div>
    <label style="display:flex;gap:8px;align-items:center;margin:4px 0"><input type="radio" name="tfm" value="fit" ${fill?'':'checked'} onchange="tfUpd()"> ${L('Photo entière (rien n’est coupé)','Whole photo (nothing cropped)')}</label>
-   <label style="display:flex;gap:8px;align-items:center;margin:4px 0"><input type="radio" name="tfm" value="fill" ${fill?'checked':''} onchange="tfUpd()"> ${L('Remplir le cadre (photo recadrée)','Fill the frame (cropped photo)')}</label>
-   <div id="tfPos" style="${fill?'':'opacity:.4;pointer-events:none'}"><label>${L('Position horizontale','Horizontal position')}<input type="range" id="tfx" min="0" max="100" value="${p[0]}" oninput="tfUpd()" style="width:100%"></label>
-   <label>${L('Position verticale','Vertical position')}<input type="range" id="tfy" min="0" max="100" value="${p[1]}" oninput="tfUpd()" style="width:100%"></label></div>
-   <div class="row" style="margin-top:12px;gap:8px"><button class="primary" onclick="tfSave('${esc(k)}')">${T('save')}</button><button onclick="lbClose()">${L('Annuler','Cancel')}</button></div></div>`;
+   <label style="display:flex;gap:8px;align-items:center;margin:4px 0"><input type="radio" name="tfm" value="fill" ${fill?'checked':''} onchange="tfUpd()"> ${L('Remplir le cadre (zoom et position réglables)','Fill the frame (zoom and position adjustable)')}</label>
+   <div id="tfPos" style="${fill?'':'opacity:.4;pointer-events:none'}">
+    <label>${L('Zoom','Zoom')} <span id="tfzv">${z} %</span></label>
+    <div class="row" style="gap:8px;flex-wrap:nowrap"><button class="small" onclick="tfZoom(-20)" aria-label="${L('Dézoomer','Zoom out')}">−</button><input type="range" id="tfz" min="100" max="400" step="5" value="${z}" oninput="tfUpd()" style="flex:1"><button class="small" onclick="tfZoom(20)" aria-label="${L('Zoomer','Zoom in')}">+</button></div>
+    <label>${L('Position horizontale','Horizontal position')}<input type="range" id="tfx" min="0" max="100" value="${p[0]}" oninput="tfUpd()" style="width:100%"></label>
+    <label>${L('Position verticale','Vertical position')}<input type="range" id="tfy" min="0" max="100" value="${p[1]}" oninput="tfUpd()" style="width:100%"></label>
+    <p class="meta">${L('Astuce : faites glisser la photo dans l’aperçu pour la déplacer, molette pour zoomer.','Tip: drag the photo in the preview to move it, mouse wheel to zoom.')}</p></div>
+   <div class="row" style="margin-top:12px;gap:8px"><button class="primary" id="tfOk">${T('save')}</button><button onclick="lbClose()">${L('Annuler','Cancel')}</button></div></div>`;
   document.body.appendChild(d);
+  $('tfOk').onclick=()=>{ const f=document.querySelector('input[name=tfm]:checked').value==='fill';
+    onSave(f?{fit:'fill',pos:Math.round($('tfx').value)+'% '+Math.round($('tfy').value)+'%',zoom:+$('tfz').value}:{fit:'',pos:'',zoom:100}); lbClose(); };
+  const pv=$('tfPrev'); let drag=null;
+  pv.addEventListener('pointerdown',e=>{ if(!pv.classList.contains('fill')) return; drag={x:e.clientX,y:e.clientY,px:+$('tfx').value,py:+$('tfy').value}; pv.setPointerCapture(e.pointerId); });
+  pv.addEventListener('pointermove',e=>{ if(!drag) return; const r=pv.getBoundingClientRect(), zz=+$('tfz').value/100;
+    $('tfx').value=Math.max(0,Math.min(100,drag.px-(e.clientX-drag.x)/r.width*100/zz)); $('tfy').value=Math.max(0,Math.min(100,drag.py-(e.clientY-drag.y)/r.height*100/zz)); tfUpd(); });
+  pv.addEventListener('pointerup',()=>{ drag=null; }); pv.addEventListener('pointercancel',()=>{ drag=null; });
+  pv.addEventListener('wheel',e=>{ if(!pv.classList.contains('fill')) return; e.preventDefault(); tfZoom(e.deltaY<0?10:-10); },{passive:false});
 }
+function tfZoom(d){ const z=$('tfz'); if(!z) return; z.value=Math.max(100,Math.min(400,+z.value+d)); tfUpd(); }
 function tfUpd(){
   const fill=document.querySelector('input[name=tfm]:checked').value==='fill', pv=$('tfPrev');
-  pv.classList.toggle('fill',fill); pv.style.setProperty('--op',$('tfx').value+'% '+$('tfy').value+'%');
+  pv.classList.toggle('fill',fill); pv.style.setProperty('--op',$('tfx').value+'% '+$('tfy').value+'%'); pv.style.setProperty('--oz',+$('tfz').value/100);
+  $('tfzv').textContent=$('tfz').value+' %';
   const pp=$('tfPos'); pp.style.opacity=fill?'':'.4'; pp.style.pointerEvents=fill?'':'none';
 }
-function tfSave(k){
-  const fill=document.querySelector('input[name=tfm]:checked').value==='fill';
-  if(fill){ tilePics[k+'::fit']='fill'; tilePics[k+'::pos']=$('tfx').value+'% '+$('tfy').value+'%'; } else { delete tilePics[k+'::fit']; delete tilePics[k+'::pos']; }
-  saveTilePics(); lbClose(); renderHome();
+// tuiles de l'accueil (réglage gardé dans tilePics : k::fit, k::pos, k::zoom)
+function tileFrame(k){
+  const pic=tilePics[k]; if(!pic) return;
+  frameDialog(pic,{fit:tilePics[k+'::fit'],pos:tilePics[k+'::pos'],zoom:tilePics[k+'::zoom']},T(k.startsWith('c_')?'cn_'+k:(NAV.find(n=>n[0]===k)||[0,0,''])[2]),c=>{
+    if(c.fit){ tilePics[k+'::fit']='fill'; tilePics[k+'::pos']=c.pos; tilePics[k+'::zoom']=c.zoom; } else { delete tilePics[k+'::fit']; delete tilePics[k+'::pos']; delete tilePics[k+'::zoom']; }
+    saveTilePics(); renderHome(); });
+}
+// image d'un tuto (dans l'éditeur) et d'une fiche (dans l'éditeur de fiche)
+function coverFrame(){ const d=state.draft; if(!d||!d.cover) return; frameDialog(d.cover,{fit:d.coverFit,pos:d.coverPos,zoom:d.coverZoom},d.title,c=>{ d.coverFit=c.fit; d.coverPos=c.pos; d.coverZoom=c.zoom; $('coverEd').innerHTML=coverEdHTML(); }); }
+function fCoverFrame(){ const d=state.fd; if(!d||!d.cover) return; frameDialog(d.cover,{fit:d.coverFit,pos:d.coverPos,zoom:d.coverZoom},d.title,c=>{ d.coverFit=c.fit; d.coverPos=c.pos; d.coverZoom=c.zoom; $('fcoverEd').innerHTML=fCoverEdHTML(); }); }
+// grande image en haut d'un tuto / d'une fiche : cadrée si un cadrage « remplir » a été choisi
+function bigCover(o){
+  if(!o||!o.cover) return '';
+  if(o.coverFit!=='fill') return `<img class="tcover" src="${imgUrl(o.cover)}" alt="">`;
+  const a=frameAttrs(o.coverFit,o.coverPos,o.coverZoom);
+  return `<div class="tcoverbox fill" style="${a.style}"><img class="tcover" src="${imgUrl(o.cover)}" alt=""></div>`;
 }
 /*
  NAV = les rubriques du menu : [clé, (inutilisé), clé de traduction]. L'ordre ici = l'ordre dans le menu.
@@ -1220,8 +1252,8 @@ function tfSave(k){
  les rubriques, "Déconnexion". Le bouton de la rubrique active reçoit la classe "on" (bleu clair).
 */
 /* ORDRE DES ONGLETS : réglable dans l'onglet Convertisseur (classes 3 et 4) ; navList() renvoie NAV dans l'ordre choisi (NAVORD), les onglets inconnus restent à leur place d'origine à la suite. */
-function navList(){ const pos=k=>{ const i=NAVORD.indexOf(k); return i<0?1e6+NAV.findIndex(n=>n[0]===k):i; }; return [...NAV].sort((a,b)=>pos(a[0])-pos(b[0])); }
-const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['glossaire','','nav_gloss'],['jeux','','nav_jeux'],['settings','','nav_set']];
+function navList(){ const si=NAVORD.indexOf('settings'); const pos=k=>{ const i=NAVORD.indexOf(k), j=NAV.findIndex(n=>n[0]===k); return i>=0?i:(si>=0?si-0.5+j*0.001:1e6+j); }; return [...NAV].sort((a,b)=>pos(a[0])-pos(b[0])); }   // onglet nouveau (pas encore dans l'ordre enregistré) : placé juste avant Paramètres
+const NAV=[['home','','nav_home'],['tutos','','nav_tutos'],['constructeur','','nav_cons'],['consommables','','nav_cons2'],['presentation','','nav_pres'],['flowsheet','','nav_flow'],['glossaire','','nav_gloss'],['jeux','','nav_jeux'],['profil','','nav_profil'],['equipe','','nav_equipe'],['settings','','nav_set']];
 
 navSyncCust();
 /* ===================== ONGLETS PERSONNALISÉS ET « CASES » MODULABLES =====================
@@ -1350,7 +1382,7 @@ window.addEventListener('resize',()=>{ if($('side').classList.contains('open')){
  renderSection() : réaffiche la page courante (utile après un changement de langue).
  cnt(k) : nombre d'éléments affiché sur les tuiles de l'accueil.
 */
-function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else if(k==='flowsheet') renderFlow(); else if(k==='convertisseur') renderConv(); else if(k==='glossaire') renderGloss(); else if(isCust(k)){ custEdit=false; renderCustom(k); } else renderFiches(k); }
+function go(k){ m3Stop(); if(!isPinned()) toggleNav(false); if(k==='home') renderHome(); else if(k==='tutos') renderList(); else if(k==='settings') renderSettings(); else if(k==='jeux') renderGame(); else if(k==='flowsheet') renderFlow(); else if(k==='convertisseur') renderConv(); else if(k==='glossaire') renderGloss(); else if(k==='profil') renderProfile(); else if(k==='equipe') renderOrg(); else if(isCust(k)){ custEdit=false; renderCustom(k); } else renderFiches(k); }
 function renderSection(){ const v=state.view;
   if(v==='home') renderHome(); else if(v==='settings') renderSettings(); else if(v==='fiches') renderFiches(state.section);
   else if(v==='jeux') renderGame();
@@ -2339,10 +2371,10 @@ function glRender(){
   if(!l.length){ b.innerHTML=`<div class="box">${glItems().length?L('Aucun mot ne correspond à la recherche.','No word matches your search.'):L('Aucun mot pour le moment.','No word yet.')}</div>`; return; }
   if(GL.mode==='cards'){
     b.innerHTML=`<div class="glgrid">`+l.map(g=>`<div class="glf" tabindex="0" role="button" aria-label="${esc(glW(g))}" onclick="this.classList.toggle('flip')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('flip')}"><div class="glfi">
-      <div class="glfa"><b class="glword">${esc(glW(g))}</b><span class="glhint">${L('Toucher pour voir la définition','Tap to see the definition')}</span></div>
+      <div class="glfa">${g.img?`<img class="glimg" src="${imgUrl(g.img)}" alt="" loading="lazy">`:''}<b class="glword">${esc(glW(g))}</b><span class="glhint">${L('Toucher pour voir la définition','Tap to see the definition')}</span></div>
       <div class="glfb"><div class="glbk"><h4>${esc(glW(g))}</h4><p>${esc(glD(g)).replace(/\n/g,'<br>')}</p></div>${canEditTutos()?`<button class="small noprint" onclick="event.stopPropagation();glEdit('${g.id}')">${L('Modifier','Edit')}</button>`:''}</div></div></div>`).join('')+`</div>`;
   } else {
-    b.innerHTML=`<div class="gllist">`+l.map(g=>`<div class="glrow"><div class="glw">${esc(glW(g))}</div><div class="gld ${GL.blur&&!GL.rev[g.id]?'blur':''}" onclick="glRev('${g.id}',this)">${esc(glD(g)).replace(/\n/g,'<br>')}</div>${ed?`<button class="small noprint" onclick="glEdit('${g.id}')" title="${esc(L('Modifier','Edit'))}">${L('Modifier','Edit')}</button>`:'<span></span>'}</div>`).join('')+`</div>`;
+    b.innerHTML=`<div class="gllist">`+l.map(g=>`<div class="glrow"><div class="glw">${g.img?`<img class="glimg sm" src="${imgUrl(g.img)}" alt="" loading="lazy">`:''}${esc(glW(g))}</div><div class="gld ${GL.blur&&!GL.rev[g.id]?'blur':''}" onclick="glRev('${g.id}',this)">${esc(glD(g)).replace(/\n/g,'<br>')}</div>${ed?`<button class="small noprint" onclick="glEdit('${g.id}')" title="${esc(L('Modifier','Edit'))}">${L('Modifier','Edit')}</button>`:'<span></span>'}</div>`).join('')+`</div>`;
   }
 }
 
@@ -2428,15 +2460,21 @@ function glEdit(id){
    <label>${L('Définition','Definition')}</label><textarea id="glEdf" rows="4">${esc(g.def)}</textarea>
    <label>${L('Mot en anglais (facultatif)','Word in English (optional)')}</label><input id="glEwe" value="${esc(g.word_en||'')}">
    <label>${L('Définition en anglais (facultatif)','Definition in English (optional)')}</label><textarea id="glEde" rows="3">${esc(g.def_en||'')}</textarea>
+   <label>${L('Image (facultatif) : photo de la pièce, schéma…','Image (optional): photo of the part, diagram…')}</label><div class="row"><input type="file" accept="image/*" onchange="glImg(this)" style="max-width:300px"><button class="small danger" id="glImgRm" onclick="glImgRm()" ${g.img?'':'hidden'}>${L('Retirer l’image','Remove image')}</button></div><div id="glImgPv">${g.img?`<img src="${imgUrl(g.img)}" alt="" class="glimgpv">`:''}</div>
    <div class="row" style="margin-top:12px;gap:8px"><button class="primary" onclick="glEdSave()">${T('save')}</button><button onclick="glEdClose()">${L('Annuler','Cancel')}</button>${g.id?`<button class="danger" onclick="glEdDel()">${T('delete')}</button>`:''}</div></div>`;
-  document.body.appendChild(d); setTimeout(()=>{ const i=$('glEw'); if(i) i.focus(); },50);
+  GLIMG=g.img||''; document.body.appendChild(d); setTimeout(()=>{ const i=$('glEw'); if(i) i.focus(); },50);
 }
+// image d'un mot-clé : réduite (600 px) et gardée avec le mot (donc partagée par donnees.json)
+let GLIMG='';
+function glImg(inp){ const f=inp.files&&inp.files[0]; if(!f) return; readImg(f,600,0.72,u=>{ GLIMG=u; $('glImgPv').innerHTML=`<img src="${imgUrl(u)}" alt="" class="glimgpv">`; $('glImgRm').hidden=false; }); }
+function glImgRm(){ GLIMG=''; $('glImgPv').innerHTML=''; $('glImgRm').hidden=true; }
 function glEdClose(){ const d=$('glEd'); if(d) d.remove(); }
 function glEdSave(){
   const d=$('glEd'); if(!d) return; const id=d.dataset.gid;
   const word=$('glEw').value.trim(), def=$('glEdf').value.trim();
   if(!word||!def){ toast(L('Le mot et sa définition sont obligatoires','Word and definition are required')); return; }
   const rec={id:id||uid(),word,def,word_en:$('glEwe').value.trim(),def_en:$('glEde').value.trim()}, a=glItems(), i=a.findIndex(x=>x.id===id);
+  if(GLIMG) rec.img=GLIMG;
   if(i>=0) a[i]=rec; else a.unshift(rec);
   glSave(); glEdClose(); glRender(); toast(i>=0?L('Mot modifié','Word updated'):L('Mot ajouté','Word added'));
 }
@@ -2665,12 +2703,21 @@ function loadPdfJs(){
 async function showPdf(f,key,name,boxId){
   key=key||f.id; name=name||(f.file&&f.file.name)||'document.pdf';
   let b,box; try{ b=await idbGet(key); box=$(boxId||'pdfBox'); }catch(e){}
-  if(box&&!b){ box.innerHTML=`<div class="box danger">${L('Ce PDF n’est pas disponible sur cet appareil (les PDF sont gardés dans le navigateur où ils ont été ajoutés).','This PDF is not available on this device (PDFs are stored in the browser where they were added).')}</div>`; return; }
+  // Pas dans ce navigateur (PDF ajouté sur un autre appareil, ex. le PC) : on le cherche dans le dossier documents/ du site (GitHub),
+  // sous le même nom de fichier. C'est ce qui permet de l'ouvrir aussi sur téléphone et tablette.
+  if(!b&&box){ box.innerHTML=`<p class="meta">${L('Recherche du PDF…','Looking for the PDF…')}</p>`;
+    try{ const r=await fetch('documents/'+encodeURIComponent(name)); if(r.ok&&/pdf|octet/i.test(r.headers.get('content-type')||'pdf')) b=await r.blob(); }catch(e){} }
+  if(box&&!b){ box.innerHTML=`<div class="box danger">${L(`Ce PDF n’est pas encore disponible sur cet appareil. Pour qu’il s’ouvre partout (téléphone, tablette), déposez le fichier « ${esc(name)} » dans le dossier documents/ du site sur GitHub.`,`This PDF is not available on this device yet. To open it everywhere (phone, tablet), put the file “${esc(name)}” in the site’s documents/ folder on GitHub.`)}</div>`; return; }
   if(!b||!box) return;
   const u=URL.createObjectURL(b);
   box.innerHTML=`<div class="row noprint" style="margin:12px 0"><a class="btn" href="${u}" target="_blank" rel="noopener">${L('Ouvrir le PDF','Open PDF')}</a><a class="btn" href="${u}" download="${esc(name)}">${L('Télécharger','Download')}</a></div><div id="pdfPages" class="pdfpages"><div class="meta">${L('Chargement du PDF…','Loading PDF…')}</div></div>`;
   const pages=$('pdfPages');
-  const fallback=()=>{ if(pages.isConnected) pages.innerHTML=`<iframe src="${u}" title="PDF" style="width:100%;height:90vh;border:1px solid var(--line);border-radius:8px"></iframe>`; };
+  // secours si pdf.js n'a pas pu afficher les pages : sur ordinateur un cadre PDF du navigateur ; sur téléphone (qui ne sait pas
+  // afficher un PDF dans un cadre) un gros bouton pour l'ouvrir avec l'application PDF du téléphone
+  const mobile=/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent);
+  const fallback=()=>{ if(!pages.isConnected) return; pages.innerHTML=mobile
+    ?`<div class="box">${L('Le PDF ne peut pas s’afficher dans la page sur ce téléphone.','The PDF cannot be shown in the page on this phone.')}<div style="margin-top:8px"><a class="btn primary" href="${u}" download="${esc(name)}">${L('Ouvrir / télécharger le PDF','Open / download the PDF')}</a></div></div>`
+    :`<iframe src="${u}" title="PDF" style="width:100%;height:90vh;border:1px solid var(--line);border-radius:8px"></iframe>`; };
   try{
     const lib=await loadPdfJs();
     const doc=lib.getDocument({data:new Uint8Array(await b.arrayBuffer())});
@@ -2793,7 +2840,7 @@ function renderFiches(type){
   state.section=type; state.view='fiches'; $('filters').classList.add('hidden'); buildNav();
   const l=fiches.filter(f=>f.type===type);
   $('app').innerHTML=`<div class="row" style="margin:12px 0;justify-content:space-between"><h2 style="margin:0">${esc(T(type==='constructeur'?'nav_cons':type==='consommables'?'nav_cons2':'nav_pres'))}</h2>${canEditFiche(type)?`<button class="primary" onclick="editFiche('','${type}')">${esc(T('add_fiche'))}</button>`:''}</div>`+
-   ((l.length||type==='presentation')?`<div class="grid">${type==='presentation'?m3Card()+m3dCards():''}${l.map(f=>`<div class="card tcard" onclick="openFiche('${f.id}')"><div class="cover c-${type}">${f.cover?`<img src="${imgUrl(f.cover)}" alt="" loading="lazy">`:icoSVG(type)}</div><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${fFiles(f).length?`<span>${f.type==='constructeur'?fFiles(f).length+' PDF':(fileKind(f.file)==='ppt'?'PowerPoint':'PDF')}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
+   ((l.length||type==='presentation')?`<div class="grid">${type==='presentation'?m3Card()+m3dCards():''}${l.map(f=>`<div class="card tcard" onclick="openFiche('${f.id}')"><div class="cover c-${type}${frameAttrs(f.coverFit,f.coverPos,f.coverZoom).cls}" style="${frameAttrs(f.coverFit,f.coverPos,f.coverZoom).style}">${f.cover?`<img src="${imgUrl(f.cover)}" alt="" loading="lazy">`:icoSVG(type)}</div><h3>${esc(f.title)}</h3><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span>${fFiles(f).length?`<span>${f.type==='constructeur'?fFiles(f).length+' PDF':(fileKind(f.file)==='ppt'?'PowerPoint':'PDF')}</span>`:''}</div></div>`).join('')}</div>`:`<div class="empty">${esc(T('no_fiche'))}</div>`)+`<p class="disclaimer">${esc(T('footer'))}</p>`;
   window.scrollTo(0,0);
 }
 /*
@@ -2806,7 +2853,7 @@ function openFiche(id){
   state.section=f.type; state.view='fiche'; state.fid=id; $('filters').classList.add('hidden'); buildNav();
   const ok=/^(https?:\/\/|\.?\/?[\w\-\/.]+\.(pdf|png|jpe?g|docx?|xlsx?|pptx?|ppsx?|html?))/i.test(f.url||'');
   $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="renderFiches('${f.type}')">${esc(T('back'))}</button><div class="row"><button onclick="window.print()">${esc(T('print'))}</button>${canEditFiche(f.type)?`<button onclick="editFiche('${id}')">${esc(T('edit'))}</button>`:''}</div></div>
-   <div class="panel">${f.cover?`<img class="tcover" src="${imgUrl(f.cover)}" alt="">`:''}<h2 style="margin-top:0">${esc(f.title)}</h2><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span></div>
+   <div class="panel">${bigCover(f)}<h2 style="margin-top:0">${esc(f.title)}</h2><div class="meta"><span>${esc(machineL(f.machine||'Non précisée'))}</span></div>
    <p>${esc(f.text).replace(/\n/g,'<br>')}</p><div id=\"pdfBox\"></div>${ok?`<a class="btn" href="${esc(f.url)}" target="_blank" rel="noopener">${esc(T('open_doc'))}</a>`:''}</div>`;
   if(f.type==='constructeur') fPdfList(f); else if(f.file) (fileKind(f.file)==='ppt'?showPpt(f):showPdf(f));
   window.scrollTo(0,0);
@@ -2825,8 +2872,8 @@ function editFiche(id,type){
 function fCoverEdHTML(){
   const d=state.fd;
   return `<label>${L('Image d’illustration (affichée sur la carte, facultatif)','Cover image (shown on the card, optional)')}</label>
-   <div class="row"><input type="file" accept="image/*" style="max-width:320px" onchange="addFCover(this)">${d.cover?`<button class="small danger" onclick="rmFCover()">${L('Retirer l’image','Remove image')}</button>`:''}</div>
-   ${d.cover?`<img src="${imgUrl(d.cover)}" alt="" style="max-width:260px;border-radius:8px;margin-top:8px;display:block">`:''}`;
+   <div class="row"><input type="file" accept="image/*" style="max-width:320px" onchange="addFCover(this)">${d.cover?`<button class="small" onclick="fCoverFrame()">${L('Cadrer / zoomer','Frame / zoom')}</button><button class="small danger" onclick="rmFCover()">${L('Retirer l’image','Remove image')}</button>`:''}</div>
+   ${d.cover?`<div class="card tcard" style="max-width:300px;margin-top:8px;cursor:default"><div class="cover${frameAttrs(d.coverFit,d.coverPos,d.coverZoom).cls}" style="${frameAttrs(d.coverFit,d.coverPos,d.coverZoom).style}"><img src="${imgUrl(d.cover)}" alt=""></div><span class="meta">${L('Aperçu de la carte','Card preview')}</span></div>`:''}`;
 }
 function addFCover(inp){
   const f=inp.files&&inp.files[0]; if(!f) return;
@@ -3834,7 +3881,8 @@ function netUpdate(){ const n=$('net'); if(!n) return; n.textContent='● '+L('H
 function isStandalone(){ return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true; }
 function instUpdate(){
   const b=$('bInstall'); if(!b) return;
-  const st=isStandalone(), lbl=st?L('Désinstaller','Uninstall'):L('Installer','Install');
+  const st=isStandalone(), lbl=L('Installer','Install');
+  if(st){ b.classList.add('hidden'); return; }   // appli déjà installée : « Désinstaller » est dans Paramètres > Application
   b.innerHTML='<span aria-hidden="true">'+(st?'×':'↓')+'</span><span class="instlbl"> '+lbl+'</span>';
   b.title=lbl; b.setAttribute('aria-label',lbl);
   b.classList.toggle('primary',!st);
@@ -3929,8 +3977,12 @@ if('serviceWorker' in navigator){
       const EYE='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/></svg>';
       const EYEOFF='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg>';
       b.innerHTML=EYE;
-      b.onclick=()=>{ const show=inp.type==='password'; inp.type=show?'text':'password'; b.innerHTML=show?EYEOFF:EYE;
+      // Sur téléphone, toucher le bouton faisait d'abord perdre le focus au champ (le clavier se ferme, la page bouge) et le « clic »
+      // était perdu : on bascule donc dès l'appui (pointerdown + preventDefault, le champ garde le focus). Le clic clavier reste possible.
+      const flip=()=>{ const show=inp.type==='password'; inp.type=show?'text':'password'; b.innerHTML=show?EYEOFF:EYE;
         b.setAttribute('aria-label',show?L('Masquer le mot de passe','Hide password'):L('Afficher le mot de passe','Show password')); };
+      b.addEventListener('pointerdown',e=>{ e.preventDefault(); flip(); b.dataset.pd='1'; });
+      b.addEventListener('click',e=>{ e.preventDefault(); if(b.dataset.pd){ delete b.dataset.pd; return; } flip(); });
       w.appendChild(b);
       const c=document.createElement('div'); c.className='meta capswarn hidden'; c.textContent=''+L('Verrouillage majuscules activé','Caps Lock is on'); w.after(c);
       inp.addEventListener('keydown',ev=>{ if(ev.getModifierState) c.classList.toggle('hidden',!ev.getModifierState('CapsLock')); });
@@ -4280,22 +4332,22 @@ const M3D_LIST=[
  {id:'redwave', file:'modeles3d/redwave.glb', col:'#d7261e', name:'Redwave CX',
   sub:['Trieur à goulotte : capots basculants, alimentation vibrante, chute libre devant les caméras','Chute sorter: tilting covers, vibrating feeder, free fall in front of the cameras'],
   where:{vis:['Caméra VIS à l’avant en haut ; éclairage LED et fond de référence blanc derrière le rideau de verre.','VIS camera at the front top; LED lighting and white reference background behind the glass curtain.'],
-         nir:['2 caméras NIR et une lampe halogène à l’avant, en bas.','2 NIR cameras and a halogen lamp at the front bottom.'],
-         uv:['2 caméras UV et une lampe UV à l’avant, tout en haut.','2 UV cameras and a UV lamp at the very front top.'],
+         nir:['Caméra NIR et lampe halogène à l’avant, en bas.','NIR camera and halogen lamp at the front bottom.'],
+         uv:['Caméra UV et lampe UV à l’avant, tout en haut.','UV camera and UV lamp at the very front top.'],
          ind:['Barre de capteurs inductifs sous la fin de la goulotte.','Inductive sensor bar under the end of the chute.']},
   poi:{alim:[1.3,2.62,25,48,2.4],goulotte:[0.4,2.35,35,58,2.0],vis:[-0.2,2.25,40,72,1.7],uv:[-0.15,2.4,40,62,1.8],nir:[-0.3,2.0,40,85,1.8],ind:[0.15,2.2,45,62,1.4],buses:[0.15,1.92,50,80,1.4],sorties:[0,1.4,30,80,2.6]}},
  {id:'binder', file:'modeles3d/binder-clarity.glb', col:'#1f6fc2', name:'Binder+Co Clarity',
   sub:['Trieur à goulotte : grand capot qui s’enlève, extrémités blanches et bleues, armoire de commande en bout','Chute sorter: large removable hood, white and blue ends, control cabinet at the end'],
-  where:{vis:['2 caméras VIS à l’avant ; rétro-éclairage LED à l’arrière : la lumière traverse le verre.','2 VIS cameras at the front; LED backlight at the rear: light goes through the glass.'],
-         nir:['2 caméras NIR et une lampe halogène au-dessus de la sortie de goulotte.','2 NIR cameras and a halogen lamp above the chute outlet.'],
-         uv:['2 caméras UV et une lampe UV à l’avant, en bas.','2 UV cameras and a UV lamp at the front bottom.'],
+  where:{vis:['Caméra VIS à l’avant ; rétro-éclairage LED à l’arrière : la lumière traverse le verre.','VIS camera at the front; LED backlight at the rear: light goes through the glass.'],
+         nir:['Caméra NIR et lampe halogène au-dessus de la sortie de goulotte.','NIR camera and halogen lamp above the chute outlet.'],
+         uv:['Caméra UV et lampe UV à l’avant, en bas.','UV camera and UV lamp at the front bottom.'],
          ind:['Capteurs inductifs sous la fin de la goulotte.','Inductive sensors under the end of the chute.']},
   poi:{alim:[0.62,2.3,20,48,2.2],goulotte:[0.2,1.65,30,55,1.8],vis:[-0.25,1.45,30,70,1.6],uv:[-0.3,1.15,30,85,1.6],nir:[-0.15,1.6,30,55,1.6],ind:[0.1,1.5,30,50,1.3],buses:[0.1,1.08,30,80,1.4],sorties:[0,0.6,30,80,2.4]}},
  {id:'mogensen', file:'modeles3d/mogensen.glb', col:'#4b4e52', name:'Mogensen',
   sub:['Trieur compact : alimentation vibrante bleue au-dessus, capot nervuré et face avant qui s’enlèvent, 2 voyants verts','Compact sorter: blue vibrating feeder on top, ribbed cover and front panel that come off, 2 green lights'],
-  where:{vis:['2 caméras VIS à l’avant ; rétro-éclairage LED à l’arrière du rideau de verre.','2 VIS cameras at the front; LED backlight behind the glass curtain.'],
-         nir:['2 caméras NIR et une lampe halogène en haut, sous le capot nervuré.','2 NIR cameras and a halogen lamp at the top, under the ribbed cover.'],
-         uv:['2 caméras UV et une lampe UV à l’avant, en bas.','2 UV cameras and a UV lamp at the front bottom.'],
+  where:{vis:['Caméra VIS à l’avant ; rétro-éclairage LED à l’arrière du rideau de verre.','VIS camera at the front; LED backlight behind the glass curtain.'],
+         nir:['Caméra NIR et lampe halogène en haut, sous le capot nervuré.','NIR camera and halogen lamp at the top, under the ribbed cover.'],
+         uv:['Caméra UV et lampe UV à l’avant, en bas.','UV camera and UV lamp at the front bottom.'],
          ind:['Capteurs inductifs sous la fin de la goulotte.','Inductive sensors under the end of the chute.']},
   poi:{alim:[0.55,2.12,20,50,2.0],goulotte:[0.18,1.4,25,50,1.6],vis:[-0.25,1.25,25,72,1.5],uv:[-0.25,1.0,25,85,1.5],nir:[-0.12,1.32,25,55,1.5],ind:[0.12,1.3,25,48,1.2],buses:[0.1,0.92,25,80,1.3],sorties:[0,0.5,25,80,2.2]}}
 ];
@@ -4305,17 +4357,17 @@ const M3D_TECH=[['vis','VIS','#f2b705',45],['nir','NIR','#ff6a3d',75],['uv','UV'
 const M3D_HOW={
  vis:{titre:['Technologie VIS (lumière visible)','VIS technology (visible light)'],fr:'La technologie VIS trie le verre selon sa transparence : si la lumière traverse le morceau, c’est du verre.',en:'VIS sorts glass by transparency: if light passes through the piece, it is glass.',
   ok:['Transparent = verre','Transparent = glass'],ko:['Opaque = indésirable','Opaque = undesirable'],cont:['Pierre (grise)','Stone (grey)'],
-  steps:[['Éclairage','une lumière visible (LED) éclaire le verre par l’arrière','Lighting','visible LED light shines through the glass from behind'],['Détection','les caméras mesurent la lumière qui traverse chaque morceau','Detection','the cameras measure the light passing through each piece'],['Analyse','l’ordinateur compare : transparent = verre, opaque = indésirable','Analysis','the computer compares: transparent = glass, opaque = undesirable'],['Éjection','les morceaux opaques sont soufflés par les jets d’air','Ejection','opaque pieces are blown out by air jets'],['Résultat','le verre propre continue vers la sortie « bon »','Result','clean glass continues to the “good” outlet']],
+  steps:[['Éclairage','une lumière visible (LED) éclaire le verre par l’arrière','Lighting','visible LED light shines through the glass from behind'],['Détection','la caméra mesure la lumière qui traverse chaque morceau','Detection','the camera measures the light passing through each piece'],['Analyse','l’ordinateur compare : transparent = verre, opaque = indésirable','Analysis','the computer compares: transparent = glass, opaque = undesirable'],['Éjection','les morceaux opaques sont soufflés par les jets d’air','Ejection','opaque pieces are blown out by air jets'],['Résultat','le verre propre continue vers la sortie « bon »','Result','clean glass continues to the “good” outlet']],
   plus:[['Simple et fiable, basée sur la transparence','Simple and reliable, based on transparency'],['Convient à toutes les couleurs, formes et tailles de verre','Suits all colours, shapes and sizes of glass'],['Efficacité élevée et régulière','High and consistent efficiency']],
   but:['Un verre de grande qualité avec un minimum d’indésirables.','High-quality glass with a minimum of undesirables.']},
  uv:{titre:['Technologie UV (ultraviolet)','UV technology (ultraviolet)'],fr:'La lumière UV fait briller certains matériaux (fluorescence) : on repère ainsi les indésirables, puis on les éjecte.',en:'UV light makes some materials glow (fluorescence), so undesirables can be found and ejected.',
   ok:['Non fluorescent = verre','Non-fluorescent = glass'],ko:['Fluorescent = indésirable','Fluorescent = undesirable'],cont:['Céramique fluorescente (blanche)','Fluorescent ceramic (white)'],
-  steps:[['Éclairage UV','la lampe UV éclaire le flux de verre','UV lighting','the UV lamp lights the glass stream'],['Détection','les caméras UV captent la fluorescence','Detection','the UV cameras capture the fluorescence'],['Analyse','le logiciel classe chaque morceau','Analysis','software classifies each piece'],['Éjection','les jets d’air retirent les morceaux fluorescents','Ejection','air jets remove fluorescent pieces'],['Résultat','le verre continue, les indésirables sont partis','Result','glass continues, undesirables are gone']],
+  steps:[['Éclairage UV','la lampe UV éclaire le flux de verre','UV lighting','the UV lamp lights the glass stream'],['Détection','la caméra UV capte la fluorescence','Detection','the UV camera captures the fluorescence'],['Analyse','le logiciel classe chaque morceau','Analysis','software classifies each piece'],['Éjection','les jets d’air retirent les morceaux fluorescents','Ejection','air jets remove fluorescent pieces'],['Résultat','le verre continue, les indésirables sont partis','Result','glass continues, undesirables are gone']],
   plus:[['Détection précise des matériaux fluorescents','Precise detection of fluorescent materials'],['Plastiques, céramiques et matières organiques brillent sous UV','Plastics, ceramics and organic matter glow under UV']],
   but:['Éliminer les indésirables fluorescents pour respecter les exigences qualité.','Remove fluorescent undesirables to meet quality requirements.']},
  nir:{titre:['Technologie NIR (proche infrarouge)','NIR technology (near-infrared)'],fr:'Chaque matériau absorbe et réfléchit l’infrarouge à sa façon : sa signature infrarouge révèle sa nature.',en:'Each material absorbs and reflects infrared its own way: its infrared signature reveals what it is.',
   ok:['Signature conforme = accepté','Matching signature = accepted'],ko:['Signature différente = éjecté','Different signature = ejected'],cont:['Plastique (bleu)','Plastic (blue)'],
-  steps:[['Éclairage NIR','la lampe halogène envoie de l’infrarouge sur le flux','NIR lighting','the halogen lamp sends infrared onto the stream'],['Réflexion','chaque matériau renvoie le NIR à sa façon','Reflection','each material reflects NIR its own way'],['Détection','les caméras NIR lisent la signature infrarouge','Detection','the NIR cameras read the infrared signature'],['Éjection','les morceaux non conformes sont soufflés','Ejection','non-matching pieces are blown out'],['Résultat','le verre accepté continue','Result','accepted glass continues']],
+  steps:[['Éclairage NIR','la lampe halogène envoie de l’infrarouge sur le flux','NIR lighting','the halogen lamp sends infrared onto the stream'],['Réflexion','chaque matériau renvoie le NIR à sa façon','Reflection','each material reflects NIR its own way'],['Détection','la caméra NIR lit la signature infrarouge','Detection','the NIR camera reads the infrared signature'],['Éjection','les morceaux non conformes sont soufflés','Ejection','non-matching pieces are blown out'],['Résultat','le verre accepté continue','Result','accepted glass continues']],
   plus:[['Plastiques, papier, bois, étiquettes','Plastics, paper, wood, labels'],['Céramiques, pierres, verres spéciaux','Ceramics, stones, special glass'],['Identifie la composition du matériau','Identifies the material composition']],
   but:['Trier les matériaux selon leur composition pour respecter les exigences qualité.','Sort materials by composition to meet quality requirements.']},
  ind:{titre:['Capteurs inductifs (détection des métaux)','Inductive sensors (metal detection)'],fr:'Le capteur crée un champ électromagnétique. Un métal qui le traverse crée des courants de Foucault qui modifient le signal. Ce ne sont pas des caméras : ce sont des bobines placées sous la goulotte.',en:'The sensor creates an electromagnetic field. A metal passing through it induces eddy currents that change the signal. These are not cameras: they are coils under the chute.',
@@ -4339,7 +4391,7 @@ const M3D_TOUR=[
 ];
 // repères de temps de l'animation (secondes, 30 images/s, image 1 = 0 s)
 const FR=f=>(f-1)/30, T_OPEN=FR(28), T_FLOW0=FR(30), T_FLOW1=FR(150), T_EXP0=FR(154), T_EXP1=FR(200);
-let M3DS={brand:'redwave',tech:'all',tour:-1}, mvAnim=0, mvLoop=0;
+let M3DS={brand:'redwave',tech:'vis',tour:-1}, mvAnim=0, mvLoop=0;   // la page s'ouvre sur la technologie VIS
 const techName=k=>{ const h=M3D_HOW[k]; return L(...h.titre); };
 function m3dCards(){
   return `<div class="card tcard" onclick="render3DModel()"><div class="cover c-presentation m3cover"><span class="catmono" style="color:#fff;font-weight:800;font-size:1.25rem">VIS · NIR · UV · IND</span><span class="m3badge">3D</span></div><h3>${L('Trieurs 3D : visite guidée, flux du verre et technologies','3D sorters: guided tour, glass flow and technologies')}</h3><div class="meta"><span>Redwave · Binder+Co · Mogensen</span><span>${L('Interactif','Interactive')}</span></div></div>`;
@@ -4356,7 +4408,7 @@ function render3DModel(id,tech){
     <div class="chips">${M3D_LIST.map(tab).join('')}</div>
     <p class="meta" style="margin:0 0 8px">${esc(L(...m.sub))}</p>
     <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><button class="primary" onclick="m3dTour(0)">🧭 ${L('Visite guidée','Guided tour')}</button>
-      <div class="chips" id="m3dtechs" style="margin:0">${tb('all',L('Toutes','All'))}${M3D_TECH.map(([k,c,col])=>tb(k,k==='ind'?L('Inductif','Inductive'):c,col)).join('')}</div></div>
+      <div class="chips" id="m3dtechs" style="margin:0">${tb('all',L('Vue d’ensemble','Overview'))}${M3D_TECH.map(([k,c,col])=>tb(k,k==='ind'?L('Inductif','Inductive'):c,col)).join('')}</div></div>
     <div class="m3dgrid"><div class="m3dview">
       <div id="mvbox" class="mvbox"><p class="meta" style="padding:20px">${L('Chargement du modèle 3D…','Loading the 3D model…')}</p></div>
       <div id="m3dcap" class="m3dcap"></div>
@@ -4382,13 +4434,17 @@ function m3dTech(k){ M3DS.tech=k; document.querySelectorAll('.m3dtech').forEach(
 function m3dApply(){
   const mv=$('mv'); if(!mv||!mv.model) return;
   const hex=h=>[1,3,5].map(i=>{ const c=parseInt(h.substr(i,2),16)/255; return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4); });
+  // UNE SEULE technologie visible à la fois : sa caméra (ou ses bobines), sa lampe, son faisceau, son indésirable et son jet d'air.
+  // « Vue d'ensemble » (tech = 'all') : aucune caméra, seulement la machine et le flux de verre avec les 4 indésirables.
+  const alpha=(mt,a)=>{ try{ mt.setAlphaMode(a<1?'BLEND':'OPAQUE'); }catch(e){} const f=mt.pbrMetallicRoughness.baseColorFactor; mt.pbrMetallicRoughness.setBaseColorFactor([f[0],f[1],f[2],a]); };
   M3D_TECH.forEach(([k,c,col])=>{
-    const on=M3DS.tech==='all'||M3DS.tech===k, rgb=hex(col);
+    const on=M3DS.tech===k, all=M3DS.tech==='all', rgb=hex(col);
     mv.model.materials.forEach(mt=>{
       const n=mt.name, pb=mt.pbrMetallicRoughness;
       if(n===`TECH_${c}_Faisceau`){ try{ mt.setAlphaMode('BLEND'); }catch(e){} pb.setBaseColorFactor([...rgb,on?0.45:0]); mt.setEmissiveFactor(on?rgb:[0,0,0]); }
-      else if(n===`TECH_${c}_Lum`||n===`TECH_${c}_Ligne`){ mt.setEmissiveFactor(on?rgb:rgb.map(v=>v*0.08)); }
-      else if(n===`TECH_${c}_Indesirable`||n===`TECH_${c}_Jet`){ try{ mt.setAlphaMode('BLEND'); }catch(e){} const f=pb.baseColorFactor; pb.setBaseColorFactor([f[0],f[1],f[2],on?(n.endsWith('Jet')?0.6:1):0]); }
+      else if(n===`TECH_${c}_Lum`||n===`TECH_${c}_Ligne`||n===`TECH_${c}_Corps`||n===`CAM_Corps_${c}`||n===`CAM_Objectif_${c}`){ alpha(mt,on?1:0); if(n.startsWith('TECH_')&&n!==`TECH_${c}_Corps`) mt.setEmissiveFactor(on?rgb:[0,0,0]); }
+      else if(n===`TECH_${c}_Indesirable`) alpha(mt,on||all?1:0);
+      else if(n===`TECH_${c}_Jet`){ try{ mt.setAlphaMode('BLEND'); }catch(e){} const f=pb.baseColorFactor; pb.setBaseColorFactor([f[0],f[1],f[2],on||all?0.6:0]); }
     });
   });
 }
@@ -4399,7 +4455,7 @@ function m3dInfo(){
   if(M3DS.tech==='all'){
     box.innerHTML=`<h3 style="margin-top:0">${L('Principe du tri optique','How optical sorting works')}</h3>
       <ol class="m3dcycle"><li><b>${L('Détection','Detection')}</b> ${L('par les caméras et capteurs','by cameras and sensors')}</li><li><b>${L('Analyse','Analysis')}</b> ${L('par l’ordinateur','by the computer')}</li><li><b>${L('Éjection','Ejection')}</b> ${L('par air comprimé (rampe de buses)','by compressed air (nozzle bar)')}</li></ol>
-      <p class="meta">${L('Dans l’animation, le verre (vert, blanc, brun) passe de l’alimentation vibrante à la goulotte, tombe devant les caméras puis dans la sortie « bon ». Chaque seconde, un indésirable passe et il est soufflé vers la sortie « rejet ».','In the animation, glass goes from the feeder to the chute, falls past the cameras into the “good” outlet. Every second an undesirable is blown into the “reject” outlet.')}</p>
+      <p class="meta">${L('Dans l’animation, le verre (vert, blanc, brun) passe de l’alimentation vibrante à la goulotte, tombe devant les caméras puis dans la sortie « bon ». Chaque seconde, un indésirable passe et il est soufflé vers la sortie « rejet ». Choisissez une technologie au-dessus pour voir SA caméra (une seule à la fois).','In the animation, glass goes from the feeder to the chute, falls past the cameras into the “good” outlet. Every second an undesirable is blown into the “reject” outlet. Pick a technology above to see ITS camera (one at a time).')}</p>
       ${M3D_TECH.map(([k,c,col])=>`<div class="m3dpart" onclick="m3dTech('${k}')" style="cursor:pointer"><i style="background:${col}"></i><div><b>${esc(techName(k))}</b><p>${esc(L(M3D_HOW[k].fr,M3D_HOW[k].en))}</p></div></div>`).join('')}
       <details class="m3dmore"><summary>${L('Le recyclage du verre en 7 étapes','Glass recycling in 7 steps')}</summary><ol>${M3D_PROCESS.map(p=>`<li><b>${esc(p[0])}</b> : ${esc(p[1])}${p[0]==='Tri optique'?' ← '+L('cette machine','this machine'):''}</li>`).join('')}</ol></details>
       <details class="m3dmore"><summary>${L('Les indésirables retirés par le tri optique','Undesirables removed by optical sorting')}</summary><ul>${M3D_INDES.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
@@ -4783,7 +4839,7 @@ function m3Start(){
  dans la copie de secours ni dans le fichier .json (trop volumineux). Et chaque appareil a SES données : pour partager
  des tutos entre téléphones, utilisez la sauvegarde en fichier (ou un vrai serveur, non prévu ici).
  ============================================================================ */
-const BK_KEYS=[SITE_KEY,'sibelco_interv_v1',RMKEY,GIKEY,TDKEY,CVKEY,TPKEY,LBLKEY,NAVKEY,FHKEY,FNKEY,FLKEY,FZKEY,GLKEY,GLEKEY,M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_last_export'];  // données à protéger
+const BK_KEYS=[SITE_KEY,'sibelco_annuaire_v1','sibelco_interv_v1',RMKEY,GIKEY,TDKEY,CVKEY,TPKEY,LBLKEY,NAVKEY,FHKEY,FNKEY,FLKEY,FZKEY,GLKEY,GLEKEY,M3_TXT_KEY,KEY,UKEY,FKEY,SKEY,GSKEY,G2KEY,LANG_KEY,'sibelco_last_export'];  // données à protéger
 const LAST_EXPORT='sibelco_last_export';
 // petite base IndexedDB "sibelco_backup" : un seul enregistrement "snap" = copie de toutes les clés ci-dessus
 function bkDb(){ return new Promise((ok,ko)=>{ const r=indexedDB.open('sibelco_backup',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); }); }
@@ -4823,7 +4879,7 @@ async function askPersist(){ try{ if(navigator.storage&&navigator.storage.persis
      Après le rechargement, un bandeau résume ce qui a été fait (sessionStorage 'sibelco_sync_msg').
    - Si le stockage est plein pendant la fusion, TOUT est annulé (les anciennes données restent intactes).
  ============================================================================ */
-const SH_ARR=[KEY,FKEY,GLKEY,CVKEY], SH_OBJ=[LBLKEY,NAVKEY,FHKEY,FNKEY,FLKEY,FZKEY,M3_TXT_KEY,TPKEY,GIKEY,SITE_KEY], SH_HASH='sibelco_shared_hash', SH_IDS='sibelco_shared_ids_v1';
+const SH_ARR=[KEY,FKEY,GLKEY,CVKEY], SH_OBJ=[LBLKEY,NAVKEY,FHKEY,FNKEY,FLKEY,FZKEY,M3_TXT_KEY,TPKEY,GIKEY,SITE_KEY,'sibelco_annuaire_v1'], SH_HASH='sibelco_shared_hash', SH_IDS='sibelco_shared_ids_v1';
 const SH_PREV='sibelco_shared_prev_v1', SH_COPY=[KEY,FKEY], SYNC_MSG='sibelco_sync_msg';   // SH_COPY = listes où un conflit garde une copie locale
 const shHash=t=>{ let h=5381; for(let i=0;i<t.length;i++) h=((h<<5)+h+t.charCodeAt(i))|0; return t.length+':'+h; };
 async function sharedSync(){
@@ -5059,6 +5115,8 @@ function histRestore(s){
     else if(v==='fiche'&&s.fid&&fiches.some(f=>f.id===s.fid)) openFiche(s.fid);
     else if(v==='fiche'||v==='fedit'||v==='fiches') renderFiches(s.section);
     else if(v==='machine'&&s.mach) renderMachine(s.mach);
+    else if(v==='profil') renderProfile();
+    else if(v==='equipe') renderOrg();
     else if(v==='model3d'&&s.id) render3DModel(s.id);
     else if(v==='flow') renderFlow(s.fl||undefined);
     else if(v==='gloss'){ if(typeof GL!=='undefined') GL.q=s.gl||''; renderGloss(); }
@@ -5177,7 +5235,111 @@ function bgPanelHTML(){
     ${canEditTutos()?`<p class="meta">${L('Pour changer la photo du site pour tout le monde : remplacez le fichier fond-verre.jpg dans le dossier de l’appli (même nom), puis publiez.','To change the site photo for everyone: replace fond-verre.jpg in the app folder (same name), then publish.')}</p>`:''}</div>`;
 }
 (function(){ const rs=renderSettings; renderSettings=function(){ rs(); const s=$('safepanel'); const h=bgPanelHTML(); if(s) s.insertAdjacentHTML('beforebegin',h); else $('app').insertAdjacentHTML('beforeend',h); }; })();
+/* ============================================================================
+ ===================== MON PROFIL + ÉQUIPE / ORGANIGRAMME =====================
+ PROFIL (menu « Mon profil ») : photo, nom, poste, site, email, téléphone, description. Bouton Teams (discussion / appel) si l'email
+ est renseigné (liens officiels teams.microsoft.com, ouverts dans Teams).
+ ANNUAIRE : chaque personne choisit d'apparaître dans l'annuaire du site (case à cocher). Les profils visibles sont rangés dans
+ DIR_KEY et partagés par donnees.json (« Exporter pour le site ») : ATTENTION, ce fichier est public sur GitHub, donc seuls les
+ profils cochés y vont, et jamais les mots de passe.
+ ORGANIGRAMME (menu « Équipe ») : administrateurs en haut, puis chaque site avec ses référents (classe 3) et son équipe (classes 0 à 2).
+ Les personnes viennent des comptes de cet appareil + de l'annuaire partagé.
+============================================================================ */
+const DIR_KEY='sibelco_annuaire_v1';
+const dirGet=()=>{ try{ return JSON.parse(localStorage.getItem(DIR_KEY))||{}; }catch(e){ return {}; } };
+function dirSave(o){ try{ localStorage.setItem(DIR_KEY,JSON.stringify(o)); }catch(e){ toast(T('storage_full')); } try{ bkSchedule(); }catch(e){} }
+const pubOf=u=>({name:u.name||u.id,cls:+u.cls||0,poste:u.poste||'',site:u.site||'',email:u.email||'',tel:u.tel||'',desc:u.desc||'',photo:u.photo||'',maj:Date.now()});
+function dirSync(u){ const d=dirGet(); if(u.annuaire) d[u.id]=pubOf(u); else delete d[u.id]; dirSave(d); }
+const siteNames=()=>{ let fn={}; try{ fn=fnGet(); }catch(e){} return (typeof FLOW_SITES!=='undefined'?FLOW_SITES:[]).filter(s=>!s.custom).map(s=>fn[s.id]||s.name); };
+const teamsChat=e=>'https://teams.microsoft.com/l/chat/0/0?users='+encodeURIComponent(e);
+const teamsCall=e=>'https://teams.microsoft.com/l/call/0/0?users='+encodeURIComponent(e);
+const validMail=e=>/^[^\s@<>"']+@[^\s@<>"']+\.[a-z]{2,}$/i.test(e||'');
+function avatar(p,size){
+  const ini=String(p.name||'?').split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+  return p.photo?`<img class="avatar" src="${imgUrl(p.photo)}" alt="" style="width:${size}px;height:${size}px">`:`<span class="avatar ini cls${+p.cls||0}" style="width:${size}px;height:${size}px;font-size:${Math.round(size*0.38)}px">${esc(ini)}</span>`;
+}
+function contactHTML(p){
+  const b=[];
+  if(validMail(p.email)){ b.push(`<a class="btn teams" href="${esc(teamsChat(p.email))}" target="_blank" rel="noopener">${L('Discussion Teams','Teams chat')}</a>`); b.push(`<a class="btn" href="${esc(teamsCall(p.email))}" target="_blank" rel="noopener">${L('Appel Teams','Teams call')}</a>`); b.push(`<a class="btn" href="mailto:${esc(p.email)}">${L('Email','Email')}</a>`); }
+  if(/^[+\d][\d .-]{5,}$/.test(p.tel||'')) b.push(`<a class="btn" href="tel:${esc(p.tel.replace(/[ .-]/g,''))}">${L('Appeler','Call')}</a>`);
+  return b.length?`<div class="row" style="gap:6px;margin-top:8px">${b.join('')}</div>`:'';
+}
+// ---------- Mon profil ----------
+let PROF_PHOTO=null;
+function renderProfile(){
+  state.section='profil'; state.view='profil'; $('filters').classList.add('hidden'); buildNav(); PROF_PHOTO=null;
+  const u=settings, sites=siteNames();
+  $('app').innerHTML=`<div class="panel profhd">${avatar(u,96)}<div><h2 style="margin:0">${esc(u.name||u.id)}</h2><div class="meta">${esc(u.poste||L('Poste non renseigné','Job not set'))}${u.site?' · '+esc(u.site):''}</div>
+      <div class="row" style="gap:6px;margin-top:6px"><span class="cls cls${u.cls}">${esc(clsL(u.cls))}</span>${u.annuaire?`<span class="tag valide">${L('Visible dans l’annuaire','Listed in the directory')}</span>`:''}</div>${contactHTML(u)}</div></div>
+   <div class="panel"><h3 style="margin-top:0">${L('Modifier mon profil','Edit my profile')}</h3>
+    <label>${L('Photo de profil','Profile picture')}</label><div class="row"><span id="profPv">${avatar(u,64)}</span><label class="btn small" style="cursor:pointer">${L('Choisir une photo…','Choose a photo…')}<input type="file" accept="image/*" class="hidden" onchange="profPhoto(this)"></label>${u.photo?`<button class="small danger" onclick="PROF_PHOTO='';$('profPv').innerHTML=avatar({name:settings.name,cls:settings.cls},64)">${L('Retirer','Remove')}</button>`:''}</div>
+    <label>${L('Nom Prénom','Full name')}</label><input id="pfName" value="${esc(u.name||'')}">
+    <label>${L('Poste / fonction','Job / role')}</label><input id="pfPoste" value="${esc(u.poste||'')}" placeholder="${esc(L('Ex : technicien de maintenance, coordinateur tri optique…','e.g. maintenance technician, optical sorting coordinator…'))}">
+    <label>${L('Site','Site')}</label><select id="pfSite"><option value="">${L('Non renseigné','Not set')}</option>${sites.map(s=>`<option ${u.site===s?'selected':''}>${esc(s)}</option>`).join('')}${u.site&&!sites.includes(u.site)?`<option selected>${esc(u.site)}</option>`:''}</select>
+    <label>${L('Email (sert aussi pour Teams)','Email (also used for Teams)')}</label><input id="pfMail" type="email" value="${esc(u.email||'')}" placeholder="prenom.nom@sibelco.com" autocomplete="email">
+    <label>${L('Téléphone (facultatif)','Phone (optional)')}</label><input id="pfTel" type="tel" value="${esc(u.tel||'')}">
+    <label>${L('Description','Description')}</label><textarea id="pfDesc" rows="3" placeholder="${esc(L('Ex : machines suivies, compétences, horaires…','e.g. machines followed, skills, shift…'))}">${esc(u.desc||'')}</textarea>
+    <label class="bgopt" style="margin-top:10px"><input type="checkbox" id="pfDir" ${u.annuaire?'checked':''}> ${L('Apparaître dans l’annuaire et l’organigramme du site','Appear in the site directory and org chart')}</label>
+    <p class="meta">${L('Votre profil (sans mot de passe) est alors partagé avec les autres appareils par le fichier donnees.json. Ce fichier est public sur GitHub : ne mettez que des informations professionnelles.','Your profile (no password) is then shared with other devices through donnees.json. That file is public on GitHub: only put work information.')}</p>
+    <div class="row" style="margin-top:12px"><button class="primary" onclick="profSave()">${T('save')}</button><button onclick="renderOrg()">${L('Voir l’organigramme','See the org chart')}</button></div></div>`;
+  window.scrollTo(0,0); try{ histPush({view:'profil'}); }catch(e){}
+}
+function profPhoto(inp){ const f=inp.files&&inp.files[0]; if(!f) return; readImg(f,320,0.8,u=>{ PROF_PHOTO=u; $('profPv').innerHTML=avatar({photo:u},64); }); }
+function profSave(){
+  const u=settings, mail=$('pfMail').value.trim();
+  if(mail&&!validMail(mail)){ toast(L('Adresse email invalide','Invalid email address')); return; }
+  Object.assign(u,{name:$('pfName').value.trim()||u.name,poste:$('pfPoste').value.trim(),site:$('pfSite').value,email:mail,tel:$('pfTel').value.trim(),desc:$('pfDesc').value.trim(),annuaire:$('pfDir').checked});
+  if(PROF_PHOTO!==null) u.photo=PROF_PHOTO;
+  saveSettings(); dirSync(u); buildNav(); toast(L('Profil enregistré','Profile saved')); renderProfile();
+}
+// ---------- Organigramme ----------
+function people(){
+  const d=dirGet(), map={};
+  Object.keys(d).forEach(id=>{ map[id]=Object.assign({id,shared:true},d[id]); });
+  users.forEach(u=>{ const p=Object.assign({},map[u.id]||{},{id:u.id,name:u.name||u.id,cls:+u.cls||0,poste:u.poste||'',site:u.site||'',photo:u.photo||'',desc:u.desc||'',local:true});
+    p.email=u.annuaire||u.id===settings.id||canEditTutos()?(u.email||''):''; p.tel=u.annuaire||u.id===settings.id||canEditTutos()?(u.tel||''):''; map[u.id]=p; });
+  return Object.values(map);
+}
+function renderOrg(site){
+  state.section='equipe'; state.view='equipe'; $('filters').classList.add('hidden'); buildNav();
+  const all=people(), sites=[...new Set([...siteNames(),...all.map(p=>p.site).filter(Boolean)])];
+  const card=p=>`<button class="orgp" onclick="orgShow('${esc(p.id)}')">${avatar(p,44)}<span><b>${esc(p.name)}</b><span class="meta">${esc(p.poste||clsL(p.cls))}</span></span></button>`;
+  const by=(l,f)=>l.filter(f).sort((a,b)=>b.cls-a.cls||a.name.localeCompare(b.name));
+  const admins=by(all,p=>p.cls>=4);
+  const block=s=>{ const inS=all.filter(p=>(p.site||'')===s&&p.cls<4), ref=by(inS,p=>p.cls===3), eq=by(inS,p=>p.cls<3);
+    if(!ref.length&&!eq.length&&s==='') return '';
+    return `<div class="orgsite"><h3>${esc(s||L('Site non renseigné','Site not set'))}</h3>
+      <div class="orglvl"><span class="meta">${L('Référents','Referents')}</span><div class="orgrow">${ref.map(card).join('')||`<span class="meta">—</span>`}</div></div>
+      <div class="orgline"></div>
+      <div class="orglvl"><span class="meta">${L('Équipe','Team')}</span><div class="orgrow">${eq.map(card).join('')||`<span class="meta">—</span>`}</div></div></div>`; };
+  const shown=site?[site]:[...sites,''];
+  $('app').innerHTML=`<div class="row noprint" style="margin:8px 0;gap:8px;flex-wrap:wrap;align-items:center"><h2 style="margin:0">${L('Équipe et organigramme','Team and org chart')}</h2>
+      <select style="width:auto" onchange="renderOrg(this.value)"><option value="">${L('Tous les sites','All sites')}</option>${sites.map(s=>`<option ${s===site?'selected':''}>${esc(s)}</option>`).join('')}</select>
+      <button onclick="renderProfile()">${L('Mon profil','My profile')}</button></div>
+    <div class="panel org"><div class="orglvl orgtop"><span class="meta">${L('Administrateur(s)','Administrator(s)')}</span><div class="orgrow">${admins.map(card).join('')||`<span class="meta">—</span>`}</div></div>
+      <div class="orgline"></div><div class="orgsites">${shown.map(block).join('')}</div></div>
+    <p class="meta">${L('Personnes : comptes de cet appareil + profils partagés dans l’annuaire (Mon profil > « Apparaître dans l’annuaire »). Le site de chacun se règle dans son profil.','People: accounts on this device + profiles shared in the directory (My profile > “Appear in the directory”). Each person sets their site in their profile.')}${isAdmin()?' '+L('L’administrateur peut aussi le régler en touchant une personne.','The administrator can also set it by tapping a person.'):''}</p>`;
+  window.scrollTo(0,0); try{ histPush({view:'equipe'}); }catch(e){}
+}
+function orgShow(id){
+  const p=people().find(x=>x.id===id); if(!p) return; lbClose();
+  const sites=siteNames(), canEd=isAdmin()&&p.local&&id!==settings.id;
+  const d=document.createElement('div'); d.id='lbModal'; d.className='flmodal';
+  d.innerHTML=`<div class="panel"><div class="profhd">${avatar(p,80)}<div><h3 style="margin:0">${esc(p.name)}</h3><div class="meta">${esc(p.poste||'')}${p.site?' · '+esc(p.site):''}</div><span class="cls cls${p.cls}">${esc(clsL(p.cls))}</span></div></div>
+    ${p.desc?`<p>${esc(p.desc).replace(/\n/g,'<br>')}</p>`:''}${p.email?`<p class="meta">${esc(p.email)}</p>`:''}${contactHTML(p)}
+    ${canEd?`<h4>${L('Réglages (administrateur)','Settings (administrator)')}</h4><label>${L('Site','Site')}</label><select id="ogSite"><option value="">${L('Non renseigné','Not set')}</option>${sites.map(s=>`<option ${p.site===s?'selected':''}>${esc(s)}</option>`).join('')}</select>
+      <label>${L('Poste','Job')}</label><input id="ogPoste" value="${esc(p.poste||'')}"><div class="row" style="margin-top:8px"><button class="primary" onclick="orgSave('${esc(id)}')">${T('save')}</button></div>`:''}
+    <div class="row" style="margin-top:12px"><button onclick="lbClose()">${L('Fermer','Close')}</button></div></div>`;
+  document.body.appendChild(d);
+}
+function orgSave(id){ const u=users.find(x=>x.id===id); if(!u||!isAdmin()) return; u.site=$('ogSite').value; u.poste=$('ogPoste').value.trim(); saveUsers(); if(u.annuaire) dirSync(u); lbClose(); renderOrg(); toast(L('Enregistré','Saved')); }
 applyBg();
+/* Paramètres > Application : installer ou DÉSINSTALLER l'appli (le bandeau n'affiche plus que « Installer », et seulement si elle n'est pas installée) */
+(function(){ const rs=renderSettings; renderSettings=function(){ rs();
+  const h=`<div class="panel" id="apppanel"><h3 style="margin-top:0">${L('Application','Application')}</h3>
+    <p class="meta">${isStandalone()?L('L’appli est installée sur cet appareil.','The app is installed on this device.'):L('L’appli est ouverte dans le navigateur.','The app is open in the browser.')}</p>
+    <div class="row">${isStandalone()?`<button class="danger" onclick="instDialog('uninstall')">${L('Désinstaller l’appli','Uninstall the app')}</button>`:`<button class="primary" onclick="$('bInstall').click()">${L('Installer l’appli','Install the app')}</button>`}</div></div>`;
+  const s=$('safepanel'); if(s) s.insertAdjacentHTML('beforebegin',h); else $('app').insertAdjacentHTML('beforeend',h); }; })();
 /* ===================== HISTORIQUE DES INTERVENTIONS =====================
  Chaque tuto terminé est noté (clé LOGKEY, sur l'appareil, 500 dernières lignes) : quel tuto, qui, quand, combien de temps.
  Visible par les classes 3 et 4 : en haut de chaque tuto (5 dernières) et dans Paramètres > Historique des interventions,

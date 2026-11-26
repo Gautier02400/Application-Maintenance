@@ -865,3 +865,56 @@ body[data-ts="2"] .gstep .box,body[data-ts="3"] .gstep .box{font-size:1.15rem}
 .m3dvocab dd{margin:0 0 2px 0;color:var(--muted);font-size:.9rem}
 .m3dplus{padding-left:20px;margin:4px 0}
 .m3dbut{background:rgba(10,90,168,.08);border-radius:6px;padding:6px 8px}
+
+/* Cadrage des photos : zoom (--oz) et position (--op) ; grande image en haut d'un tuto / d'une fiche quand elle est « remplie » */
+.card .cover.fill img{transform:scale(var(--oz,1));transform-origin:var(--op,50% 50%)}
+.tcoverbox{width:100%;aspect-ratio:16/7;overflow:hidden;border-radius:10px;margin:0 0 10px}
+.tcoverbox .tcover{width:100%;height:100%;max-height:none;object-fit:cover;object-position:var(--op,50% 50%);transform:scale(var(--oz,1));transform-origin:var(--op,50% 50%);margin:0;border-radius:0}
+
+/* ===================== VERSION MOBILE : toutes les cases de la même taille =====================
+ Téléphone : 2 colonnes pour les tuiles de l'accueil, toutes de la même hauteur (image 16/9, titre sur 2 lignes maximum,
+ compteur sur 1 ligne) ; listes de tutos / fiches : cartes identiques sur 2 colonnes (1 colonne sur très petit écran). */
+.card .cover{flex:none}
+@media (max-width:640px){
+  .tiles,.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .tiles .card,.grid .card{padding:10px;gap:4px;height:100%}
+  .tiles .card .cover,.grid .card .cover{aspect-ratio:16/9;margin:-10px -10px 4px}
+  .tiles .card h3,.grid .card h3{font-size:.85rem;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em}
+  .tiles .card .meta,.grid .card .meta{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+  .grid .card .row{flex-wrap:nowrap;overflow:hidden}
+  .grid .card .tag{font-size:.65rem;padding:1px 6px;white-space:nowrap}
+  .tiles .card .tpedit{flex-wrap:wrap;gap:4px}
+  .tiles .card .tpedit button,.tiles .card .tpedit .tpbtn{font-size:.7rem;padding:3px 6px}
+  .card .cover svg{width:28%;height:28%}
+  .catmono{font-size:1.1rem}
+  .homehd h2{font-size:1.2rem}
+  .stats .stat{min-width:0}
+  .poste-row select{min-width:0;width:100%}
+  .mrow input,.mrow select{min-width:0;flex:1 1 45%}
+  .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .chips .chip{flex:none}
+}
+@media (max-width:360px){ .grid{grid-template-columns:1fr} }
+.pweye{min-width:44px;min-height:44px;touch-action:manipulation}
+/* Mots-clés : image du mot */
+.glimg{display:block;width:100%;max-height:110px;object-fit:contain;border-radius:8px;margin-bottom:6px;background:#fff}
+.glimg.sm{width:46px;height:46px;max-height:none;object-fit:cover;display:inline-block;vertical-align:middle;margin:0 8px 0 0}
+.glimgpv{max-width:220px;max-height:160px;border-radius:8px;margin-top:6px;display:block}
+
+/* ===================== PROFIL ET ORGANIGRAMME ===================== */
+.avatar{border-radius:50%;object-fit:cover;flex:none;display:inline-grid;place-items:center;background:var(--line);color:#fff;font-weight:700;border:2px solid var(--card);box-shadow:var(--shadow)}
+.avatar.ini.cls0{background:#7d8791}.avatar.ini.cls1{background:#2e7d32}.avatar.ini.cls2{background:#1565c0}.avatar.ini.cls3{background:#ef6c00}.avatar.ini.cls4{background:#6a1b9a}
+.profhd{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+a.btn.teams{background:#4b53bc;color:#fff;border-color:#4b53bc;padding:8px 14px;border-radius:8px;font-weight:600}
+.org{overflow-x:auto}
+.orglvl{display:flex;flex-direction:column;align-items:center;gap:6px}
+.orgrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.orgline{width:2px;height:18px;background:var(--line);margin:6px auto}
+.orgsites{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;border-top:2px solid var(--line);padding-top:12px}
+.orgsite{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--bg)}
+.orgsite h3{margin:0 0 8px;text-align:center}
+.orgp{display:flex;align-items:center;gap:8px;text-align:left;padding:6px 10px;border-radius:10px;min-width:170px;max-width:240px;background:var(--card)}
+.orgp:hover{border-color:var(--accent)}
+.orgp b{display:block;font-size:.9rem}
+.orgp .meta{display:block;font-size:.75rem}
+@media (max-width:640px){ .orgp{min-width:0;width:100%;max-width:none} .orgrow{flex-direction:column;align-items:stretch;width:100%} .profhd{flex-direction:column;text-align:center} }
