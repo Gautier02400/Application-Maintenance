@@ -4328,6 +4328,9 @@ function loadModelViewer(){
 }
 // MODIFIABLE : les modèles 3D (un fichier .glb par marque, chacun avec les 4 technologies VIS, NIR, UV, inductif + le flux de verre)
 // poi = points de la visite guidée : [y, z (hauteur), angle horizontal°, angle vertical°, distance m] en coordonnées Blender de la machine
+// version des fichiers 3D : ajoutée à leur adresse (…glb?v=67) pour que les navigateurs prennent tout de suite la nouvelle version
+// (GitHub les garde 10 min en cache). Mise à jour automatiquement par maj-version.ps1, en même temps que sw.js.
+const APP_VER = 'v69';
 const M3D_LIST=[
  {id:'redwave', file:'modeles3d/redwave.glb', col:'#d7261e', name:'Redwave CX',
   sub:['Trieur à goulotte : capots basculants, alimentation vibrante, chute libre devant les caméras','Chute sorter: tilting covers, vibrating feeder, free fall in front of the cameras'],
@@ -4422,7 +4425,7 @@ function render3DModel(id,tech){
   if(location.protocol==='file:'){ $('mvbox').innerHTML=`<div class="box danger">${L('La 3D s’affiche quand l’appli est ouverte en ligne (adresse GitHub), pas en double-cliquant sur index.html.','3D shows when the app is opened online (GitHub address), not by double-clicking index.html.')}</div>`; return; }
   loadModelViewer().then(()=>{
     const box=$('mvbox'); if(!box) return;
-    box.innerHTML=`<model-viewer id="mv" src="${esc(m.file)}" alt="${esc(m.name)}" camera-controls touch-action="pan-y" shadow-intensity="1" exposure="1.05" environment-image="neutral" camera-orbit="-35deg 62deg auto" interpolation-decay="120" ar ar-modes="webxr scene-viewer quick-look" interaction-prompt="none"></model-viewer>`;
+    box.innerHTML=`<model-viewer id="mv" src="${esc(m.file)}?${APP_VER}" alt="${esc(m.name)}" camera-controls touch-action="pan-y" shadow-intensity="1" exposure="1.05" environment-image="neutral" camera-orbit="-35deg 62deg auto" interpolation-decay="120" ar ar-modes="webxr scene-viewer quick-look" interaction-prompt="none"></model-viewer>`;
     const mv=$('mv');
     mv.addEventListener('load',()=>{ if(mv.availableAnimations.length) mv.animationName=mv.availableAnimations[0]; mv.play();
       let n=0; const ready=()=>{ if(mv.duration>0||n++>60){ mv.pause(); mv.dataset.ready='1'; setTimeout(()=>{ m3dApply(); mvFlow(); if(M3DS.tour>=0) m3dTour(M3DS.tour); },80); } else setTimeout(ready,50); }; ready(); });
@@ -5329,11 +5332,58 @@ function orgShow(id){
     ${p.desc?`<p>${esc(p.desc).replace(/\n/g,'<br>')}</p>`:''}${p.email?`<p class="meta">${esc(p.email)}</p>`:''}${contactHTML(p)}
     ${canEd?`<h4>${L('Réglages (administrateur)','Settings (administrator)')}</h4><label>${L('Site','Site')}</label><select id="ogSite"><option value="">${L('Non renseigné','Not set')}</option>${sites.map(s=>`<option ${p.site===s?'selected':''}>${esc(s)}</option>`).join('')}</select>
       <label>${L('Poste','Job')}</label><input id="ogPoste" value="${esc(p.poste||'')}"><div class="row" style="margin-top:8px"><button class="primary" onclick="orgSave('${esc(id)}')">${T('save')}</button></div>`:''}
+    ${isAdmin()?`<h4>${L('Photo de profil (administrateur)','Profile picture (administrator)')}</h4><div class="row" style="gap:6px"><label class="btn small" style="cursor:pointer">${p.photo?L('Changer la photo','Change picture'):L('Mettre une photo','Add a picture')}<input type="file" accept="image/*" class="hidden" onchange="admPhoto('${esc(id)}',this)"></label>${p.photo?`<button class="small danger" onclick="admPhoto('${esc(id)}',null)">${L('Retirer la photo','Remove picture')}</button>`:''}</div>`:''}
     <div class="row" style="margin-top:12px"><button onclick="lbClose()">${L('Fermer','Close')}</button></div></div>`;
   document.body.appendChild(d);
 }
+/* L'ADMINISTRATEUR peut mettre, changer ou retirer la photo de profil de n'importe qui (photo inappropriée, photo d'identité…).
+   Compte de cet appareil : photo enregistrée dans le compte (et dans l'annuaire s'il y apparaît). Profil venu de l'annuaire partagé :
+   photo modifiée dans l'annuaire (partagée au prochain « Exporter pour le site »). */
+function admPhoto(id,inp){
+  if(!isAdmin()) return;
+  const apply=ph=>{
+    const u=users.find(x=>x.id===id);
+    if(u){ u.photo=ph; saveUsers(); if(u.annuaire) dirSync(u); if(id===settings.id) settings.photo=ph; }
+    else { const d=dirGet(); if(d[id]){ d[id].photo=ph; d[id].maj=Date.now(); dirSave(d); } }
+    avUpdate(); lbClose(); if(state.view==='equipe') renderOrg(); orgShow(id); toast(ph?L('Photo mise à jour','Picture updated'):L('Photo retirée','Picture removed'));
+  };
+  if(!inp) return apply('');
+  const f=inp.files&&inp.files[0]; if(f) readImg(f,320,0.8,apply);
+}
 function orgSave(id){ const u=users.find(x=>x.id===id); if(!u||!isAdmin()) return; u.site=$('ogSite').value; u.poste=$('ogPoste').value.trim(); saveUsers(); if(u.annuaire) dirSync(u); lbClose(); renderOrg(); toast(L('Enregistré','Saved')); }
 applyBg();
+/* PHOTO DE PROFIL EN HAUT À DROITE (à droite de FR/EN) : clic = petit menu
+   Mon profil / Équipe et organigramme / Paramètres / Déconnexion. Mise à jour à chaque affichage (buildNav). */
+function avUpdate(){
+  const b=$('bAvatar'); if(!b) return;
+  if(document.body.classList.contains('nolog')||!settings||!settings.name){ b.innerHTML=''; b.classList.add('hidden'); return; }
+  b.classList.remove('hidden'); b.innerHTML=avatar(settings,34);
+  b.title=settings.name; b.setAttribute('aria-label',L('Mon compte : ','My account: ')+settings.name);
+}
+function avClose(){ const m=$('avMenu'); if(m) m.remove(); const b=$('bAvatar'); if(b) b.setAttribute('aria-expanded','false');
+  document.removeEventListener('click',avOut,true); document.removeEventListener('keydown',avKey,true); }
+function avOut(e){ const m=$('avMenu'); if(m&&!m.contains(e.target)&&!$('bAvatar').contains(e.target)) avClose(); }
+function avKey(e){ if(e.key==='Escape') avClose(); }
+function avGo(k){ avClose(); if(k==='logout') logout(); else go(k); }
+function avMenu(e){
+  if(e) e.stopPropagation();
+  if($('avMenu')) return avClose();
+  const b=$('bAvatar'), m=document.createElement('div'); m.id='avMenu'; m.className='avmenu'; m.setAttribute('role','menu');
+  m.innerHTML=`<div class="avhd">${avatar(settings,46)}<div><b>${esc(settings.name)}</b>${settings.poste?`<div class="meta">${esc(settings.poste)}</div>`:''}<span class="cls cls${+settings.cls||0}">${esc(clsL(+settings.cls||0))}</span></div></div>
+    <button role="menuitem" onclick="avGo('profil')">👤 ${L('Mon profil','My profile')}</button>
+    <button role="menuitem" onclick="avGo('equipe')">👥 ${L('Équipe / organigramme','Team / org chart')}</button>
+    <button role="menuitem" onclick="avGo('settings')">⚙️ ${L('Paramètres','Settings')}</button>
+    <button role="menuitem" class="out" onclick="avGo('logout')">⎋ ${L('Déconnexion','Log out')}</button>`;
+  document.body.appendChild(m);
+  const r=b.getBoundingClientRect(); m.style.top=(r.bottom+8)+'px'; m.style.right=Math.max(8,window.innerWidth-r.right)+'px';
+  b.setAttribute('aria-expanded','true');
+  setTimeout(()=>{ document.addEventListener('click',avOut,true); document.addEventListener('keydown',avKey,true); },0);
+  const f=m.querySelector('button'); if(f) f.focus();
+}
+(function(){ const bn=buildNav; buildNav=function(){ const r=bn.apply(this,arguments); avUpdate(); return r; }; })();
+(function(){ const lo=logout; logout=function(){ avClose(); lo.apply(this,arguments); avUpdate(); }; })();
+window.addEventListener('resize',()=>avClose());
+avUpdate();
 /* Paramètres > Application : installer ou DÉSINSTALLER l'appli (le bandeau n'affiche plus que « Installer », et seulement si elle n'est pas installée) */
 (function(){ const rs=renderSettings; renderSettings=function(){ rs();
   const h=`<div class="panel" id="apppanel"><h3 style="margin-top:0">${L('Application','Application')}</h3>

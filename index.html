@@ -146,6 +146,8 @@ window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); w
           <button id="bFr" onclick="setLang('fr')">FR</button>
           <button id="bEn" onclick="setLang('en')">EN</button>
         </div>
+        <!-- photo de profil : ouvre le petit menu Mon profil / Équipe / Paramètres / Déconnexion (voir avMenu dans app.js) -->
+        <button id="bAvatar" class="avbtn" type="button" aria-haspopup="menu" aria-expanded="false" onclick="avMenu(event)"></button>
       </div>
     </div>
   </div>

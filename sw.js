@@ -10,7 +10,7 @@
 // Nom du cache. IMPORTANT : à chaque fois que vous modifiez index.html, app.js, style.css (ou un autre fichier de la liste),
 // changez ce numéro pour que les appareils affichent « Nouvelle version disponible ».
 // Le plus simple : lancez le script  maj-version.ps1  (clic droit > Exécuter avec PowerShell) qui augmente le numéro tout seul.
-const CACHE = 'tutos-maintenance-v67';
+const CACHE = 'tutos-maintenance-v69';
 
 // Fichiers de l'appli à mettre en cache dès l'installation (ils doivent tous exister dans le dossier).
 const FILES = ['./', './index.html', './style.css', './app.js', './manifest.webmanifest',
@@ -78,7 +78,7 @@ self.addEventListener('fetch', e => {
       return r;
     });
     // ignoreSearch pour les pages : "index.html?source=pwa" retrouve bien la copie de "index.html"
-    const fromCache = async () => (await caches.match(req, { ignoreSearch: nav })) || (nav ? await caches.match('./index.html') : undefined);
+    const fromCache = async () => (await caches.match(req)) || (await caches.match(req, { ignoreSearch: true })) || (nav ? await caches.match('./index.html') : undefined);
     let timer;
     try {
       return await Promise.race([net, new Promise((_, no) => { timer = setTimeout(() => no(new Error('timeout')), NETWORK_TIMEOUT_MS); })]);
