@@ -10,7 +10,7 @@
 // Nom du cache. IMPORTANT : à chaque fois que vous modifiez index.html, app.js, style.css (ou un autre fichier de la liste),
 // changez ce numéro pour que les appareils affichent « Nouvelle version disponible ».
 // Le plus simple : lancez le script  maj-version.ps1  (clic droit > Exécuter avec PowerShell) qui augmente le numéro tout seul.
-const CACHE = 'tutos-maintenance-v62';
+const CACHE = 'tutos-maintenance-v63';
 
 // Fichiers de l'appli à mettre en cache dès l'installation (ils doivent tous exister dans le dossier).
 const FILES = ['./', './index.html', './style.css', './app.js', './manifest.webmanifest',
@@ -28,7 +28,7 @@ const OPTIONAL = [
   // Copies locales des bibliothèques (dossier lib/, facultatif : sinon on passe par le CDN ci-dessous)
   './lib/pdf.min.js', './lib/pdf.worker.min.js', './lib/jszip.min.js', './lib/qrcode.min.js',
   // Visionneuse 3D et modèles Blender (.glb)
-  './lib/model-viewer.min.js', './modeles3d/redwave-cx-vis.glb'];
+  './lib/model-viewer.min.js', './modeles3d/redwave.glb', './modeles3d/binder-clarity.glb', './modeles3d/steinert.glb'];
 
 // Bibliothèques externes : pdf.js (affichage des PDF) et JSZip (lecture des PowerPoint .pptx).
 // Mises en cache "si possible" : si Internet manque pendant l'installation, ça ne bloque pas l'appli.
