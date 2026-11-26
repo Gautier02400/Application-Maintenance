@@ -854,3 +854,14 @@ body[data-ts="2"] .gstep .box,body[data-ts="3"] .gstep .box{font-size:1.15rem}
 .m3dsteps li.on{background:rgba(242,183,5,.22);font-weight:600}
 .m3dcycle{padding-left:22px}
 #mvFlowBtn.on{outline:3px solid rgba(255,255,255,.6)}
+.m3dtour h3{margin:6px 0 8px}
+.m3ddots{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}
+.m3ddots button{width:12px;height:12px;border-radius:50%;padding:0;border:1px solid var(--accent);background:transparent}
+.m3ddots button.on{background:var(--accent)}
+.m3dmore{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
+.m3dmore summary{cursor:pointer;font-weight:600;color:var(--accent)}
+.m3dmore ol,.m3dmore ul{padding-left:20px;margin:6px 0}
+.m3dvocab dt{font-weight:600;margin-top:4px}
+.m3dvocab dd{margin:0 0 2px 0;color:var(--muted);font-size:.9rem}
+.m3dplus{padding-left:20px;margin:4px 0}
+.m3dbut{background:rgba(10,90,168,.08);border-radius:6px;padding:6px 8px}

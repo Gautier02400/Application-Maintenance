@@ -4260,7 +4260,7 @@ function m3Card(){
  POUR AJOUTER UN MODÈLE : déposez le .glb dans modeles3d/, ajoutez une ligne dans M3D_LIST, et dans sw.js (liste OPTIONAL).
  TECHNOLOGIES : dans Blender, les matériaux TECH_VIS_… / TECH_NIR_… / TECH_UV_… / TECH_IND_… (Faisceau, Lum, Ligne) sont allumés ou
  éteints par m3dApply() selon la technologie choisie.
- Fichier Blender source : dossier Blender/ à côté de l'appli (TRIEURS_3D_v2_flux.blend).
+ Fichier Blender source : dossier Blender/ à côté de l'appli (TRIEURS_3D_v3_visite.blend).
 ============================================================================ */
 const MV_LIB='https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js';
 let _mv=null;
@@ -4275,66 +4275,93 @@ function loadModelViewer(){
   return _mv;
 }
 // MODIFIABLE : les modèles 3D (un fichier .glb par marque, chacun avec les 4 technologies VIS, NIR, UV, inductif + le flux de verre)
+// poi = points de la visite guidée : [y, z (hauteur), angle horizontal°, angle vertical°, distance m] en coordonnées Blender de la machine
 const M3D_LIST=[
  {id:'redwave', file:'modeles3d/redwave.glb', col:'#d7261e', name:'Redwave CX',
-  sub:['Trieur à goulotte : capots basculants, alimentation vibrante, chute libre devant les capteurs','Chute sorter: tilting covers, vibrating feeder, free fall in front of the sensors'],
+  sub:['Trieur à goulotte : capots basculants, alimentation vibrante, chute libre devant les caméras','Chute sorter: tilting covers, vibrating feeder, free fall in front of the cameras'],
   where:{vis:['Caméra VIS à l’avant en haut ; éclairage LED et fond de référence blanc derrière le rideau de verre.','VIS camera at the front top; LED lighting and white reference background behind the glass curtain.'],
-         nir:['Capteur NIR et lampe halogène à l’avant, en bas.','NIR sensor and halogen lamp at the front bottom.'],
-         uv:['Caméra UV et lampe UV à l’avant, tout en haut.','UV camera and UV lamp at the very front top.'],
-         ind:['Barre de capteurs inductifs sous la fin de la goulotte.','Inductive sensor bar under the end of the chute.']}},
+         nir:['2 caméras NIR et une lampe halogène à l’avant, en bas.','2 NIR cameras and a halogen lamp at the front bottom.'],
+         uv:['2 caméras UV et une lampe UV à l’avant, tout en haut.','2 UV cameras and a UV lamp at the very front top.'],
+         ind:['Barre de capteurs inductifs sous la fin de la goulotte.','Inductive sensor bar under the end of the chute.']},
+  poi:{alim:[1.3,2.62,25,48,2.4],goulotte:[0.4,2.35,35,58,2.0],vis:[-0.2,2.25,40,72,1.7],uv:[-0.15,2.4,40,62,1.8],nir:[-0.3,2.0,40,85,1.8],ind:[0.15,2.2,45,62,1.4],buses:[0.15,1.92,50,80,1.4],sorties:[0,1.4,30,80,2.6]}},
  {id:'binder', file:'modeles3d/binder-clarity.glb', col:'#1f6fc2', name:'Binder+Co Clarity',
-  sub:['Trieur à goulotte : grand capot basculant, extrémités bleues, armoire de commande en bout','Chute sorter: large tilting hood, blue ends, control cabinet at the end'],
-  where:{vis:['Caméra VIS à l’avant sous le capot ; rétro-éclairage LED à l’arrière : la lumière traverse le verre.','VIS camera at the front under the hood; LED backlight at the rear: light goes through the glass.'],
-         nir:['Capteur NIR et lampe halogène au-dessus de la sortie de goulotte.','NIR sensor and halogen lamp above the chute outlet.'],
-         uv:['Caméra UV et lampe UV à l’avant, en bas.','UV camera and UV lamp at the front bottom.'],
-         ind:['Capteurs inductifs sous la fin de la goulotte.','Inductive sensors under the end of the chute.']}},
+  sub:['Trieur à goulotte : grand capot qui s’enlève, extrémités blanches et bleues, armoire de commande en bout','Chute sorter: large removable hood, white and blue ends, control cabinet at the end'],
+  where:{vis:['2 caméras VIS à l’avant ; rétro-éclairage LED à l’arrière : la lumière traverse le verre.','2 VIS cameras at the front; LED backlight at the rear: light goes through the glass.'],
+         nir:['2 caméras NIR et une lampe halogène au-dessus de la sortie de goulotte.','2 NIR cameras and a halogen lamp above the chute outlet.'],
+         uv:['2 caméras UV et une lampe UV à l’avant, en bas.','2 UV cameras and a UV lamp at the front bottom.'],
+         ind:['Capteurs inductifs sous la fin de la goulotte.','Inductive sensors under the end of the chute.']},
+  poi:{alim:[0.62,2.3,20,48,2.2],goulotte:[0.2,1.65,30,55,1.8],vis:[-0.25,1.45,30,70,1.6],uv:[-0.3,1.15,30,85,1.6],nir:[-0.15,1.6,30,55,1.6],ind:[0.1,1.5,30,50,1.3],buses:[0.1,1.08,30,80,1.4],sorties:[0,0.6,30,80,2.4]}},
  {id:'mogensen', file:'modeles3d/mogensen.glb', col:'#4b4e52', name:'Mogensen',
-  sub:['Trieur compact : alimentation vibrante bleue au-dessus, capot nervuré, face avant anthracite, 2 voyants verts','Compact sorter: blue vibrating feeder on top, ribbed cover, dark front panel, 2 green lights'],
-  where:{vis:['Caméra VIS à l’avant ; rétro-éclairage LED à l’arrière du rideau de verre.','VIS camera at the front; LED backlight behind the glass curtain.'],
-         nir:['Capteur NIR et lampe halogène en haut, sous le capot nervuré.','NIR sensor and halogen lamp at the top, under the ribbed cover.'],
-         uv:['Caméra UV et lampe UV à l’avant, en bas.','UV camera and UV lamp at the front bottom.'],
-         ind:['Capteurs inductifs sous la fin de la goulotte.','Inductive sensors under the end of the chute.']}}
+  sub:['Trieur compact : alimentation vibrante bleue au-dessus, capot nervuré et face avant qui s’enlèvent, 2 voyants verts','Compact sorter: blue vibrating feeder on top, ribbed cover and front panel that come off, 2 green lights'],
+  where:{vis:['2 caméras VIS à l’avant ; rétro-éclairage LED à l’arrière du rideau de verre.','2 VIS cameras at the front; LED backlight behind the glass curtain.'],
+         nir:['2 caméras NIR et une lampe halogène en haut, sous le capot nervuré.','2 NIR cameras and a halogen lamp at the top, under the ribbed cover.'],
+         uv:['2 caméras UV et une lampe UV à l’avant, en bas.','2 UV cameras and a UV lamp at the front bottom.'],
+         ind:['Capteurs inductifs sous la fin de la goulotte.','Inductive sensors under the end of the chute.']},
+  poi:{alim:[0.55,2.12,20,50,2.0],goulotte:[0.18,1.4,25,50,1.6],vis:[-0.25,1.25,25,72,1.5],uv:[-0.25,1.0,25,85,1.5],nir:[-0.12,1.32,25,55,1.5],ind:[0.12,1.3,25,48,1.2],buses:[0.1,0.92,25,80,1.3],sorties:[0,0.5,25,80,2.2]}}
 ];
-// technologies : code du site, code dans le fichier 3D, couleur, image où l'indésirable passe devant le capteur (voir DET_FR dans Blender)
+// technologies : code du site, code dans le fichier 3D, couleur, image où l'indésirable passe devant la caméra (voir DET_FR dans Blender)
 const M3D_TECH=[['vis','VIS','#f2b705',45],['nir','NIR','#ff6a3d',75],['uv','UV','#9b5cff',105],['ind','IND','#0fb5a0',135]];
-/* Fonctionnement de chaque technologie (d'après le diaporama de stage) : principe, étapes, indésirable montré dans l'animation */
+/* ===== Contenu du diaporama de stage (traduit en français) ===== */
 const M3D_HOW={
- vis:{fr:'La technologie VIS trie le verre selon sa transparence : si la lumière traverse le morceau, c’est du verre.',en:'VIS sorts glass by transparency: if light passes through the piece, it is glass.',
+ vis:{titre:['Technologie VIS (lumière visible)','VIS technology (visible light)'],fr:'La technologie VIS trie le verre selon sa transparence : si la lumière traverse le morceau, c’est du verre.',en:'VIS sorts glass by transparency: if light passes through the piece, it is glass.',
   ok:['Transparent = verre','Transparent = glass'],ko:['Opaque = indésirable','Opaque = undesirable'],cont:['Pierre (grise)','Stone (grey)'],
-  steps:[['Éclairage','une lumière visible (LED) éclaire le verre par l’arrière','Lighting','visible LED light shines through the glass from behind'],['Détection','la caméra mesure la lumière qui traverse chaque morceau','Detection','the camera measures the light passing through each piece'],['Analyse','l’ordinateur compare : transparent = verre, opaque = indésirable','Analysis','the computer compares: transparent = glass, opaque = undesirable'],['Éjection','les morceaux opaques sont soufflés par les jets d’air de la rampe','Ejection','opaque pieces are blown out by the air jets of the nozzle bar'],['Résultat','le verre propre continue vers la sortie « bon »','Result','clean glass continues to the “good” outlet']]},
- uv:{fr:'La lumière UV fait briller certains matériaux (fluorescence) : on repère ainsi les indésirables invisibles à l’œil nu.',en:'UV light makes some materials glow (fluorescence), revealing undesirables invisible to the naked eye.',
+  steps:[['Éclairage','une lumière visible (LED) éclaire le verre par l’arrière','Lighting','visible LED light shines through the glass from behind'],['Détection','les caméras mesurent la lumière qui traverse chaque morceau','Detection','the cameras measure the light passing through each piece'],['Analyse','l’ordinateur compare : transparent = verre, opaque = indésirable','Analysis','the computer compares: transparent = glass, opaque = undesirable'],['Éjection','les morceaux opaques sont soufflés par les jets d’air','Ejection','opaque pieces are blown out by air jets'],['Résultat','le verre propre continue vers la sortie « bon »','Result','clean glass continues to the “good” outlet']],
+  plus:[['Simple et fiable, basée sur la transparence','Simple and reliable, based on transparency'],['Convient à toutes les couleurs, formes et tailles de verre','Suits all colours, shapes and sizes of glass'],['Efficacité élevée et régulière','High and consistent efficiency']],
+  but:['Un verre de grande qualité avec un minimum d’indésirables.','High-quality glass with a minimum of undesirables.']},
+ uv:{titre:['Technologie UV (ultraviolet)','UV technology (ultraviolet)'],fr:'La lumière UV fait briller certains matériaux (fluorescence) : on repère ainsi les indésirables, puis on les éjecte.',en:'UV light makes some materials glow (fluorescence), so undesirables can be found and ejected.',
   ok:['Non fluorescent = verre','Non-fluorescent = glass'],ko:['Fluorescent = indésirable','Fluorescent = undesirable'],cont:['Céramique fluorescente (blanche)','Fluorescent ceramic (white)'],
-  steps:[['Éclairage UV','la lampe UV éclaire le flux de verre','UV lighting','the UV lamp lights the glass stream'],['Détection','la caméra UV capte la fluorescence','Detection','the UV camera captures the fluorescence'],['Analyse','le logiciel classe chaque morceau','Analysis','software classifies each piece'],['Éjection','les morceaux fluorescents sont soufflés','Ejection','fluorescent pieces are blown out'],['Résultat','le verre continue, les indésirables sont partis','Result','glass continues, undesirables are gone']]},
- nir:{fr:'Chaque matériau absorbe et réfléchit l’infrarouge à sa façon : sa signature infrarouge révèle sa nature.',en:'Each material absorbs and reflects infrared its own way: its infrared signature reveals what it is.',
-  ok:['Signature du verre = accepté','Glass signature = accepted'],ko:['Autre signature = éjecté','Other signature = ejected'],cont:['Plastique (bleu)','Plastic (blue)'],
-  steps:[['Éclairage NIR','la lampe halogène envoie de l’infrarouge sur le flux','NIR lighting','the halogen lamp sends infrared onto the stream'],['Réflexion','chaque matériau renvoie le NIR à sa façon','Reflection','each material reflects NIR its own way'],['Détection','le capteur NIR lit la signature infrarouge','Detection','the NIR sensor reads the infrared signature'],['Éjection','les morceaux dont la signature ne correspond pas sont soufflés','Ejection','pieces with a non-matching signature are blown out'],['Résultat','le verre accepté continue','Result','accepted glass continues']]},
- ind:{fr:'Le capteur crée un champ électromagnétique : un métal qui le traverse crée des courants de Foucault qui modifient le signal.',en:'The sensor creates an electromagnetic field: a metal passing through it induces eddy currents that change the signal.',
+  steps:[['Éclairage UV','la lampe UV éclaire le flux de verre','UV lighting','the UV lamp lights the glass stream'],['Détection','les caméras UV captent la fluorescence','Detection','the UV cameras capture the fluorescence'],['Analyse','le logiciel classe chaque morceau','Analysis','software classifies each piece'],['Éjection','les jets d’air retirent les morceaux fluorescents','Ejection','air jets remove fluorescent pieces'],['Résultat','le verre continue, les indésirables sont partis','Result','glass continues, undesirables are gone']],
+  plus:[['Détection précise des matériaux fluorescents','Precise detection of fluorescent materials'],['Plastiques, céramiques et matières organiques brillent sous UV','Plastics, ceramics and organic matter glow under UV']],
+  but:['Éliminer les indésirables fluorescents pour respecter les exigences qualité.','Remove fluorescent undesirables to meet quality requirements.']},
+ nir:{titre:['Technologie NIR (proche infrarouge)','NIR technology (near-infrared)'],fr:'Chaque matériau absorbe et réfléchit l’infrarouge à sa façon : sa signature infrarouge révèle sa nature.',en:'Each material absorbs and reflects infrared its own way: its infrared signature reveals what it is.',
+  ok:['Signature conforme = accepté','Matching signature = accepted'],ko:['Signature différente = éjecté','Different signature = ejected'],cont:['Plastique (bleu)','Plastic (blue)'],
+  steps:[['Éclairage NIR','la lampe halogène envoie de l’infrarouge sur le flux','NIR lighting','the halogen lamp sends infrared onto the stream'],['Réflexion','chaque matériau renvoie le NIR à sa façon','Reflection','each material reflects NIR its own way'],['Détection','les caméras NIR lisent la signature infrarouge','Detection','the NIR cameras read the infrared signature'],['Éjection','les morceaux non conformes sont soufflés','Ejection','non-matching pieces are blown out'],['Résultat','le verre accepté continue','Result','accepted glass continues']],
+  plus:[['Plastiques, papier, bois, étiquettes','Plastics, paper, wood, labels'],['Céramiques, pierres, verres spéciaux','Ceramics, stones, special glass'],['Identifie la composition du matériau','Identifies the material composition']],
+  but:['Trier les matériaux selon leur composition pour respecter les exigences qualité.','Sort materials by composition to meet quality requirements.']},
+ ind:{titre:['Capteurs inductifs (détection des métaux)','Inductive sensors (metal detection)'],fr:'Le capteur crée un champ électromagnétique. Un métal qui le traverse crée des courants de Foucault qui modifient le signal. Ce ne sont pas des caméras : ce sont des bobines placées sous la goulotte.',en:'The sensor creates an electromagnetic field. A metal passing through it induces eddy currents that change the signal. These are not cameras: they are coils under the chute.',
   ok:['Pas de métal = accepté','No metal = accepted'],ko:['Métal détecté = éjecté','Metal detected = ejected'],cont:['Capsule métallique (gris métal)','Metal cap (metallic grey)'],
-  steps:[['Champ magnétique','les bobines sous la goulotte créent un champ','Magnetic field','the coils under the chute create a field'],['Induction','des courants de Foucault apparaissent dans le métal','Induction','eddy currents appear in the metal'],['Détection','le signal du capteur change','Detection','the sensor signal changes'],['Éjection','les métaux sont soufflés par les jets d’air','Ejection','metals are blown out by air jets'],['Résultat','le verre sans métal continue','Result','metal-free glass continues']]}
+  steps:[['Champ magnétique','les bobines créent un champ','Magnetic field','the coils create a field'],['Induction','des courants de Foucault apparaissent dans le métal','Induction','eddy currents appear in the metal'],['Détection','le signal du capteur change','Detection','the sensor signal changes'],['Éjection','les métaux sont soufflés par les jets d’air','Ejection','metals are blown out by air jets'],['Résultat','le verre sans métal continue','Result','metal-free glass continues']],
+  plus:[['Métaux ferreux et non ferreux','Ferrous and non-ferrous metals'],['Petites et grandes pièces, même à grande vitesse','Small and large pieces, even at high speed'],['Protège les équipements et améliore la qualité','Protects equipment and improves quality']],
+  but:['Retirer tous les métaux pour protéger les équipements et garantir la qualité.','Remove all metals to protect equipment and guarantee quality.']}
 };
+const M3D_PROCESS=[['Collecte','points d’apport volontaire et centres de collecte'],['Réception','le verre ménager est livré sur le site'],['Préparation','broyage et séparation granulométrique'],['Déferraillage','aimants et courants de Foucault'],['Tri optique','caméras VIS, UV, NIR, couleur'],['Contrôle qualité','analyses et tests d’efficacité'],['Calcin final','matière première pour les verriers']];
+const M3D_INDES=['Céramiques, pierres, porcelaine (CSP)','Verres spéciaux','Plastiques','Déchets industriels banals (plastique, papier, textile…)','Métaux non ferreux','Métaux ferreux','Poussières et fines'];
+const M3D_VOCAB=[['Calcin','verre broyé, matière première des verriers'],['Tri optique','tri automatique par caméras et capteurs'],['Capteur','appareil qui mesure (caméra, bobine…)'],['Indésirable','tout ce qui n’est pas du bon verre'],['Jet d’air','souffle d’air comprimé qui éjecte un indésirable'],['Fluorescence','lumière émise par certains matériaux sous UV'],['Proche infrarouge (NIR)','lumière invisible qui révèle la composition'],['Courants de Foucault','courants créés dans un métal par un champ magnétique'],['Étalonnage','réglage de la machine par rapport à une référence'],['Fiche réflexe','fiche courte : bons réglages et gestes en cas de problème']];
+/* ===== Visite guidée : une étape = un endroit de la machine + une explication ===== */
+const M3D_TOUR=[
+ {k:'ensemble',t:'Vue d’ensemble',x:m=>`Le ${m.name} est un trieur optique : il retire les indésirables du calcin. Le principe tient en 3 temps : <b>1. Détection</b> par les caméras et capteurs, <b>2. Analyse</b> par l’ordinateur, <b>3. Éjection</b> par air comprimé. Le capot s’enlève pour voir le flux de verre en fonctionnement.`},
+ {k:'alim',t:'Alimentation vibrante',x:()=>`Le calcin arrive dans la trémie. L’auge vibrante l’étale en <b>une couche fine et régulière</b> sur toute la largeur de la machine : une particule cachée derrière une autre ne peut pas être analysée.`},
+ {k:'goulotte',t:'Goulotte',x:()=>`Le verre glisse sur la goulotte, qui l’accélère et régularise sa vitesse. À la sortie, il forme un <b>rideau régulier</b> qui tombe devant les caméras : la machine peut ainsi calculer l’instant exact où il faudra souffler. Une goulotte encrassée ou usée modifie la trajectoire du verre.`},
+ {k:'vis',tech:'vis'},{k:'uv',tech:'uv'},{k:'nir',tech:'nir'},{k:'ind',tech:'ind'},
+ {k:'buses',t:'Rampe de buses et jets d’air',x:()=>`Derrière le rideau de verre, une <b>rampe de buses</b> couvre toute la largeur. Elle est alimentée en <b>air comprimé</b> par le collecteur, et chaque buse est commandée par une <b>électrovanne</b> (pilotée par la carte d’entrées/sorties). Quand l’ordinateur a repéré un indésirable, il calcule le moment où il passera devant la rampe et ouvre les buses en face <b>pendant quelques millisecondes</b> : le jet d’air dévie l’indésirable sans toucher le verre voisin.<br><br><b>Maintenance :</b> une buse bouchée ou une électrovanne en panne laisse passer des indésirables. D’où le <b>test des vannes</b> en mode maintenance (voir les fiches réflexes).`},
+ {k:'sorties',t:'Lame séparatrice et sorties',x:()=>`La <b>lame séparatrice</b> partage les deux flux : le verre non soufflé continue sa chute dans la sortie <b>« bon »</b>, les indésirables soufflés passent de l’autre côté de la lame vers la sortie <b>« rejet »</b>.`},
+ {k:'qualite',t:'Pourquoi c’est important',x:()=>`<b>Qualité du tri :</b> une détection régulière et fiable.<br><b>Pureté du calcin :</b> même un petit indésirable peut gâcher une fournée de verre.<br><b>Valorisation :</b> un bon tri, c’est plus de verre réutilisé.<br><br><b>Entretien :</b> nettoyage des lampes et des vitres, test des vannes, balance des blancs : les bons réglages sont dans les fiches réflexes.`}
+];
 // repères de temps de l'animation (secondes, 30 images/s, image 1 = 0 s)
 const FR=f=>(f-1)/30, T_OPEN=FR(28), T_FLOW0=FR(30), T_FLOW1=FR(150), T_EXP0=FR(154), T_EXP1=FR(200);
-let M3DS={brand:'redwave',tech:'all'}, mvAnim=0, mvLoop=0;
+let M3DS={brand:'redwave',tech:'all',tour:-1}, mvAnim=0, mvLoop=0;
+const techName=k=>{ const h=M3D_HOW[k]; return L(...h.titre); };
 function m3dCards(){
-  return `<div class="card tcard" onclick="render3DModel()"><div class="cover c-presentation m3cover"><span class="catmono" style="color:#fff;font-weight:800;font-size:1.25rem">VIS · NIR · UV · IND</span><span class="m3badge">3D</span></div><h3>${L('Trieurs 3D : fonctionnement, flux du verre et technologies','3D sorters: operation, glass flow and technologies')}</h3><div class="meta"><span>Redwave · Binder+Co · Mogensen</span><span>${L('Interactif','Interactive')}</span></div></div>`;
+  return `<div class="card tcard" onclick="render3DModel()"><div class="cover c-presentation m3cover"><span class="catmono" style="color:#fff;font-weight:800;font-size:1.25rem">VIS · NIR · UV · IND</span><span class="m3badge">3D</span></div><h3>${L('Trieurs 3D : visite guidée, flux du verre et technologies','3D sorters: guided tour, glass flow and technologies')}</h3><div class="meta"><span>Redwave · Binder+Co · Mogensen</span><span>${L('Interactif','Interactive')}</span></div></div>`;
 }
 function render3DModel(id,tech){
-  if(id&&M3D_LIST.some(x=>x.id===id)) M3DS.brand=id; if(tech) M3DS.tech=tech;
+  if(id&&M3D_LIST.some(x=>x.id===id)){ if(id!==M3DS.brand) M3DS.tour=-1; M3DS.brand=id; } if(tech) M3DS.tech=tech;
   const m=M3D_LIST.find(x=>x.id===M3DS.brand)||M3D_LIST[0];
   if(typeof m3Stop==='function') m3Stop(); mvStop();
   state.section='presentation'; state.view='model3d'; state.id=m.id; $('filters').classList.add('hidden'); buildNav();
   const tab=x=>`<button class="chip ${x.id===m.id?'on':''}" onclick="render3DModel('${x.id}')"><i class="m3dot" style="background:${x.col}"></i>${esc(x.name)}</button>`;
-  const tb=(k,lab,col)=>`<button class="chip m3dtech ${M3DS.tech===k?'on':''}" data-k="${k}" onclick="m3dTech('${k}')">${col?`<i class="m3dot" style="background:${col}"></i>`:''}${esc(lab)}</button>`;
+  const tb=(k,lab,col)=>`<button class="chip m3dtech ${M3DS.tech===k?'on':''}" data-k="${k}" onclick="M3DS.tour=-1;m3dTech('${k}')">${col?`<i class="m3dot" style="background:${col}"></i>`:''}${esc(lab)}</button>`;
   $('app').innerHTML=`<div class="row noprint" style="margin:12px 0;justify-content:space-between"><button onclick="mvStop();renderFiches('presentation')">${esc(T('back'))}</button></div>
    <div class="panel"><h2 style="margin-top:0">${L('Trieurs en 3D — fonctionnement et technologies','3D sorters — operation and technologies')}</h2>
     <div class="chips">${M3D_LIST.map(tab).join('')}</div>
     <p class="meta" style="margin:0 0 8px">${esc(L(...m.sub))}</p>
-    <div class="chips" id="m3dtechs">${tb('all',L('Toutes','All'))}${M3D_TECH.map(([k,c,col])=>tb(k,k==='ind'?L('Inductif','Inductive'):c,col)).join('')}</div>
+    <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><button class="primary" onclick="m3dTour(0)">🧭 ${L('Visite guidée','Guided tour')}</button>
+      <div class="chips" id="m3dtechs" style="margin:0">${tb('all',L('Toutes','All'))}${M3D_TECH.map(([k,c,col])=>tb(k,k==='ind'?L('Inductif','Inductive'):c,col)).join('')}</div></div>
     <div class="m3dgrid"><div class="m3dview">
       <div id="mvbox" class="mvbox"><p class="meta" style="padding:20px">${L('Chargement du modèle 3D…','Loading the 3D model…')}</p></div>
       <div id="m3dcap" class="m3dcap"></div>
       <div class="m3dctl">
-        <div class="row" style="gap:6px"><button class="primary" id="mvFlowBtn" onclick="mvFlow()">▶ ${L('Fonctionnement (flux du verre)','Operation (glass flow)')}</button><button onclick="mvPlay(1)">${L('Vue éclatée','Exploded view')}</button><button onclick="mvPlay(0)">${L('Fermer la machine','Close the machine')}</button><button onclick="mvReset()">${L('Vue initiale','Reset view')}</button></div>
+        <div class="row" style="gap:6px"><button id="mvFlowBtn" onclick="mvFlow()">▶ ${L('Fonctionnement (flux du verre)','Operation (glass flow)')}</button><button onclick="mvPlay(1)">${L('Vue éclatée','Exploded view')}</button><button onclick="mvPlay(0)">${L('Fermer la machine','Close the machine')}</button><button onclick="mvReset()">${L('Vue initiale','Reset view')}</button></div>
         <label for="mvx">${L('Fermée · ouverte · éclatée','Closed · open · exploded')}</label><input type="range" id="mvx" min="0" max="100" value="50" oninput="mvStop();mvSet(this.value/100)">
         <p class="meta">${L('Faites tourner avec le doigt ou la souris, pincez / molette pour zoomer.','Rotate with finger or mouse, pinch / wheel to zoom.')}</p></div>
     </div><div class="m3dlegend" id="m3dinfo"></div></div>
@@ -4343,14 +4370,14 @@ function render3DModel(id,tech){
   if(location.protocol==='file:'){ $('mvbox').innerHTML=`<div class="box danger">${L('La 3D s’affiche quand l’appli est ouverte en ligne (adresse GitHub), pas en double-cliquant sur index.html.','3D shows when the app is opened online (GitHub address), not by double-clicking index.html.')}</div>`; return; }
   loadModelViewer().then(()=>{
     const box=$('mvbox'); if(!box) return;
-    box.innerHTML=`<model-viewer id="mv" src="${esc(m.file)}" alt="${esc(m.name)}" camera-controls touch-action="pan-y" shadow-intensity="1" exposure="1.05" environment-image="neutral" camera-orbit="-35deg 62deg auto" ar ar-modes="webxr scene-viewer quick-look" interaction-prompt="none"></model-viewer>`;
+    box.innerHTML=`<model-viewer id="mv" src="${esc(m.file)}" alt="${esc(m.name)}" camera-controls touch-action="pan-y" shadow-intensity="1" exposure="1.05" environment-image="neutral" camera-orbit="-35deg 62deg auto" interpolation-decay="120" ar ar-modes="webxr scene-viewer quick-look" interaction-prompt="none"></model-viewer>`;
     const mv=$('mv');
     mv.addEventListener('load',()=>{ if(mv.availableAnimations.length) mv.animationName=mv.availableAnimations[0]; mv.play();
-      let n=0; const ready=()=>{ if(mv.duration>0||n++>60){ mv.pause(); mv.dataset.ready='1'; setTimeout(()=>{ m3dApply(); mvFlow(); },80); } else setTimeout(ready,50); }; ready(); });
+      let n=0; const ready=()=>{ if(mv.duration>0||n++>60){ mv.pause(); mv.dataset.ready='1'; setTimeout(()=>{ m3dApply(); mvFlow(); if(M3DS.tour>=0) m3dTour(M3DS.tour); },80); } else setTimeout(ready,50); }; ready(); });
     mv.addEventListener('error',()=>{ box.innerHTML=`<div class="box danger">${L('Le fichier 3D n’a pas pu être chargé.','The 3D file could not be loaded.')}</div>`; });
   }).catch(()=>{ const b=$('mvbox'); if(b) b.innerHTML=`<div class="box danger">${L('Impossible de charger la visionneuse 3D (pas d’Internet et pas de copie dans lib/).','Could not load the 3D viewer (no Internet and no copy in lib/).')}</div>`; });
 }
-// choisir la technologie : ses capteurs, faisceaux, indésirable et jets restent visibles, les autres s'effacent
+// choisir la technologie : ses caméras, faisceaux, indésirable et jets restent visibles, les autres s'effacent
 function m3dTech(k){ M3DS.tech=k; document.querySelectorAll('.m3dtech').forEach(b=>b.classList.toggle('on',b.dataset.k===k)); m3dInfo(); m3dApply(); if(!mvLoop) mvFlow(); }
 function m3dApply(){
   const mv=$('mv'); if(!mv||!mv.model) return;
@@ -4365,25 +4392,49 @@ function m3dApply(){
     });
   });
 }
-// panneau de droite : principe + étapes de la technologie choisie (ou résumé des 4)
+// panneau de droite : « Technologie VIS » + explication (ou vue d'ensemble), ou l'étape de la visite guidée
 function m3dInfo(){
   const box=$('m3dinfo'); if(!box) return; const m=M3D_LIST.find(x=>x.id===M3DS.brand)||M3D_LIST[0];
+  if(M3DS.tour>=0) return m3dTourCard();
   if(M3DS.tech==='all'){
-    box.innerHTML=`<h3 style="margin-top:0">${esc(m.name)} — ${L('comment ça trie','how it sorts')}</h3>
-      <ol class="m3dcycle"><li><b>${L('Détection','Detection')}</b> ${L('par les capteurs','by the sensors')}</li><li><b>${L('Analyse','Analysis')}</b> ${L('par l’ordinateur','by the computer')}</li><li><b>${L('Éjection','Ejection')}</b> ${L('par jet d’air comprimé (rampe de buses)','by compressed-air jet (nozzle bar)')}</li></ol>
-      <p class="meta">${L('Dans l’animation, le verre (vert, blanc, brun) passe de l’alimentation vibrante à la goulotte, tombe devant les capteurs puis dans la sortie « bon ». Chaque seconde, un indésirable passe et il est soufflé vers la sortie « rejet ».','In the animation, glass (green, white, brown) goes from the vibrating feeder to the chute, falls past the sensors then into the “good” outlet. Every second an undesirable passes and is blown into the “reject” outlet.')}</p>
-      ${M3D_TECH.map(([k,c,col])=>{ const h=M3D_HOW[k]; return `<div class="m3dpart" onclick="m3dTech('${k}')" style="cursor:pointer"><i style="background:${col}"></i><div><b>${k==='ind'?L('Capteurs inductifs','Inductive sensors'):L('Technologie ','Technology ')+c}</b><p>${esc(L(h.fr,h.en))}</p><p class="meta">${L('Indésirable montré','Undesirable shown')} : ${esc(L(...h.cont))} · ${esc(L(...m.where[k]))}</p></div></div>`; }).join('')}
-      <p class="meta">${L('Touchez une technologie pour suivre ses étapes pas à pas pendant l’animation.','Tap a technology to follow its steps during the animation.')}</p>`;
+    box.innerHTML=`<h3 style="margin-top:0">${L('Principe du tri optique','How optical sorting works')}</h3>
+      <ol class="m3dcycle"><li><b>${L('Détection','Detection')}</b> ${L('par les caméras et capteurs','by cameras and sensors')}</li><li><b>${L('Analyse','Analysis')}</b> ${L('par l’ordinateur','by the computer')}</li><li><b>${L('Éjection','Ejection')}</b> ${L('par air comprimé (rampe de buses)','by compressed air (nozzle bar)')}</li></ol>
+      <p class="meta">${L('Dans l’animation, le verre (vert, blanc, brun) passe de l’alimentation vibrante à la goulotte, tombe devant les caméras puis dans la sortie « bon ». Chaque seconde, un indésirable passe et il est soufflé vers la sortie « rejet ».','In the animation, glass goes from the feeder to the chute, falls past the cameras into the “good” outlet. Every second an undesirable is blown into the “reject” outlet.')}</p>
+      ${M3D_TECH.map(([k,c,col])=>`<div class="m3dpart" onclick="m3dTech('${k}')" style="cursor:pointer"><i style="background:${col}"></i><div><b>${esc(techName(k))}</b><p>${esc(L(M3D_HOW[k].fr,M3D_HOW[k].en))}</p></div></div>`).join('')}
+      <details class="m3dmore"><summary>${L('Le recyclage du verre en 7 étapes','Glass recycling in 7 steps')}</summary><ol>${M3D_PROCESS.map(p=>`<li><b>${esc(p[0])}</b> : ${esc(p[1])}${p[0]==='Tri optique'?' ← '+L('cette machine','this machine'):''}</li>`).join('')}</ol></details>
+      <details class="m3dmore"><summary>${L('Les indésirables retirés par le tri optique','Undesirables removed by optical sorting')}</summary><ul>${M3D_INDES.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
+      <details class="m3dmore"><summary>${L('Vocabulaire (10 mots)','Vocabulary (10 words)')}</summary><dl class="m3dvocab">${M3D_VOCAB.map(v=>`<dt>${esc(v[0])}</dt><dd>${esc(v[1])}</dd>`).join('')}</dl></details>`;
     return;
   }
   const [k,c,col]=M3D_TECH.find(t=>t[0]===M3DS.tech), h=M3D_HOW[k];
-  box.innerHTML=`<h3 style="margin-top:0"><i class="m3dot" style="background:${col}"></i>${k==='ind'?L('Capteurs inductifs','Inductive sensors'):L('Technologie ','Technology ')+c} — ${esc(m.name)}</h3>
-    <p>${esc(L(h.fr,h.en))}</p>
+  box.innerHTML=`<h3 style="margin-top:0"><i class="m3dot" style="background:${col}"></i>${esc(techName(k))}</h3>${m3dTechBody(k,m)}`;
+}
+function m3dTechBody(k,m){
+  const h=M3D_HOW[k], col=M3D_TECH.find(t=>t[0]===k)[2];
+  return `<p>${esc(L(h.fr,h.en))}</p>
     <div class="sfcs"><span class="sfc" style="border-color:${col}">✓ ${esc(L(...h.ok))}</span><span class="sfc" style="border-color:${col}">✗ ${esc(L(...h.ko))}</span></div>
     <ol class="m3dsteps" id="m3dsteps">${h.steps.map((s,i)=>`<li data-i="${i}"><b>${esc(L(s[0],s[2]))}</b> : ${esc(L(s[1],s[3]))}</li>`).join('')}</ol>
-    <p><b>${L('Sur cette machine','On this machine')} :</b> ${esc(L(...m.where[k]))}</p>
-    <p class="meta">${L('Dans l’animation, l’indésirable est','In the animation, the undesirable is')} : <b>${esc(L(...h.cont))}</b>.</p>
-    ${(()=>{ const p=(typeof M3_PARTS!=='undefined')?M3_PARTS.find(x=>x.id===k):null; return p&&(L(p.dfr,p.den)||[]).length?`<p class="meta">${L('Ce qu’elle détecte','What it detects')} :</p><div class="sfcs">${L(p.dfr,p.den).map(d=>`<span class="sfc" style="border-color:${col}">${esc(d)}</span>`).join('')}</div>`:''; })()}`;
+    <p><b>${L('Sur cette machine','On this machine')} :</b> ${esc(L(...m.where[k]))} <span class="meta">${L('Indésirable montré','Undesirable shown')} : ${esc(L(...h.cont))}.</span></p>
+    <p><b>${L('Points forts','Strengths')} :</b></p><ul class="m3dplus">${h.plus.map(p=>`<li>${esc(L(...p))}</li>`).join('')}</ul>
+    <p class="m3dbut"><b>${L('Objectif','Goal')} :</b> ${esc(L(...h.but))}</p>`;
+}
+// ===== Visite guidée =====
+function m3dTour(i){
+  const m=M3D_LIST.find(x=>x.id===M3DS.brand)||M3D_LIST[0]; i=Math.max(0,Math.min(M3D_TOUR.length-1,i)); M3DS.tour=i;
+  const s=M3D_TOUR[i]; M3DS.tech=s.tech||'all'; document.querySelectorAll('.m3dtech').forEach(b=>b.classList.toggle('on',b.dataset.k===M3DS.tech));
+  m3dApply(); m3dTourCard(); if(!mvLoop) mvFlow();
+  const mv=$('mv'); if(!mv) return; const p=m.poi[s.k];
+  if(p){ mv.cameraTarget=`0m ${p[1]}m ${-p[0]}m`; mv.cameraOrbit=`${p[2]}deg ${p[3]}deg ${p[4]}m`; }
+  else { mv.cameraTarget='auto auto auto'; mv.cameraOrbit=s.k==='qualite'?'25deg 65deg auto':'-35deg 62deg auto'; }
+  const v=document.querySelector('.mvbox'); if(v&&v.getBoundingClientRect().top<0) v.scrollIntoView({block:'start',behavior:'smooth'});
+}
+function m3dTourCard(){
+  const box=$('m3dinfo'); if(!box) return; const m=M3D_LIST.find(x=>x.id===M3DS.brand)||M3D_LIST[0], i=M3DS.tour, s=M3D_TOUR[i], n=M3D_TOUR.length;
+  const head=s.tech?esc(techName(s.tech)):esc(s.t), body=s.tech?m3dTechBody(s.tech,m):`<p>${s.x(m)}</p>`;
+  box.innerHTML=`<div class="m3dtour"><div class="meta">${L('Visite guidée','Guided tour')} · ${i+1} / ${n}</div>
+    <div class="m3ddots">${M3D_TOUR.map((_,j)=>`<button class="${j===i?'on':''}" onclick="m3dTour(${j})" aria-label="${j+1}"></button>`).join('')}</div>
+    <h3>${s.tech?`<i class="m3dot" style="background:${M3D_TECH.find(t=>t[0]===s.tech)[2]}"></i>`:''}${head}</h3>${body}
+    <div class="row" style="gap:6px;margin-top:10px"><button onclick="m3dTour(${i-1})" ${i===0?'disabled':''}>← ${L('Précédent','Previous')}</button>${i<n-1?`<button class="primary" onclick="m3dTour(${i+1})">${L('Suivant','Next')} →</button>`:`<button class="primary" onclick="M3DS.tour=-1;m3dTech('all');mvReset()">${L('Terminer','Finish')} ✓</button>`}<button onclick="M3DS.tour=-1;m3dTech('all');mvReset()">${L('Quitter','Leave')}</button></div></div>`;
 }
 // étape en cours pour la technologie choisie, d'après l'image de l'animation (synchronisée avec le passage de l'indésirable)
 function m3dStepAt(f){
@@ -4397,15 +4448,15 @@ function m3dCaption(t){
   document.querySelectorAll('#m3dsteps li').forEach(li=>li.classList.toggle('on',+li.dataset.i===i));
   cap.innerHTML=i<0?`<span class="meta">${L('Le verre passe… attendez l’indésirable','Glass is flowing… wait for the undesirable')} (${esc(L(...h.cont))})</span>`:`<span class="m3dstep" style="border-color:${col}">${i+1}. <b>${esc(L(h.steps[i][0],h.steps[i][2]))}</b> — ${esc(L(h.steps[i][1],h.steps[i][3]))}</span>`;
 }
-// FONCTIONNEMENT : la machine est ouverte et le flux de verre tourne en boucle (images 30 à 150)
+// FONCTIONNEMENT : la machine est ouverte (capots enlevés) et le flux de verre tourne en boucle (images 30 à 150)
 function mvFlow(){
-  const mv=$('mv'); if(!mv||!mv.dataset.ready) return; mvStop(); const sl=$('mvx'); if(sl) sl.value=50;
+  const mv=$('mv'); if(!mv||!mv.dataset.ready) return; cancelAnimationFrame(mvLoop); cancelAnimationFrame(mvAnim); const sl=$('mvx'); if(sl) sl.value=50;
   let t=T_FLOW0, last=performance.now(); const b=$('mvFlowBtn'); if(b) b.classList.add('on');
   const step=n=>{ if(!$('mv')) return; t+=(n-last)/1000; last=n; if(t>T_FLOW1) t=T_FLOW0+(t-T_FLOW1); mv.pause(); mv.currentTime=t; m3dCaption(t); mvLoop=requestAnimationFrame(step); };
   mvLoop=requestAnimationFrame(step);
 }
 function mvStop(){ cancelAnimationFrame(mvLoop); mvLoop=0; cancelAnimationFrame(mvAnim); const b=$('mvFlowBtn'); if(b) b.classList.remove('on'); const c=$('m3dcap'); if(c) c.innerHTML=''; document.querySelectorAll('#m3dsteps li').forEach(li=>li.classList.remove('on')); }
-// curseur : 0 = machine fermée, 0,5 = ouverte (capteurs visibles), 1 = éclatée
+// curseur : 0 = machine fermée, 0,5 = ouverte (capots enlevés), 1 = éclatée
 const mvTime=k=>k<=0.5?(k/0.5)*T_OPEN:T_EXP0+((k-0.5)/0.5)*(T_EXP1-T_EXP0);
 function mvSet(k){ const mv=$('mv'); if(!mv||!mv.dataset.ready) return; mv.pause(); mv.currentTime=mvTime(Math.max(0,Math.min(1,k))); }
 function mvPlay(to){
